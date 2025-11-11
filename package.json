@@ -131,8 +131,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vikadata/kapps.git",
-    "directory": "packages/gaia-agent"
+    "url": "https://github.com/gaia-agent/gaia-agent"
   },
   "packageManager": "pnpm@10.15.1",
   "sideEffects": false,

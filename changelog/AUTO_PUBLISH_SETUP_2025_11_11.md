@@ -61,7 +61,7 @@ Successfully configured automated NPM publishing with changelog management.
 ```bash
 # 1. Create token on npmjs.com
 # 2. Go to repo settings
-https://github.com/vikadata/gaia-agent/settings/secrets/actions
+https://github.com/gaia-agent/gaia-agent/settings/secrets/actions
 
 # 3. Add secret
 Name: NPM_TOKEN
@@ -150,7 +150,7 @@ git push
 
 After merging to main:
 
-1. Go to https://github.com/vikadata/gaia-agent/actions
+1. Go to https://github.com/gaia-agent/gaia-agent/actions
 2. Find "Publish to NPM" workflow
 3. Verify all steps pass ✅
 

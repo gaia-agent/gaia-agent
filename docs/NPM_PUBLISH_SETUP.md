@@ -13,7 +13,7 @@ This guide explains how to set up automatic NPM publishing for gaia-agent.
 
 ### Step 2: Add Token to GitHub
 
-1. Go to https://github.com/vikadata/gaia-agent/settings/secrets/actions
+1. Go to https://github.com/gaia-agent/gaia-agent/settings/secrets/actions
 2. Click **"New repository secret"**
 3. Name: `NPM_TOKEN`
 4. Value: [paste your npm token]
@@ -258,7 +258,7 @@ Add npm alternatives:
 ```yaml
 - name: Publish to GitHub Packages
   run: |
-    echo "@vikadata:registry=https://npm.pkg.github.com" > .npmrc
+    echo "@gaia-agent:registry=https://npm.pkg.github.com" > .npmrc
     pnpm publish
   env:
     NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -305,7 +305,7 @@ git tag -l
 
 ### View Publish History
 
-- GitHub: https://github.com/vikadata/gaia-agent/actions
+- GitHub: https://github.com/gaia-agent/gaia-agent/actions
 - NPM: https://www.npmjs.com/package/gaia-agent?activeTab=versions
 - Git tags: `git tag -l --sort=-v:refname`
 
