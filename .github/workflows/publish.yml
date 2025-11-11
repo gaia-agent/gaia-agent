@@ -35,6 +35,12 @@ jobs:
 
       - name: Run tests
         run: pnpm test
+        env:
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          BROWSERUSE_API_KEY: ${{ secrets.BROWSERUSE_API_KEY }}
+          HUGGINGFACE_TOKEN: ${{ secrets.HUGGINGFACE_TOKEN }}
 
       - name: Build
         run: pnpm build
