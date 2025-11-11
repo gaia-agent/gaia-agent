@@ -83,15 +83,15 @@ export type MemoryProvider = "mem0" | "agentcore";
  * Provider configuration for agent tools
  */
 export interface ProviderConfig {
-  /** Browser automation provider */
-  browser?: BrowserProvider;
+  /** Browser automation provider (undefined to disable) */
+  browser?: BrowserProvider | undefined;
 
-  /** Code execution sandbox provider */
-  sandbox?: SandboxProvider;
+  /** Code execution sandbox provider (undefined to disable) */
+  sandbox?: SandboxProvider | undefined;
 
-  /** Web search provider */
-  search?: SearchProvider;
+  /** Web search provider (undefined to disable) */
+  search?: SearchProvider | undefined;
 
-  /** Memory management provider */
-  memory?: MemoryProvider;
+  /** Memory management provider (undefined to disable) */
+  memory?: MemoryProvider | undefined;
 }

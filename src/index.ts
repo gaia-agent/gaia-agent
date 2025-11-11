@@ -79,6 +79,57 @@ import { createMemoryTools } from "./tools/memory/index.js";
 import type { ProviderConfig } from "./types.js";
 
 /**
+ * Validate required API keys for providers
+ */
+function validateProviderConfig(providers?: ProviderConfig): void {
+  // Determine which providers are enabled
+  // Default to tavily/e2b unless explicitly set to undefined or a different provider
+  const searchProvider =
+    providers && "search" in providers && providers.search === undefined
+      ? undefined
+      : providers?.search || "tavily";
+
+  const sandboxProvider =
+    providers && "sandbox" in providers && providers.sandbox === undefined
+      ? undefined
+      : providers?.sandbox || "e2b";
+
+  // Validate search provider (skip if explicitly disabled)
+  if (searchProvider === "tavily" && (!process.env.TAVILY_API_KEY || process.env.TAVILY_API_KEY.trim() === "")) {
+    throw new Error(
+      "TAVILY_API_KEY environment variable is required for Tavily search.\n" +
+        "Get your API key at https://tavily.com\n" +
+        "Or disable search: createGaiaAgent({ providers: { search: undefined } })"
+    );
+  }
+
+  if (searchProvider === "exa" && (!process.env.EXA_API_KEY || process.env.EXA_API_KEY.trim() === "")) {
+    throw new Error(
+      "EXA_API_KEY environment variable is required for Exa search.\n" +
+        "Get your API key at https://exa.ai\n" +
+        "Or disable search: createGaiaAgent({ providers: { search: undefined } })"
+    );
+  }
+
+  // Validate sandbox provider (skip if explicitly disabled)
+  if (sandboxProvider === "e2b" && (!process.env.E2B_API_KEY || process.env.E2B_API_KEY.trim() === "")) {
+    throw new Error(
+      "E2B_API_KEY environment variable is required for E2B sandbox.\n" +
+        "Get your API key at https://e2b.dev\n" +
+        "Or disable sandbox: createGaiaAgent({ providers: { sandbox: undefined } })"
+    );
+  }
+
+  if (sandboxProvider === "sandock" && (!process.env.SANDOCK_API_KEY || process.env.SANDOCK_API_KEY.trim() === "")) {
+    throw new Error(
+      "SANDOCK_API_KEY environment variable is required for Sandock sandbox.\n" +
+        "Get your API key at https://sandock.ai\n" +
+        "Or disable sandbox: createGaiaAgent({ providers: { sandbox: undefined } })"
+    );
+  }
+}
+
+/**
  * Default GAIA agent configuration
  */
 const DEFAULT_INSTRUCTIONS = `You are a highly capable AI assistant designed to solve complex tasks from the GAIA benchmark.
@@ -136,17 +187,37 @@ When you have completed the task, provide a final answer.`;
  * ```
  */
 export function getDefaultTools(providers?: ProviderConfig) {
-  const _browserProvider = providers?.browser || "browseruse";
-  const sandboxProvider = providers?.sandbox || "e2b";
-  const searchProvider = providers?.search || "tavily";
-  const memoryProvider = providers?.memory || "mem0";
+  // Validate provider configuration before creating tools
+  validateProviderConfig(providers);
+
+  // Determine which providers are enabled
+  // Default to recommended providers unless explicitly set to undefined or a different provider
+  const _browserProvider =
+    providers && "browser" in providers && providers.browser === undefined
+      ? undefined
+      : providers?.browser || "browseruse";
+
+  const sandboxProvider =
+    providers && "sandbox" in providers && providers.sandbox === undefined
+      ? undefined
+      : providers?.sandbox || "e2b";
+
+  const searchProvider =
+    providers && "search" in providers && providers.search === undefined
+      ? undefined
+      : providers?.search || "tavily";
+
+  const memoryProvider =
+    providers && "memory" in providers && providers.memory === undefined
+      ? undefined
+      : providers?.memory || "mem0";
 
   const tools: Record<string, unknown> = {
     calculator,
     httpRequest,
   };
 
-  // Add search tools based on provider
+  // Add search tools based on provider (skip if explicitly disabled)
   if (searchProvider === "tavily") {
     tools.search = tavilySearch;
   } else if (searchProvider === "exa") {
@@ -155,7 +226,7 @@ export function getDefaultTools(providers?: ProviderConfig) {
     tools.searchFindSimilar = exaFindSimilar;
   }
 
-  // Add sandbox tools based on provider
+  // Add sandbox tools based on provider (skip if explicitly disabled)
   if (sandboxProvider === "e2b") {
     tools.sandbox = e2bSandbox;
   } else if (sandboxProvider === "sandock") {
@@ -176,9 +247,21 @@ export function getDefaultTools(providers?: ProviderConfig) {
   }
   */
 
-  // Add memory tools based on provider using factory pattern
-  const memoryTools = createMemoryTools(memoryProvider);
-  Object.assign(tools, memoryTools);
+  // Add memory tools based on provider using factory pattern (skip if explicitly disabled or no API key)
+  if (memoryProvider !== undefined) {
+    // Check if memory provider has required API key
+    const hasMemoryKey =
+      (memoryProvider === "mem0" && process.env.MEM0_API_KEY && process.env.MEM0_API_KEY.trim() !== "") ||
+      (memoryProvider === "agentcore" &&
+        process.env.AWS_ACCESS_KEY_ID &&
+        process.env.AWS_ACCESS_KEY_ID.trim() !== "");
+
+    if (hasMemoryKey) {
+      const memoryTools = createMemoryTools(memoryProvider);
+      Object.assign(tools, memoryTools);
+    }
+    // Silently skip memory tools if no API key (memory is optional)
+  }
 
   return tools;
 }
