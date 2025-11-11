@@ -109,6 +109,36 @@ function extractStepDetails(steps: any[]): StepDetail[] {
 }
 
 /**
+ * Extract tools summary from steps
+ */
+// biome-ignore lint/suspicious/noExplicitAny: Dynamic step structure from AI SDK
+function extractToolsSummary(steps: any[]): {
+  totalToolCalls: number;
+  uniqueTools: string[];
+  toolsUsed: string[];
+} {
+  const toolsUsed: string[] = [];
+  const uniqueToolsSet = new Set<string>();
+
+  for (const step of steps) {
+    if ("toolCalls" in step && step.toolCalls) {
+      // biome-ignore lint/suspicious/noExplicitAny: Dynamic AI SDK tool call structure
+      for (const toolCall of step.toolCalls as any[]) {
+        const toolName = toolCall.toolName;
+        toolsUsed.push(toolName);
+        uniqueToolsSet.add(toolName);
+      }
+    }
+  }
+
+  return {
+    totalToolCalls: toolsUsed.length,
+    uniqueTools: Array.from(uniqueToolsSet),
+    toolsUsed,
+  };
+}
+
+/**
  * Normalize answer for comparison (remove whitespace, lowercase, etc.)
  */
 export function normalizeAnswer(answer: string): string {
@@ -304,14 +334,28 @@ export async function evaluateTask(
         console.log(`${"=".repeat(80)}\n`);
       }
 
+      // Extract tools summary
+      const toolsSummary = resolvedSteps ? extractToolsSummary(resolvedSteps) : null;
+
       return {
         taskId: task.id,
+        question: task.question,
+        level: task.level,
+        files: task.files?.map((f) => f.name),
         answer,
         expectedAnswer: task.answer,
         correct,
         durationMs,
         steps: resolvedSteps?.length || 0,
         stepDetails: resolvedSteps ? extractStepDetails(resolvedSteps) : undefined,
+        toolsUsed: toolsSummary?.toolsUsed,
+        summary: toolsSummary
+          ? {
+              totalToolCalls: toolsSummary.totalToolCalls,
+              uniqueTools: toolsSummary.uniqueTools,
+              hadError: false,
+            }
+          : undefined,
       };
     } else {
       // Normal mode: wait for complete response
@@ -379,14 +423,28 @@ export async function evaluateTask(
         console.log(`${"=".repeat(80)}\n`);
       }
 
+      // Extract tools summary
+      const toolsSummary = result.steps ? extractToolsSummary(result.steps) : null;
+
       return {
         taskId: task.id,
+        question: task.question,
+        level: task.level,
+        files: task.files?.map((f) => f.name),
         answer,
         expectedAnswer: task.answer,
         correct,
         durationMs,
         steps: result.steps?.length || 0,
         stepDetails: result.steps ? extractStepDetails(result.steps) : undefined,
+        toolsUsed: toolsSummary?.toolsUsed,
+        summary: toolsSummary
+          ? {
+              totalToolCalls: toolsSummary.totalToolCalls,
+              uniqueTools: toolsSummary.uniqueTools,
+              hadError: false,
+            }
+          : undefined,
       };
     }
   } catch (error) {
@@ -398,12 +456,20 @@ export async function evaluateTask(
 
     return {
       taskId: task.id,
+      question: task.question,
+      level: task.level,
+      files: task.files?.map((f) => f.name),
       answer: "",
       expectedAnswer: task.answer,
       correct: false,
       durationMs,
       steps: 0,
       error: error instanceof Error ? error.message : String(error),
+      summary: {
+        totalToolCalls: 0,
+        uniqueTools: [],
+        hadError: true,
+      },
     };
   }
 }

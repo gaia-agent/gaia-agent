@@ -5,7 +5,8 @@
 import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { GaiaBenchmarkResult } from "./types.js";
+import type { GaiaBenchmarkResult, GaiaTask } from "./types.js";
+import { updateWrongAnswers } from "./wrong-answers.js";
 
 /**
  * Calculate and display summary statistics
@@ -32,10 +33,11 @@ export function displaySummary(results: GaiaBenchmarkResult[]): void {
 }
 
 /**
- * Save results to JSON file
+ * Save results to JSON file and update wrong answers collection
  */
 export async function saveResults(
   results: GaiaBenchmarkResult[],
+  tasks: GaiaTask[],
   outputDir: string,
   dataset: string,
 ): Promise<void> {
@@ -66,4 +68,7 @@ export async function saveResults(
 
   await writeFile(filepath, JSON.stringify(output, null, 2));
   console.log(`💾 Results saved to: ${filepath}`);
+
+  // Update wrong answers collection
+  await updateWrongAnswers(results, tasks, outputDir);
 }

@@ -1,16 +1,18 @@
 # Benchmark Module
 
-Modular GAIA benchmark runner with streaming support.
+Modular GAIA benchmark runner with streaming support and automatic wrong answers tracking.
 
 ## Structure
 
 ```
 benchmark/
-├── types.ts        # Type definitions for benchmark
-├── downloader.ts   # Dataset downloader (Parquet from Hugging Face)
-├── evaluator.ts    # Task evaluation logic with streaming support
-├── reporter.ts     # Results reporting and summary
-└── run.ts          # Main CLI runner
+├── types.ts              # Type definitions for benchmark
+├── downloader.ts         # Dataset downloader (Parquet from Hugging Face)
+├── evaluator.ts          # Task evaluation logic with streaming support
+├── reporter.ts           # Results reporting and summary
+├── wrong-answers.ts      # Wrong answers collection manager
+├── run.ts                # Main CLI runner
+└── run-wrong-answers.ts  # Wrong answers retry runner
 ```
 
 ## Usage
@@ -99,6 +101,26 @@ The result is 345...
 
 This helps you understand the agent's reasoning in real-time.
 
+### Wrong Answers Collection
+
+Automatically track and retry failed tasks:
+
+```bash
+# Run benchmark (automatically creates wrong-answers.json)
+pnpm benchmark --limit 20
+
+# View wrong answers
+cat benchmark-results/wrong-answers.json
+
+# Retry only failed tasks
+pnpm benchmark:wrong
+
+# With options
+pnpm benchmark:wrong --verbose --stream --limit 5 --level 1
+```
+
+📖 **[See full wrong answers documentation →](./wrong-answers.md)**
+
 ## Module Details
 
 ### `downloader.ts`
@@ -128,13 +150,35 @@ const result = await evaluateTask(task, agent, {
 
 ### `reporter.ts`
 
-Generates summary statistics and saves results:
+Generates summary statistics, saves results, and updates wrong answers:
 
 ```typescript
 import { displaySummary, saveResults } from './reporter.js';
 
 displaySummary(results);
-await saveResults(results, './output', 'validation');
+await saveResults(results, tasks, './output', 'validation');
+// Automatically updates wrong-answers.json
+```
+
+### `wrong-answers.ts`
+
+Manages wrong answers collection:
+
+```typescript
+import { 
+  loadWrongAnswers, 
+  updateWrongAnswers,
+  displayWrongAnswersSummary 
+} from './wrong-answers.js';
+
+// Load wrong answers
+const collection = await loadWrongAnswers('./benchmark-results');
+
+// Update with new results
+await updateWrongAnswers(results, tasks, './benchmark-results');
+
+// Display summary
+await displayWrongAnswersSummary('./benchmark-results');
 ```
 
 ## Environment Variables

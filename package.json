@@ -112,6 +112,7 @@
     "benchmark:reasoning": "tsx benchmark/run.ts --category reasoning",
     "benchmark:quick": "tsx benchmark/run.ts --limit 5 --verbose",
     "benchmark:random": "tsx benchmark/run.ts --random --verbose",
+    "benchmark:wrong": "tsx benchmark/run-wrong-answers.ts",
     "prepublishOnly": "npm run build"
   },
   "keywords": [

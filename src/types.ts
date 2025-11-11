@@ -86,6 +86,15 @@ export interface GaiaBenchmarkResult {
   /** Task ID */
   taskId: string;
 
+  /** Task question (for easier log reading) */
+  question: string;
+
+  /** Task difficulty level */
+  level: 1 | 2 | 3;
+
+  /** File attachments (if any) */
+  files?: string[];
+
   /** Agent's answer */
   answer: string;
 
@@ -106,6 +115,16 @@ export interface GaiaBenchmarkResult {
 
   /** Error message if failed */
   error?: string;
+
+  /** Tools used in this task */
+  toolsUsed?: string[];
+
+  /** Summary of what the agent did */
+  summary?: {
+    totalToolCalls: number;
+    uniqueTools: string[];
+    hadError: boolean;
+  };
 }
 
 /**

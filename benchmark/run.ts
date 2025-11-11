@@ -174,7 +174,10 @@ function categorizeTask(task: GaiaTask): string[] {
 /**
  * Run benchmark on all tasks
  */
-async function runBenchmark(config: BenchmarkConfig): Promise<GaiaBenchmarkResult[]> {
+async function runBenchmark(config: BenchmarkConfig): Promise<{
+  results: GaiaBenchmarkResult[];
+  tasks: GaiaTask[];
+}> {
   // Get model and provider configuration from environment
   const model = getOpenAIModel();
   const providers = getProviderConfigFromEnv();
@@ -238,7 +241,7 @@ async function runBenchmark(config: BenchmarkConfig): Promise<GaiaBenchmarkResul
     }
   }
 
-  return results;
+  return { results, tasks };
 }
 
 /**
@@ -308,13 +311,13 @@ async function main() {
 
   try {
     // Run benchmark
-    const results = await runBenchmark(config);
+    const { results, tasks } = await runBenchmark(config);
 
     // Display summary
     displaySummary(results);
 
-    // Save results
-    await saveResults(results, config.outputDir, config.dataset);
+    // Save results and update wrong answers
+    await saveResults(results, tasks, config.outputDir, config.dataset);
 
     console.log("✅ Benchmark completed successfully!");
     process.exit(0);
