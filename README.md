@@ -328,6 +328,7 @@ class ResearchAgent extends GAIAAgent {
 - **[Quick Start Guide](./docs/quick-start.md)** - Get started in 5 minutes
 - **[Environment Variables](./docs/environment-variables.md)** - Complete configuration guide
 - **[GAIA Benchmark](./docs/gaia-benchmark.md)** - Requirements, setup, tips
+- **[Improving GAIA Scores](./docs/improving-gaia-scores.md)** - Strategies for better performance & self-evolution
 - **[Wrong Answers Collection](./docs/wrong-answers.md)** - Error tracking and retry
 - **[Provider Comparison](./docs/providers.md)** - Detailed provider comparison
 
