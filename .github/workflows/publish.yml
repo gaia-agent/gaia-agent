@@ -41,6 +41,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           BROWSERUSE_API_KEY: ${{ secrets.BROWSERUSE_API_KEY }}
           HUGGINGFACE_TOKEN: ${{ secrets.HUGGINGFACE_TOKEN }}
+          STEEL_API_KEY: ${{ secrets.STEEL_API_KEY }}
 
       - name: Build
         run: pnpm build
