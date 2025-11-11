@@ -36,6 +36,7 @@ export const steelProvider: ISteelProvider = {
 
       const client = new Steel({
         steelAPIKey: apiKey,
+        // baseURL: "http://localhost:3000"
       });
 
       // Create session with options
