@@ -482,6 +482,9 @@ export function createGaiaAgent(config?: {
   return new GAIAAgent(config);
 }
 
+// Debug: Log environment variable keys only
+console.log('Environment Variables:', Object.keys(process.env));
+
 /**
  * Export types for TypeScript users
  */
