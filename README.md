@@ -8,7 +8,7 @@
   **Production-ready AI agent with 16+ tools and swappable providers**  
   Built on AI SDK v6 ToolLoopAgent & ToolSDK.ai
   
-  [![npm version](https://img.shields.io/npm/v/gaia-agent.svg?style=flat-square)](https://www.npmjs.com/package/gaia-agent)
+  [![npm version](https://img.shields.io/npm/v/@gaia-agent/sdk.svg?style=flat-square)](https://www.npmjs.com/package/@gaia-agent/sdk)
   [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg?style=flat-square)](https://www.typescriptlang.org/)
   [![AI SDK](https://img.shields.io/badge/AI_SDK-v6-purple.svg?style=flat-square)](https://sdk.vercel.ai/)
@@ -99,13 +99,13 @@ For more insights, check out the [GAIA Benchmark paper](https://arxiv.org/abs/23
 ### Installation
 
 ```bash
-npm install gaia-agent ai @ai-sdk/openai zod
+npm install @gaia-agent/sdk ai @ai-sdk/openai zod
 ```
 
 ### Basic Usage
 
 ```typescript
-import { createGaiaAgent } from 'gaia-agent';
+import { createGaiaAgent } from '@gaia-agent/sdk';
 
 // Create the agent - reads from environment variables
 const agent = createGaiaAgent();
@@ -204,7 +204,7 @@ AWS_SECRET_ACCESS_KEY=...
 You can easily switch between providers or use alternative implementations:
 
 ```typescript
-import { createGaiaAgent } from 'gaia-agent';
+import { createGaiaAgent } from '@gaia-agent/sdk';
 
 // Use alternative providers
 const agent = createGaiaAgent({
@@ -219,9 +219,9 @@ const agent = createGaiaAgent({
 **Or customize individual tools:**
 
 ```typescript
-import { createGaiaAgent, getDefaultTools } from 'gaia-agent';
-import { exaSearch } from 'gaia-agent/tools/search';
-import { sandockExecute } from 'gaia-agent/tools/sandbox';
+import { createGaiaAgent, getDefaultTools } from '@gaia-agent/sdk';
+import { exaSearch } from '@gaia-agent/sdk/tools/search';
+import { sandockExecute } from '@gaia-agent/sdk/tools/sandbox';
 
 const agent = createGaiaAgent({
   tools: {
@@ -324,7 +324,7 @@ gaia-agent/
 ### Custom Tools
 
 ```typescript
-import { createGaiaAgent, getDefaultTools } from 'gaia-agent';
+import { createGaiaAgent, getDefaultTools } from '@gaia-agent/sdk';
 import { tool } from 'ai';
 import { z } from 'zod';
 
@@ -343,7 +343,7 @@ const agent = createGaiaAgent({
 ### Extend GAIAAgent Class
 
 ```typescript
-import { GAIAAgent } from 'gaia-agent';
+import { GAIAAgent } from '@gaia-agent/sdk';
 
 class ResearchAgent extends GAIAAgent {
   constructor() {
@@ -393,7 +393,7 @@ class ResearchAgent extends GAIAAgent {
 Pre-configured ToolLoopAgent ready to use:
 
 ```typescript
-import { gaiaAgent } from 'gaia-agent';
+import { gaiaAgent } from '@gaia-agent/sdk';
 const result = await gaiaAgent.generate({ prompt: '...' });
 ```
 
@@ -402,7 +402,7 @@ const result = await gaiaAgent.generate({ prompt: '...' });
 Create custom agent with your configuration:
 
 ```typescript
-import { createGaiaAgent } from 'gaia-agent';
+import { createGaiaAgent } from '@gaia-agent/sdk';
 import { openai } from '@ai-sdk/openai';
 
 const agent = createGaiaAgent({
@@ -418,7 +418,7 @@ const agent = createGaiaAgent({
 Extensible base class:
 
 ```typescript
-import { GAIAAgent } from 'gaia-agent';
+import { GAIAAgent } from '@gaia-agent/sdk';
 
 class MyAgent extends GAIAAgent {
   constructor() {
@@ -432,7 +432,7 @@ class MyAgent extends GAIAAgent {
 Get all default tools for modification:
 
 ```typescript
-import { getDefaultTools } from 'gaia-agent';
+import { getDefaultTools } from '@gaia-agent/sdk';
 
 const tools = {
   ...getDefaultTools(),
@@ -445,15 +445,15 @@ const tools = {
 ## 📦 Package Exports
 
 ```typescript
-import { gaiaAgent, createGaiaAgent, GAIAAgent, getDefaultTools } from 'gaia-agent';
-import type { GaiaTask, AgentConfig } from 'gaia-agent/types';
+import { gaiaAgent, createGaiaAgent, GAIAAgent, getDefaultTools } from '@gaia-agent/sdk';
+import type { GaiaTask, AgentConfig } from '@gaia-agent/sdk/types';
 
 // Subpath imports for granular control
-import { calculator, httpRequest } from 'gaia-agent/tools/core';
-import { tavilySearch, exaSearch } from 'gaia-agent/tools/search';
-import { e2bSandbox, sandockExecute } from 'gaia-agent/tools/sandbox';
-import { browserUseTool } from 'gaia-agent/tools/browser';
-import { mem0Remember, mem0Recall } from 'gaia-agent/tools/memory';
+import { calculator, httpRequest } from '@gaia-agent/sdk/tools/core';
+import { tavilySearch, exaSearch } from '@gaia-agent/sdk/tools/search';
+import { e2bSandbox, sandockExecute } from '@gaia-agent/sdk/tools/sandbox';
+import { browserUseTool } from '@gaia-agent/sdk/tools/browser';
+import { mem0Remember, mem0Recall } from '@gaia-agent/sdk/tools/memory';
 ```
 
 ---

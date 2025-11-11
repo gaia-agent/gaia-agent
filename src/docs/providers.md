@@ -31,7 +31,7 @@ gaia-agent uses a provider pattern for tool categories, allowing you to swap imp
 
 **Setup**:
 ```typescript
-import { e2bSandbox } from 'gaia-agent/tools/sandbox';
+import { e2bSandbox } from '@gaia-agent/sdk/tools/sandbox';
 
 const agent = createGaiaAgent({
   tools: { sandbox: e2bSandbox },
@@ -58,7 +58,7 @@ const agent = createGaiaAgent({
 
 **Setup**:
 ```typescript
-import { sandockExecute } from 'gaia-agent/tools/sandbox';
+import { sandockExecute } from '@gaia-agent/sdk/tools/sandbox';
 
 const agent = createGaiaAgent({
   tools: { sandbox: sandockExecute },
@@ -89,7 +89,7 @@ const agent = createGaiaAgent({
 
 **Setup**:
 ```typescript
-import { browserUseTool } from 'gaia-agent/tools/browser';
+import { browserUseTool } from '@gaia-agent/sdk/tools/browser';
 
 const agent = createGaiaAgent({
   tools: { browser: browserUseTool },
@@ -122,7 +122,7 @@ import {
   browserClick,
   browserType,
   browserScreenshot,
-} from 'gaia-agent/tools/browser';
+} from '@gaia-agent/sdk/tools/browser';
 
 const agent = createGaiaAgent({
   tools: {
@@ -160,7 +160,7 @@ const agent = createGaiaAgent({
 
 **Setup**:
 ```typescript
-import { tavilySearch } from 'gaia-agent/tools/search';
+import { tavilySearch } from '@gaia-agent/sdk/tools/search';
 
 const agent = createGaiaAgent({
   tools: { search: tavilySearch },
@@ -189,7 +189,7 @@ const agent = createGaiaAgent({
 
 **Setup**:
 ```typescript
-import { exaSearch, exaGetContents, exaFindSimilar } from 'gaia-agent/tools/search';
+import { exaSearch, exaGetContents, exaFindSimilar } from '@gaia-agent/sdk/tools/search';
 
 const agent = createGaiaAgent({
   tools: {
@@ -206,8 +206,8 @@ const agent = createGaiaAgent({
 ### Using Both (Recommended)
 
 ```typescript
-import { tavilySearch } from 'gaia-agent/tools/search';
-import { exaSearch, exaGetContents } from 'gaia-agent/tools/search';
+import { tavilySearch } from '@gaia-agent/sdk/tools/search';
+import { exaSearch, exaGetContents } from '@gaia-agent/sdk/tools/search';
 
 const agent = createGaiaAgent({
   tools: {
@@ -236,7 +236,7 @@ const agent = createGaiaAgent({
 
 **Setup**:
 ```typescript
-import { mem0Remember, mem0Recall } from 'gaia-agent/tools/memory';
+import { mem0Remember, mem0Recall } from '@gaia-agent/sdk/tools/memory';
 
 const agent = createGaiaAgent({
   tools: {
@@ -254,8 +254,8 @@ const agent = createGaiaAgent({
 ### 1. Simple Swap
 
 ```typescript
-import { createGaiaAgent } from 'gaia-agent';
-import { e2bSandbox } from 'gaia-agent/tools/sandbox';
+import { createGaiaAgent } from '@gaia-agent/sdk';
+import { e2bSandbox } from '@gaia-agent/sdk/tools/sandbox';
 
 const agent = createGaiaAgent({
   tools: {
@@ -267,9 +267,9 @@ const agent = createGaiaAgent({
 ### 2. Multiple Swaps
 
 ```typescript
-import { createGaiaAgent } from 'gaia-agent';
-import { e2bSandbox } from 'gaia-agent/tools/sandbox';
-import { browserUseTool } from 'gaia-agent/tools/browser';
+import { createGaiaAgent } from '@gaia-agent/sdk';
+import { e2bSandbox } from '@gaia-agent/sdk/tools/sandbox';
+import { browserUseTool } from '@gaia-agent/sdk/tools/browser';
 
 const agent = createGaiaAgent({
   tools: {
@@ -282,8 +282,8 @@ const agent = createGaiaAgent({
 ### 3. Mix Default + Custom
 
 ```typescript
-import { createGaiaAgent, getDefaultTools } from 'gaia-agent';
-import { e2bSandbox } from 'gaia-agent/tools/sandbox';
+import { createGaiaAgent, getDefaultTools } from '@gaia-agent/sdk';
+import { e2bSandbox } from '@gaia-agent/sdk/tools/sandbox';
 
 const agent = createGaiaAgent({
   tools: {
@@ -296,10 +296,10 @@ const agent = createGaiaAgent({
 ### 4. Selective Import
 
 ```typescript
-import { createGaiaAgent } from 'gaia-agent';
-import { calculator, httpRequest } from 'gaia-agent/tools/core';
-import { tavilySearch } from 'gaia-agent/tools/search';
-import { e2bSandbox } from 'gaia-agent/tools/sandbox';
+import { createGaiaAgent } from '@gaia-agent/sdk';
+import { calculator, httpRequest } from '@gaia-agent/sdk/tools/core';
+import { tavilySearch } from '@gaia-agent/sdk/tools/search';
+import { e2bSandbox } from '@gaia-agent/sdk/tools/sandbox';
 
 const agent = createGaiaAgent({
   tools: {

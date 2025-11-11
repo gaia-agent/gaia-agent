@@ -134,12 +134,12 @@ Added swappable memory provider system with support for Mem0 and AWS AgentCore M
 
 Old code still works:
 ```typescript
-import { mem0Remember } from 'gaia-agent/tools/memory';
+import { mem0Remember } from '@gaia-agent/sdk/tools/memory';
 ```
 
 New recommended approach:
 ```typescript
-import { createMemoryTools } from 'gaia-agent/tools/memory';
+import { createMemoryTools } from '@gaia-agent/sdk/tools/memory';
 
 const tools = createMemoryTools('mem0', { apiKey: '...' });
 // or

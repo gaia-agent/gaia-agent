@@ -25,8 +25,8 @@ Choose one:
 **Recommendation**: Use E2B for production GAIA benchmarks.
 
 ```typescript
-import { createGaiaAgent } from 'gaia-agent';
-import { e2bSandbox } from 'gaia-agent/tools/sandbox';
+import { createGaiaAgent } from '@gaia-agent/sdk';
+import { e2bSandbox } from '@gaia-agent/sdk/tools/sandbox';
 
 const agent = createGaiaAgent({
   tools: {
@@ -46,7 +46,7 @@ Choose one:
 **Recommendation**: Use BrowserUse for better AI integration.
 
 ```typescript
-import { browserUseTool } from 'gaia-agent/tools/browser';
+import { browserUseTool } from '@gaia-agent/sdk/tools/browser';
 
 const agent = createGaiaAgent({
   tools: {
@@ -66,8 +66,8 @@ Choose one or both:
 **Recommendation**: Use Tavily for general tasks, add Exa for research-heavy benchmarks.
 
 ```typescript
-import { tavilySearch } from 'gaia-agent/tools/search';
-import { exaSearch, exaGetContents } from 'gaia-agent/tools/search';
+import { tavilySearch } from '@gaia-agent/sdk/tools/search';
+import { exaSearch, exaGetContents } from '@gaia-agent/sdk/tools/search';
 
 const agent = createGaiaAgent({
   tools: {
@@ -117,10 +117,10 @@ pnpm run benchmark:quick
 ### Example Configuration for GAIA
 
 ```typescript
-import { createGaiaAgent, getDefaultTools } from 'gaia-agent';
-import { e2bSandbox } from 'gaia-agent/tools/sandbox';
-import { browserUseTool } from 'gaia-agent/tools/browser';
-import { tavilySearch, exaSearch } from 'gaia-agent/tools/search';
+import { createGaiaAgent, getDefaultTools } from '@gaia-agent/sdk';
+import { e2bSandbox } from '@gaia-agent/sdk/tools/sandbox';
+import { browserUseTool } from '@gaia-agent/sdk/tools/browser';
+import { tavilySearch, exaSearch } from '@gaia-agent/sdk/tools/search';
 
 // Optimized for GAIA benchmarks
 const agent = createGaiaAgent({

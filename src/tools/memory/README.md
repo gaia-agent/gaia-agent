@@ -9,7 +9,7 @@ Community-driven memory management service.
 
 **Usage:**
 ```typescript
-import { createGaiaAgent } from 'gaia-agent';
+import { createGaiaAgent } from '@gaia-agent/sdk';
 
 const agent = createGaiaAgent({
   providers: {
@@ -30,7 +30,7 @@ Enterprise-grade memory management using AWS Bedrock AgentCore.
 
 **Usage:**
 ```typescript
-import { createGaiaAgent } from 'gaia-agent';
+import { createGaiaAgent } from '@gaia-agent/sdk';
 
 const agent = createGaiaAgent({
   providers: {
