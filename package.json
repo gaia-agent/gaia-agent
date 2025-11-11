@@ -105,6 +105,11 @@
     "benchmark:level1": "tsx benchmark/run.ts --level 1",
     "benchmark:level2": "tsx benchmark/run.ts --level 2",
     "benchmark:level3": "tsx benchmark/run.ts --level 3",
+    "benchmark:files": "tsx benchmark/run.ts --category files",
+    "benchmark:code": "tsx benchmark/run.ts --category code",
+    "benchmark:search": "tsx benchmark/run.ts --category search",
+    "benchmark:browser": "tsx benchmark/run.ts --category browser",
+    "benchmark:reasoning": "tsx benchmark/run.ts --category reasoning",
     "benchmark:quick": "tsx benchmark/run.ts --limit 5 --verbose",
     "benchmark:random": "tsx benchmark/run.ts --random --verbose",
     "prepublishOnly": "npm run build"

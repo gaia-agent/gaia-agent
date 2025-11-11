@@ -12,6 +12,7 @@ export interface BenchmarkConfig {
   outputDir: string;
   verbose: boolean;
   stream?: boolean;
+  category?: "files" | "code" | "search" | "browser" | "reasoning";
 }
 
 export interface HuggingFaceTask {

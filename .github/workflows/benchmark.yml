@@ -1,0 +1,190 @@
+name: GAIA Benchmark
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: 'OpenAI Model'
+        required: true
+        default: 'gpt-4o'
+        type: choice
+        options:
+          - gpt-4o
+          - gpt-4o-mini
+          - gpt-4-turbo
+          - gpt-3.5-turbo
+      
+      dataset:
+        description: 'Dataset'
+        required: true
+        default: 'validation'
+        type: choice
+        options:
+          - validation
+          - test
+      
+      level:
+        description: 'Difficulty Level (empty for all)'
+        required: false
+        type: choice
+        options:
+          - ''
+          - '1'
+          - '2'
+          - '3'
+      
+      category:
+        description: 'Task Category (empty for all)'
+        required: false
+        type: choice
+        options:
+          - ''
+          - files
+          - code
+          - search
+          - browser
+          - reasoning
+      
+      search_provider:
+        description: 'Search Provider'
+        required: true
+        default: 'tavily'
+        type: choice
+        options:
+          - tavily
+          - exa
+      
+      sandbox_provider:
+        description: 'Sandbox Provider'
+        required: true
+        default: 'e2b'
+        type: choice
+        options:
+          - e2b
+          - sandock
+      
+      limit:
+        description: 'Limit number of tasks (empty for all)'
+        required: false
+        type: string
+        default: ''
+      
+      verbose:
+        description: 'Verbose output'
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      
+      - name: Install dependencies
+        run: pnpm install
+      
+      - name: Build project
+        run: pnpm build
+      
+      - name: Run benchmark
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ inputs.model }}
+          HUGGINGFACE_TOKEN: ${{ secrets.HUGGINGFACE_TOKEN }}
+          
+          # Provider configuration
+          GAIA_AGENT_SEARCH_PROVIDER: ${{ inputs.search_provider }}
+          GAIA_AGENT_SANDBOX_PROVIDER: ${{ inputs.sandbox_provider }}
+          
+          # Provider API keys
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
+          SANDOCK_API_KEY: ${{ secrets.SANDOCK_API_KEY }}
+          BROWSERUSE_API_KEY: ${{ secrets.BROWSERUSE_API_KEY }}
+          
+          # AWS credentials (optional)
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          
+          # Memory providers (optional)
+          MEM0_API_KEY: ${{ secrets.MEM0_API_KEY }}
+        run: |
+          # Build benchmark command
+          CMD="pnpm benchmark"
+          
+          # Add dataset flag
+          if [ "${{ inputs.dataset }}" = "test" ]; then
+            CMD="$CMD --test"
+          fi
+          
+          # Add level filter
+          if [ -n "${{ inputs.level }}" ]; then
+            CMD="$CMD --level ${{ inputs.level }}"
+          fi
+          
+          # Add category filter
+          if [ -n "${{ inputs.category }}" ]; then
+            CMD="$CMD --category ${{ inputs.category }}"
+          fi
+          
+          # Add limit
+          if [ -n "${{ inputs.limit }}" ]; then
+            CMD="$CMD --limit ${{ inputs.limit }}"
+          fi
+          
+          # Add verbose flag
+          if [ "${{ inputs.verbose }}" = "true" ]; then
+            CMD="$CMD --verbose"
+          fi
+          
+          echo "Running: $CMD"
+          $CMD
+      
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: benchmark-results-${{ inputs.model }}-${{ inputs.search_provider }}-${{ inputs.sandbox_provider }}
+          path: benchmark-results/
+          retention-days: 30
+      
+      - name: Create summary
+        if: always()
+        run: |
+          echo "# GAIA Benchmark Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- **Model**: ${{ inputs.model }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dataset**: ${{ inputs.dataset }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Level**: ${{ inputs.level || 'all' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Category**: ${{ inputs.category || 'all' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Search Provider**: ${{ inputs.search_provider }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Sandbox Provider**: ${{ inputs.sandbox_provider }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Limit**: ${{ inputs.limit || 'none' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Find the latest result file
+          RESULT_FILE=$(ls -t benchmark-results/gaia-*.json 2>/dev/null | head -1)
+          
+          if [ -f "$RESULT_FILE" ]; then
+            echo "## Results" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+            cat "$RESULT_FILE" | jq '.metadata' >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No results file found" >> $GITHUB_STEP_SUMMARY
+          fi

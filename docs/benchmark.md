@@ -24,6 +24,25 @@ pnpm benchmark --level 1        # Filter by difficulty (1-3)
 pnpm benchmark --limit 10       # Limit tasks
 ```
 
+### Test by Capability
+
+Filter tasks by required skills using category filters:
+
+```bash
+pnpm benchmark:files            # Tasks with file attachments (images, PDFs, etc.)
+pnpm benchmark:code             # Code execution & mathematical calculations
+pnpm benchmark:search           # Web search & information retrieval
+pnpm benchmark:browser          # Browser automation (navigation, clicks, etc.)
+pnpm benchmark:reasoning        # Pure reasoning/logic tasks
+```
+
+**Category detection** - Tasks are automatically categorized based on:
+- **files**: Has file attachments (images, PDFs, spreadsheets, etc.)
+- **code**: Contains keywords like "calculate", "compute", "code", "equation", "algorithm"
+- **search**: Contains keywords like "search", "find", "article", "website", "arxiv", "wikipedia"
+- **browser**: Contains keywords like "browser", "navigate", "click", "webpage"
+- **reasoning**: Pure logic/reasoning tasks (no other category matches)
+
 ### Advanced Options
 
 ```bash
@@ -46,6 +65,14 @@ pnpm benchmark --random --stream --verbose
 pnpm benchmark:quick            # 5 tasks with verbose output
 pnpm benchmark:random           # Random task with verbose
 pnpm benchmark:level1           # Level 1 tasks only
+```
+
+**Category filters support all flags:**
+```bash
+pnpm benchmark:files --limit 5 --verbose      # Test file handling
+pnpm benchmark:search --stream                # Search with streaming
+pnpm benchmark:code --random --verbose        # Random code task
+pnpm benchmark --category search --level 2    # Advanced search tasks
 ```
 
 **Note:** Use `--stream` flag with any command for real-time output:

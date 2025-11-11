@@ -1,51 +1,95 @@
-# GAIA Agent
+<div align="center">
+  <img src="docs/logo.svg" alt="GAIA Agent Logo" width="200" height="200">
+  
+  # GAIA Agent
+  
+  ### 🤖 Build GAIA-benchmark-ready AI agents in seconds, not weeks
+  
+  **Production-ready AI agent with 16+ tools and swappable providers**  
+  Built on AI SDK v6 ToolLoopAgent & ToolSDK.ai
+  
+  [![npm version](https://img.shields.io/npm/v/gaia-agent.svg?style=flat-square)](https://www.npmjs.com/package/gaia-agent)
+  [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg?style=flat-square)](https://www.typescriptlang.org/)
+  [![AI SDK](https://img.shields.io/badge/AI_SDK-v6-purple.svg?style=flat-square)](https://sdk.vercel.ai/)
+  
+  [Quick Start](#quick-start) · [Features](#features) · [Documentation](#documentation) · [Examples](#examples)
+  
+</div>
 
-Build a GAIA-benchmark-ready super agent in seconds, not days or weeks.
-🤖 **GAIA-benchmark-ready Headless AI agent with 16+ tools and swappable providers** - Built on AI SDK v6 ToolLoopAgent & ToolSDK.ai
+---
 
-```typescript
-import { createGaiaAgent } from 'gaia-agent';
+## ✨ Features
 
-const agent = createGaiaAgent();
+<table>
+<tr>
+<td width="50%">
 
-const result = await agent.generate({
-  prompt: 'Search for recent AI breakthroughs and summarize the top 3',
-});
-```
+### 🚀 Zero Configuration
+Pre-configured agent ready for GAIA benchmarks out of the box
 
-[![npm version](https://img.shields.io/npm/v/gaia-agent.svg)](https://www.npmjs.com/package/gaia-agent)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+### 🔧 16+ Built-in Tools
+Organized by category with official SDKs (Tavily, Exa, E2B, BrowserUse)
 
-## Features
+### 🔄 Swappable Providers
+Easy provider switching for sandbox, browser, search, and memory
 
-- 🚀 **Zero Config** - Pre-configured agent ready for GAIA benchmarks
-- 🔧 **16 Built-in Tools** - Organized by category with official SDKs
-- 🔄 **Swappable Providers** - Choose sandbox (E2B/Sandock), browser (BrowserUse/AWS), search (Tavily/Exa)
-- 🌐 **AI-Powered Search** - Integrated Tavily (@tavily/core) and Exa (exa-js) SDKs
-- 🛡️ **Secure Sandbox** - E2B cloud sandbox (e2b SDK) with code execution + filesystem
-- 🖥️ **Browser Automation** - BrowserUse (browser-use-sdk) or AWS AgentCore
-- 🧠 **Agent Memory** - Persistent memory with Mem0
-- 📦 **Tree-Shaking Friendly** - ESM with granular exports
-- 🏗️ **TypeScript First** - Built and compiled, full type safety
-- 🔌 **ToolSDK Ready** - Easy integration with custom tools
+### 🌐 AI-Powered Search
+Integrated Tavily and Exa for intelligent web search
 
-## Why?
+</td>
+<td width="50%">
 
-Building AI agents usually means:
-- ❌ Days/weeks setting up APIs for search, code execution, memory
-- ❌ Writing tool wrappers and error handling for each service
-- ❌ Figuring out which providers to use and how to swap them
+### 🛡️ Secure Sandbox
+E2B cloud sandbox with code execution + filesystem operations
 
-**With gaia-agent:**
-- ✅ **16 tools ready** with official SDKs (Tavily, Exa, E2B, BrowserUse)
-- ✅ **GAIA benchmark ready** - Run benchmarks immediately with `pnpm run benchmark`
-- ✅ **Swap providers easily** - Change sandbox/browser/search with one line
-- ✅ **AI SDK v6 native** - Built on `ToolLoopAgent`, no wrappers
-- ✅ **Tree-shakeable** - Only bundle what you use
+### 🖥️ Browser Automation
+BrowserUse SDK or AWS AgentCore for web interactions
+
+### 🧠 Agent Memory
+Persistent memory with Mem0 or AWS AgentCore
+
+### 📦 Tree-Shaking Friendly
+ESM with granular exports, TypeScript-first
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🎯 Why GAIA Agent?
+
+<table>
+<tr>
+<td>
+
+### ❌ Traditional Approach
+- Days/weeks setting up APIs
+- Writing tool wrappers manually
+- Error handling for each service
+- Figuring out which providers to use
+- Integration testing headaches
+
+</td>
+<td>
+
+### ✅ With GAIA Agent
+- **3 lines of code** to get started
+- **16 tools ready** with official SDKs
+- **GAIA benchmark ready** immediately
+- **Swap providers** with one line
+- **Production-tested** implementations
+
+</td>
+</tr>
+</table>
 
 **Time savings:** From weeks of infrastructure setup → 3 lines of code
 
-## Quick Start
+---
+
+## 🚀 Quick Start
 
 ### Installation
 
@@ -68,13 +112,25 @@ const result = await agent.generate({
 console.log(result.text);
 ```
 
-### Environment Variables
+---
+
+## 📋 Environment Variables
 
 ```bash
 # Required
 OPENAI_API_KEY=sk-...
 
-# Required - Default providers (can be swapped)
+# Optional - OpenAI Configuration
+OPENAI_MODEL=gpt-4o                    # Default model (gpt-4o, gpt-4o-mini, etc.)
+OPENAI_BASE_URL=https://api.openai.com/v1  # Custom endpoint
+
+# Optional - Provider Selection
+GAIA_AGENT_SEARCH_PROVIDER=tavily      # Search: tavily | exa
+GAIA_AGENT_SANDBOX_PROVIDER=e2b        # Sandbox: e2b | sandock
+GAIA_AGENT_BROWSER_PROVIDER=browseruse # Browser: browseruse | aws-agentcore
+GAIA_AGENT_MEMORY_PROVIDER=mem0        # Memory: mem0 | agentcore (optional)
+
+# Required - Default provider API keys
 TAVILY_API_KEY=...           # Search provider (default: Tavily)
 E2B_API_KEY=...              # Sandbox provider (default: E2B)
 BROWSERUSE_API_KEY=...       # Browser provider (default: BrowserUse)
@@ -89,7 +145,14 @@ AWS_ACCESS_KEY_ID=...        # Alternative memory (AWS AgentCore)
 AWS_SECRET_ACCESS_KEY=...
 ```
 
-### Default Providers
+**Provider Configuration Priority:**
+1. Code configuration (highest): `createGaiaAgent({ providers: { search: 'exa' } })`
+2. Environment variables: `GAIA_AGENT_SEARCH_PROVIDER=exa`
+3. Defaults (lowest): `tavily`, `e2b`, `browseruse`, `mem0`
+
+---
+
+## 🎛️ Default Providers
 
 **gaia-agent** comes with pre-configured providers optimized for GAIA benchmarks:
 
@@ -106,7 +169,9 @@ AWS_SECRET_ACCESS_KEY=...
 - **BrowserUse**: Modern browser automation with best reliability
 - **Mem0**: Simple memory API (optional, not required for most tasks)
 
-## Built-in Tools
+---
+
+## 🛠️ Built-in Tools
 
 ### Core
 - **calculator** - Math calculations
@@ -127,7 +192,9 @@ AWS_SECRET_ACCESS_KEY=...
 ### Memory
 - **mem0Remember/mem0Recall** - Persistent memory ([Mem0](https://mem0.ai))
 
-## Swap Providers
+---
+
+## 🔄 Swap Providers
 
 You can easily switch between providers or use alternative implementations:
 
@@ -174,12 +241,23 @@ pnpm run benchmark:quick     # 5 tasks (testing)
 pnpm run benchmark:random    # Random 1 task with verbose output
 ```
 
+**Test by capability** - Filter tasks by required skills:
+
+```bash
+pnpm benchmark:files         # Tasks with file attachments (images, PDFs, etc.)
+pnpm benchmark:code          # Code execution & mathematical calculations
+pnpm benchmark:search        # Web search & information retrieval
+pnpm benchmark:browser       # Browser automation (navigation, clicks, etc.)
+pnpm benchmark:reasoning     # Pure reasoning/logic tasks
+```
+
 **Stream mode** shows agent's thinking process in real-time:
 ```bash
 pnpm benchmark --stream --random
 
 # Or use with other commands
 pnpm benchmark:random --stream
+pnpm benchmark:search --stream --limit 3
 
 # Output:
 # 🤖 Agent thinking (streaming)...
@@ -188,12 +266,12 @@ pnpm benchmark:random --stream
 # The result is 345...
 ```
 
-**Custom options:**
+**Custom options** - All flags are compatible with category filters:
 ```bash
-pnpm benchmark --random --verbose   # Random task with detailed logs
-pnpm benchmark:random --stream      # Streaming + random task
-pnpm benchmark --limit 3 --verbose  # 3 tasks with detailed logs
-pnpm benchmark --level 1 --random   # Random Level 1 task
+pnpm benchmark:files --limit 5 --verbose      # Test file handling
+pnpm benchmark:search --stream                # Search with streaming
+pnpm benchmark:code --random --verbose        # Random code task
+pnpm benchmark --category search --level 2    # Advanced search tasks
 ```
 
 📖 **[See GAIA requirements and setup →](./docs/gaia-benchmark.md)**

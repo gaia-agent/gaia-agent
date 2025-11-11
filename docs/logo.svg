@@ -1,0 +1,93 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle with Gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="orbitGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f093fb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f5576c;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Outer Circle -->
+  <circle cx="100" cy="100" r="95" fill="url(#bgGradient)" opacity="0.1"/>
+  
+  <!-- Main Circle (Brain/Core) -->
+  <circle cx="100" cy="100" r="45" fill="url(#bgGradient)" filter="url(#glow)"/>
+  
+  <!-- Neural Network Nodes (representing AI capabilities) -->
+  <!-- Top -->
+  <circle cx="100" cy="35" r="8" fill="#f093fb" opacity="0.9">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Top Right -->
+  <circle cx="146" cy="54" r="8" fill="#667eea" opacity="0.9">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" begin="0.3s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Right -->
+  <circle cx="165" cy="100" r="8" fill="#764ba2" opacity="0.9">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" begin="0.6s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Bottom Right -->
+  <circle cx="146" cy="146" r="8" fill="#f5576c" opacity="0.9">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" begin="0.9s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Bottom -->
+  <circle cx="100" cy="165" r="8" fill="#f093fb" opacity="0.9">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" begin="1.2s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Bottom Left -->
+  <circle cx="54" cy="146" r="8" fill="#667eea" opacity="0.9">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" begin="1.5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Left -->
+  <circle cx="35" cy="100" r="8" fill="#764ba2" opacity="0.9">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" begin="1.8s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Top Left -->
+  <circle cx="54" cy="54" r="8" fill="#f5576c" opacity="0.9">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" begin="2.1s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Connection Lines (Neural Network) -->
+  <g stroke="url(#orbitGradient)" stroke-width="2" opacity="0.3">
+    <line x1="100" y1="35" x2="100" y2="55"/>
+    <line x1="146" y1="54" x2="128" y2="72"/>
+    <line x1="165" y1="100" x2="145" y2="100"/>
+    <line x1="146" y1="146" x2="128" y2="128"/>
+    <line x1="100" y1="165" x2="100" y2="145"/>
+    <line x1="54" y1="146" x2="72" y2="128"/>
+    <line x1="35" y1="100" x2="55" y2="100"/>
+    <line x1="54" y1="54" x2="72" y2="72"/>
+  </g>
+  
+  <!-- Center Symbol - GAIA "G" -->
+  <text x="100" y="118" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">G</text>
+  
+  <!-- Orbit Ring (representing benchmark/testing) -->
+  <circle cx="100" cy="100" r="70" stroke="url(#orbitGradient)" stroke-width="2" fill="none" opacity="0.4" stroke-dasharray="5,5">
+    <animateTransform
+      attributeName="transform"
+      type="rotate"
+      from="0 100 100"
+      to="360 100 100"
+      dur="20s"
+      repeatCount="indefinite"/>
+  </circle>
+</svg>

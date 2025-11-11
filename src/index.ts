@@ -79,6 +79,45 @@ import { createMemoryTools } from "./tools/memory/index.js";
 import type { ProviderConfig } from "./types.js";
 
 /**
+ * Load provider configuration from environment variables
+ * Supports: GAIA_AGENT_SEARCH_PROVIDER, GAIA_AGENT_SANDBOX_PROVIDER, etc.
+ */
+function loadProviderConfigFromEnv(): ProviderConfig | undefined {
+  const envConfig: ProviderConfig = {};
+  let hasConfig = false;
+
+  // Search provider
+  const searchProvider = process.env.GAIA_AGENT_SEARCH_PROVIDER?.toLowerCase();
+  if (searchProvider === "tavily" || searchProvider === "exa") {
+    envConfig.search = searchProvider;
+    hasConfig = true;
+  }
+
+  // Sandbox provider
+  const sandboxProvider = process.env.GAIA_AGENT_SANDBOX_PROVIDER?.toLowerCase();
+  if (sandboxProvider === "e2b" || sandboxProvider === "sandock") {
+    envConfig.sandbox = sandboxProvider;
+    hasConfig = true;
+  }
+
+  // Browser provider
+  const browserProvider = process.env.GAIA_AGENT_BROWSER_PROVIDER?.toLowerCase();
+  if (browserProvider === "browseruse" || browserProvider === "aws-agentcore") {
+    envConfig.browser = browserProvider as "browseruse" | "aws-agentcore";
+    hasConfig = true;
+  }
+
+  // Memory provider
+  const memoryProvider = process.env.GAIA_AGENT_MEMORY_PROVIDER?.toLowerCase();
+  if (memoryProvider === "mem0" || memoryProvider === "agentcore") {
+    envConfig.memory = memoryProvider as "mem0" | "agentcore";
+    hasConfig = true;
+  }
+
+  return hasConfig ? envConfig : undefined;
+}
+
+/**
  * Validate required API keys for providers
  */
 function validateProviderConfig(providers?: ProviderConfig): void {
@@ -197,32 +236,46 @@ When you have completed the task, provide a final answer.`;
  *
  * const agent = createGaiaAgent({ tools });
  * ```
+ *
+ * @example Using environment variables
+ * ```typescript
+ * // Set in .env file:
+ * // GAIA_AGENT_SEARCH_PROVIDER=exa
+ * // GAIA_AGENT_SANDBOX_PROVIDER=sandock
+ *
+ * const tools = getDefaultTools();
+ * // Automatically uses providers from environment variables
+ * ```
  */
 export function getDefaultTools(providers?: ProviderConfig) {
+  // Merge environment config with explicit config (explicit takes precedence)
+  const envConfig = loadProviderConfigFromEnv();
+  const mergedConfig = { ...envConfig, ...providers };
+
   // Validate provider configuration before creating tools
-  validateProviderConfig(providers);
+  validateProviderConfig(mergedConfig);
 
   // Determine which providers are enabled
   // Default to recommended providers unless explicitly set to undefined or a different provider
   const _browserProvider =
-    providers && "browser" in providers && providers.browser === undefined
+    mergedConfig && "browser" in mergedConfig && mergedConfig.browser === undefined
       ? undefined
-      : providers?.browser || "browseruse";
+      : mergedConfig?.browser || "browseruse";
 
   const sandboxProvider =
-    providers && "sandbox" in providers && providers.sandbox === undefined
+    mergedConfig && "sandbox" in mergedConfig && mergedConfig.sandbox === undefined
       ? undefined
-      : providers?.sandbox || "e2b";
+      : mergedConfig?.sandbox || "e2b";
 
   const searchProvider =
-    providers && "search" in providers && providers.search === undefined
+    mergedConfig && "search" in mergedConfig && mergedConfig.search === undefined
       ? undefined
-      : providers?.search || "tavily";
+      : mergedConfig?.search || "tavily";
 
   const memoryProvider =
-    providers && "memory" in providers && providers.memory === undefined
+    mergedConfig && "memory" in mergedConfig && mergedConfig.memory === undefined
       ? undefined
-      : providers?.memory || "mem0";
+      : mergedConfig?.memory || "mem0";
 
   const tools: Record<string, unknown> = {
     calculator,
