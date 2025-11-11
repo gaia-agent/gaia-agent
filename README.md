@@ -1,19 +1,19 @@
 <div align="center">
   <img src="docs/logo.svg" alt="GAIA Agent Logo" width="200" height="200">
   
-  # GAIA Agent
+  # GAIA Super Agent SDK
   
-  ### 🤖 Build GAIA-benchmark-ready AI agents in seconds, not weeks
+  ### 🤖 Build GAIA-Benchmark-ready Super AI Agents in seconds, not weeks
   
-  **Production-ready AI agent with 16+ tools and swappable providers**  
+  **Production-ready Super AI agent with 16+ tools and swappable providers**  
   Built on AI SDK v6 ToolLoopAgent & ToolSDK.ai
   
   [![npm version](https://img.shields.io/npm/v/@gaia-agent/sdk.svg?style=flat-square)](https://www.npmjs.com/package/@gaia-agent/sdk)
-  [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
+  [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat-square)](LICENSE)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg?style=flat-square)](https://www.typescriptlang.org/)
   [![AI SDK](https://img.shields.io/badge/AI_SDK-v6-purple.svg?style=flat-square)](https://sdk.vercel.ai/)
   
-  [Quick Start](#-quick-start) · [Features](#-features) · [Documentation](#-documentation) · [Examples](#-examples)
+  [Quick Start](#-quick-start) · [Features](#-features) · [GAIA Benchmark](#-gaia-benchmark) · [Documentation](#-documentation)
   
 </div>
 
@@ -60,6 +60,11 @@ ESM with granular exports, TypeScript-first
 
 ## 🎯 Why GAIA Agent?
 
+### 🌟 Our Mission
+**Empower developers to build world-class Super AI Agents in minutes, not months.**
+
+Whether you're creating a production-ready AI assistant for your product or competing in GAIA benchmarks, GAIA Agent provides the enterprise-grade foundation you need.
+
 <table>
 <tr>
 <td>
@@ -86,6 +91,8 @@ ESM with granular exports, TypeScript-first
 </table>
 
 **Time savings:** From weeks of infrastructure setup → 3 lines of code
+
+**Result:** A world-class, production-ready Super Agent that rivals top AI systems
 
 ### 🌟 What is the GAIA Benchmark?
 The [GAIA Benchmark](https://huggingface.co/datasets/gaia-benchmark/GAIA) is a comprehensive evaluation suite designed to test the capabilities of AI agents across a wide range of tasks, including reasoning, search, code execution, and browser automation.
@@ -352,17 +359,10 @@ For manual version bumps (minor/major), see [docs/NPM_PUBLISH_SETUP.md](./docs/N
 
 ## 📄 License
 
-MIT
+Apache License 2.0
 
 ---
 
 <div align="center">
   <p>Made with ❤️ for the AI community</p>
-  <p>
-    <a href="https://github.com/gaia-agent/gaia-agent/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/gaia-agent/gaia-agent/issues">Request Feature</a>
-    ·
-    <a href="https://twitter.com/yourusername">Follow Updates</a>
-  </p>
 </div>
