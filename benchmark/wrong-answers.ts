@@ -18,6 +18,13 @@ export interface WrongAnswerEntry {
   lastFailedAt: string;
   attemptCount: number;
   error?: string;
+  steps?: number;
+  toolsUsed?: string[];
+  summary?: {
+    totalToolCalls: number;
+    uniqueTools: string[];
+    hadError: boolean;
+  };
 }
 
 export interface WrongAnswersCollection {
@@ -118,6 +125,9 @@ export async function updateWrongAnswers(
         lastFailedAt: now,
         attemptCount: (existing?.attemptCount || 0) + 1,
         error: result.error,
+        steps: result.steps,
+        toolsUsed: result.toolsUsed,
+        summary: result.summary,
       };
 
       if (existing) {

@@ -40,13 +40,17 @@ export async function saveResults(
   tasks: GaiaTask[],
   outputDir: string,
   dataset: string,
+  incremental = false,
 ): Promise<void> {
   if (!existsSync(outputDir)) {
     await mkdir(outputDir, { recursive: true });
   }
 
+  // Use fixed filename for incremental updates, timestamped for final save
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const filename = `gaia-${dataset}-${timestamp}.json`;
+  const filename = incremental 
+    ? `gaia-${dataset}-latest.json`
+    : `gaia-${dataset}-${timestamp}.json`;
   const filepath = join(outputDir, filename);
 
   const total = results.length;
@@ -62,13 +66,22 @@ export async function saveResults(
       accuracy: Number.parseFloat(accuracy.toFixed(2)),
       agent: "gaia-agent",
       model: process.env.OPENAI_MODEL || "gpt-4o",
+      incremental,
     },
     results,
   };
 
   await writeFile(filepath, JSON.stringify(output, null, 2));
-  console.log(`💾 Results saved to: ${filepath}`);
+  
+  if (!incremental) {
+    console.log(`💾 Results saved to: ${filepath}`);
+  } else {
+    // Only show progress indicator for incremental saves
+    process.stdout.write(`\r💾 Progress saved: ${results.length} tasks completed`);
+  }
 
-  // Update wrong answers collection
-  await updateWrongAnswers(results, tasks, outputDir);
+  // Update wrong answers collection (only on final save)
+  if (!incremental) {
+    await updateWrongAnswers(results, tasks, outputDir);
+  }
 }

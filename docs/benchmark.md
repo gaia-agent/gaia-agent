@@ -45,6 +45,23 @@ pnpm benchmark:reasoning        # Pure reasoning/logic tasks
 - **browser**: Contains keywords like "browser", "navigate", "click", "webpage"
 - **reasoning**: Pure logic/reasoning tasks (no other category matches)
 
+### Resume from Checkpoint
+
+Resume interrupted benchmarks without losing progress:
+
+```bash
+# Initial run (may be interrupted)
+pnpm benchmark --limit 100
+
+# Resume from last completed task
+pnpm benchmark --resume
+
+# Or use shortcut
+pnpm benchmark:resume
+```
+
+📖 **[See full resume documentation →](./resume-feature.md)**
+
 ### Advanced Options
 
 ```bash

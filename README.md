@@ -192,6 +192,9 @@ Run official GAIA benchmarks with enhanced results tracking:
 pnpm benchmark                  # Run validation set
 pnpm benchmark --limit 10       # Test with 10 tasks
 
+# Resume interrupted runs
+pnpm benchmark --resume         # Continue from checkpoint
+
 # Filter by capability
 pnpm benchmark:files            # Tasks with file attachments
 pnpm benchmark:code             # Code execution tasks
@@ -225,6 +228,7 @@ pnpm benchmark:wrong
 ```
 
 📖 **[Wrong answers guide →](./docs/wrong-answers.md)**  
+📖 **[Resume feature guide →](./docs/resume-feature.md)**  
 📖 **[Benchmark module docs →](./docs/benchmark.md)**  
 📖 **[GAIA setup guide →](./docs/gaia-benchmark.md)**
 

@@ -102,6 +102,7 @@
     "test:coverage": "vitest run --coverage",
     "benchmark": "tsx benchmark/run.ts",
     "benchmark:test": "tsx benchmark/run.ts --test",
+    "benchmark:resume": "tsx benchmark/run.ts --resume",
     "benchmark:level1": "tsx benchmark/run.ts --level 1",
     "benchmark:level2": "tsx benchmark/run.ts --level 2",
     "benchmark:level3": "tsx benchmark/run.ts --level 3",

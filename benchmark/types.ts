@@ -13,6 +13,7 @@ export interface BenchmarkConfig {
   verbose: boolean;
   stream?: boolean;
   category?: "files" | "code" | "search" | "browser" | "reasoning";
+  resume?: boolean;
 }
 
 export interface HuggingFaceTask {

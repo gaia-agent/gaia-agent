@@ -14,6 +14,7 @@
  *   pnpm run benchmark --random           # Random single task
  *   pnpm run benchmark --stream           # Stream agent thinking in real-time
  *   pnpm run benchmark --verbose          # Detailed output
+ *   pnpm run benchmark --resume           # Resume from last checkpoint (latest.json)
  *
  * Categories:
  *   files      - Tasks with file attachments (images, PDFs, etc.)
@@ -26,6 +27,7 @@
  *   pnpm benchmark:files --limit 5 --verbose    # Test file handling capability
  *   pnpm benchmark:search --stream              # Test search with streaming
  *   pnpm benchmark:code --random --verbose      # Random code execution task
+ *   pnpm benchmark --resume                     # Resume interrupted benchmark
  */
 
 import { existsSync } from "node:fs";
@@ -55,12 +57,51 @@ if (!process.env.OPENAI_API_KEY) {
 
 // Now import other modules AFTER env is loaded
 import { createOpenAI } from "@ai-sdk/openai";
+import { readFile } from "node:fs/promises";
 import { createGaiaAgent } from "../src/index.js";
 import type { GaiaTask, ProviderConfig } from "../src/types.js";
 import { downloadGaiaDataset } from "./downloader.js";
 import { evaluateTask } from "./evaluator.js";
 import { displaySummary, saveResults } from "./reporter.js";
 import type { BenchmarkConfig, GaiaBenchmarkResult } from "./types.js";
+
+/**
+ * Load checkpoint from latest.json if it exists
+ */
+async function loadCheckpoint(
+  outputDir: string,
+  dataset: string,
+): Promise<{ results: GaiaBenchmarkResult[]; completedTaskIds: Set<string> } | null> {
+  const checkpointPath = join(outputDir, `gaia-${dataset}-latest.json`);
+
+  if (!existsSync(checkpointPath)) {
+    return null;
+  }
+
+  try {
+    const content = await readFile(checkpointPath, "utf-8");
+    const checkpoint = JSON.parse(content);
+
+    if (!checkpoint.results || !Array.isArray(checkpoint.results)) {
+      return null;
+    }
+
+    const completedTaskIds = new Set<string>(
+      checkpoint.results.map((r: GaiaBenchmarkResult) => r.taskId),
+    );
+
+    console.log(`📂 Found checkpoint with ${checkpoint.results.length} completed tasks`);
+    console.log(`   File: ${checkpointPath}`);
+
+    return {
+      results: checkpoint.results,
+      completedTaskIds,
+    };
+  } catch (error) {
+    console.warn(`⚠️  Failed to load checkpoint: ${error}`);
+    return null;
+  }
+}
 
 /**
  * Get OpenAI model from environment or use default
@@ -187,6 +228,15 @@ async function runBenchmark(config: BenchmarkConfig): Promise<{
     ? createGaiaAgent({ model, providers })
     : createGaiaAgent({ model });
 
+  // Load checkpoint if resuming
+  let checkpoint: { results: GaiaBenchmarkResult[]; completedTaskIds: Set<string> } | null = null;
+  if (config.resume) {
+    checkpoint = await loadCheckpoint(config.outputDir, config.dataset);
+    if (!checkpoint) {
+      console.log("📂 No checkpoint found, starting from beginning");
+    }
+  }
+
   // Download dataset
   let tasks = await downloadGaiaDataset(config.dataset);
 
@@ -203,6 +253,14 @@ async function runBenchmark(config: BenchmarkConfig): Promise<{
       return categories.includes(config.category as string);
     });
     console.log(`🔍 Filtered to ${tasks.length} tasks (Category: ${config.category})`);
+  }
+
+  // Filter out completed tasks if resuming
+  if (checkpoint) {
+    const originalCount = tasks.length;
+    tasks = tasks.filter((task) => !checkpoint.completedTaskIds.has(task.id));
+    const skipped = originalCount - tasks.length;
+    console.log(`🔄 Resuming: Skipping ${skipped} completed tasks, ${tasks.length} remaining`);
   }
 
   // Random mode: pick one random task
@@ -223,11 +281,20 @@ async function runBenchmark(config: BenchmarkConfig): Promise<{
 
   console.log(`\n🚀 Running benchmark on ${tasks.length} tasks...\n`);
 
-  const results: GaiaBenchmarkResult[] = [];
+  // Start with checkpoint results if resuming
+  const results: GaiaBenchmarkResult[] = checkpoint ? [...checkpoint.results] : [];
+  
+  // Keep track of all tasks (for final save)
+  const allTasks = await downloadGaiaDataset(config.dataset);
 
   // Run tasks sequentially (to avoid rate limits)
   for (const [index, task] of tasks.entries()) {
-    console.log(`[${index + 1}/${tasks.length}] Evaluating ${task.id}...`);
+    const totalCompleted = checkpoint ? checkpoint.results.length + index + 1 : index + 1;
+    const totalTasks = checkpoint
+      ? checkpoint.results.length + tasks.length
+      : tasks.length;
+
+    console.log(`[${totalCompleted}/${totalTasks}] Evaluating ${task.id}...`);
 
     const result = await evaluateTask(task, gaiaAgent, {
       verbose: config.verbose,
@@ -235,13 +302,16 @@ async function runBenchmark(config: BenchmarkConfig): Promise<{
     });
     results.push(result);
 
+    // Save incremental results after each task (with all tasks for context)
+    await saveResults(results, allTasks, config.outputDir, config.dataset, true);
+
     // Add small delay to avoid rate limits
     if (index < tasks.length - 1) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
 
-  return { results, tasks };
+  return { results, tasks: allTasks };
 }
 
 /**
@@ -264,6 +334,7 @@ async function main() {
       : "./benchmark-results",
     verbose: args.includes("--verbose") || args.includes("-v"),
     stream: args.includes("--stream"),
+    resume: args.includes("--resume"),
     category: args.includes("--category")
       ? (args[args.indexOf("--category") + 1] as
           | "files"
@@ -291,6 +362,7 @@ async function main() {
   console.log(`Limit:    ${config.limit || "none"}`);
   console.log(`Random:   ${config.random ? "yes" : "no"}`);
   console.log(`Stream:   ${config.stream ? "yes" : "no"}`);
+  console.log(`Resume:   ${config.resume ? "yes" : "no"}`);
   console.log(`Output:   ${config.outputDir}`);
   console.log(`Verbose:  ${config.verbose}`);
   console.log("=".repeat(60));

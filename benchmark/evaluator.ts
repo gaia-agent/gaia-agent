@@ -264,9 +264,42 @@ export async function evaluateTask(
       // Stream mode: show real-time agent thinking process
       console.log("\n🤖 Agent thinking (streaming)...\n");
 
-      const { textStream, steps } = await agent.stream({
+      const { textStream, steps: stepsPromise } = await agent.stream({
         messages,
       });
+
+      // Create a promise to track steps as they arrive
+      let stepCount = 0;
+      const checkSteps = async () => {
+        const steps = await stepsPromise;
+        
+        // Show tool execution details as they complete
+        for (let i = stepCount; i < steps.length; i++) {
+          const step = steps[i];
+          
+          if ("toolCalls" in step && step.toolCalls && step.toolCalls.length > 0) {
+            console.log(`\n🔧 Tool Execution (Step ${i + 1}):`);
+            for (const toolCall of step.toolCalls) {
+              console.log(`  └─ ${toolCall.toolName}`);
+            }
+          }
+          
+          if ("toolResults" in step && step.toolResults && step.toolResults.length > 0) {
+            for (const result of step.toolResults) {
+              const resultPreview = 
+                typeof result.output === "string" 
+                  ? result.output.substring(0, 100) + (result.output.length > 100 ? "..." : "")
+                  : "[object]";
+              console.log(`  ✓ ${result.toolName}: ${resultPreview}`);
+            }
+          }
+          
+          stepCount = i + 1;
+        }
+      };
+
+      // Poll for new steps while streaming
+      const stepPoller = setInterval(checkSteps, 500);
 
       // Stream text chunks to stdout
       for await (const chunk of textStream) {
@@ -274,12 +307,15 @@ export async function evaluateTask(
         answer += chunk;
       }
 
+      clearInterval(stepPoller);
+      await checkSteps(); // Final check
+
       console.log("\n"); // New line after streaming
 
       const durationMs = Date.now() - startTime;
 
       // Wait for steps to complete
-      const resolvedSteps = await steps;
+      const resolvedSteps = await stepsPromise;
 
       // Check correctness
       const correct = task.answer
