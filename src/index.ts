@@ -6,10 +6,12 @@
  *
  * @example Basic Usage
  * ```typescript
- * import { gaiaAgent } from 'gaia-agent';
+ * import { createGaiaAgent } from 'gaia-agent';
  *
- * // Use the agent directly
- * const result = await gaiaAgent.generate({
+ * // Create the agent
+ * const agent = createGaiaAgent();
+ *
+ * const result = await agent.generate({
  *   prompt: 'What is 15 * 23?',
  * });
  *
@@ -53,7 +55,7 @@
  * ```
  */
 
-import { openai } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
 import type { LanguageModel } from "ai";
 import { stepCountIs, ToolLoopAgent } from "ai";
 import {
@@ -249,36 +251,18 @@ export class GAIAAgent extends ToolLoopAgent {
     };
 
     super({
-      model: config?.model || openai(process.env.OPENAI_MODEL || "gpt-4o"),
+      model:
+        config?.model ||
+        createOpenAI({
+          baseURL: process.env.OPENAI_BASE_URL,
+          apiKey: process.env.OPENAI_API_KEY,
+        })(process.env.OPENAI_MODEL || "gpt-4o"),
       instructions: config?.instructions || DEFAULT_INSTRUCTIONS,
       tools,
       stopWhen: stepCountIs(config?.maxSteps || 15),
     });
   }
 }
-
-/**
- * Pre-configured GAIA agent using AI SDK v6 ToolLoopAgent
- *
- * This agent comes with built-in tools for:
- * - Mathematical calculations
- * - File operations
- * - HTTP requests
- * - Code execution via Sandock (https://sandock.ai)
- * - Memory management via Mem0
- *
- * @example
- * ```typescript
- * import { gaiaAgent } from 'gaia-agent';
- *
- * const result = await gaiaAgent.generate({
- *   prompt: 'What is the weather in San Francisco?',
- * });
- *
- * console.log(result.text);
- * ```
- */
-export const gaiaAgent = new GAIAAgent();
 
 /**
  * Create a custom GAIA agent with specific configuration

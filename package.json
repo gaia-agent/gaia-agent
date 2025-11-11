@@ -96,12 +96,17 @@
     "lint:fix": "biome lint --write .",
     "check": "biome check .",
     "check:fix": "biome check --write .",
-    "benchmark": "tsx src/benchmark-runner.ts",
-    "benchmark:test": "tsx src/benchmark-runner.ts --test",
-    "benchmark:level1": "tsx src/benchmark-runner.ts --level 1",
-    "benchmark:level2": "tsx src/benchmark-runner.ts --level 2",
-    "benchmark:level3": "tsx src/benchmark-runner.ts --level 3",
-    "benchmark:quick": "tsx src/benchmark-runner.ts --limit 5 --verbose",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "benchmark": "tsx benchmark/run.ts",
+    "benchmark:test": "tsx benchmark/run.ts --test",
+    "benchmark:level1": "tsx benchmark/run.ts --level 1",
+    "benchmark:level2": "tsx benchmark/run.ts --level 2",
+    "benchmark:level3": "tsx benchmark/run.ts --level 3",
+    "benchmark:quick": "tsx benchmark/run.ts --limit 5 --verbose",
+    "benchmark:random": "tsx benchmark/run.ts --random --verbose",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -131,15 +136,18 @@
     "@tavily/core": "^0.5.12",
     "ai": "6.0.0-beta.98",
     "browser-use-sdk": "^2.0.4",
+    "dotenv": "^17.2.3",
     "e2b": "^2.6.3",
     "exa-js": "^2.0.0",
+    "hyparquet": "^1.20.2",
     "zod": "^4.1.11"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.4",
     "@types/node": "24.6.2",
-    "apache-arrow": "^21.1.0",
+    "@vitest/ui": "^4.0.8",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.8"
   }
 }

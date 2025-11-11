@@ -33,6 +33,7 @@
     ".turbo",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "src/benchmark-runner.ts"
+    "benchmark/**/*",
+    "test/**/*"
   ]
 }

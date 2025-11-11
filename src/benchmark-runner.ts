@@ -12,17 +12,43 @@
  *   pnpm run benchmark --limit 10   # Limit number of tasks
  */
 
+// Load .env BEFORE importing anything else
+import { config } from "dotenv";
 import { existsSync } from "node:fs";
-import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { tableFromIPC } from "apache-arrow";
-import { gaiaAgent } from "./index.js";
+
+const envPath = join(process.cwd(), ".env");
+if (existsSync(envPath)) {
+  config({ path: envPath });
+  console.log("✅ Loaded environment variables from .env file");
+} else {
+  console.warn("⚠️  .env file not found. Please copy .env.example to .env and configure your API keys.");
+  console.warn("   Required: OPENAI_API_KEY");
+  console.warn("   Optional: E2B_API_KEY, TAVILY_API_KEY, BROWSERUSE_API_KEY, etc.");
+  console.warn("");
+}
+
+// Validate required environment variables
+if (!process.env.OPENAI_API_KEY) {
+  console.error("❌ Error: OPENAI_API_KEY is required but not set.");
+  console.error("   Please create a .env file (copy from .env.example) and set OPENAI_API_KEY.");
+  process.exit(1);
+}
+
+// Now import other modules AFTER env is loaded
+import { mkdir, writeFile } from "node:fs/promises";
+import { parquetRead } from "hyparquet";
+import { createGaiaAgent } from "./index.js";
 import type { GaiaBenchmarkResult, GaiaTask } from "./types.js";
+
+// Create agent AFTER env is loaded
+const gaiaAgent = createGaiaAgent();
 
 interface BenchmarkConfig {
   dataset: "validation" | "test";
   level?: 1 | 2 | 3;
   limit?: number;
+  random?: boolean;
   outputDir: string;
   verbose: boolean;
 }
@@ -50,43 +76,58 @@ async function downloadGaiaDataset(dataset: "validation" | "test"): Promise<Gaia
   console.log(`📥 Downloading ${dataset} dataset from Hugging Face (Parquet format)...`);
 
   try {
-    const response = await fetch(datasetUrl);
+    // Add Hugging Face token if available for authentication
+    const headers: Record<string, string> = {};
+    if (process.env.HUGGINGFACE_TOKEN) {
+      headers.Authorization = `Bearer ${process.env.HUGGINGFACE_TOKEN}`;
+    }
+
+    const response = await fetch(datasetUrl, { headers });
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error(
+          `HTTP 401: Unauthorized - GAIA dataset requires Hugging Face authentication.\n` +
+            `Please set HUGGINGFACE_TOKEN in your .env file.\n` +
+            `Get your token from: https://huggingface.co/settings/tokens`
+        );
+      }
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    // Read Parquet file using Apache Arrow
-    const buffer = await response.arrayBuffer();
-    const table = tableFromIPC(new Uint8Array(buffer));
+    // Read Parquet file using hyparquet
+    const arrayBuffer = await response.arrayBuffer();
+    
+    let tasks: GaiaTask[] = [];
 
-    const tasks: GaiaTask[] = [];
-
-    // Convert Arrow table to GaiaTask format
-    for (let i = 0; i < table.numRows; i++) {
-      const row = table.get(i);
-      if (!row) continue;
-
-      const task: GaiaTask = {
-        id: row.task_id?.toString() || `task-${i}`,
-        level: (Number(row.Level) as 1 | 2 | 3) || 1,
-        question: row.Question?.toString() || "",
-        answer: row.Final_answer?.toString(),
-        files: row.file_name
-          ? [
-              {
-                name: row.file_name.toString(),
-                path: row.file_path?.toString() || "",
-                type: row.file_name.toString().split(".").pop() || "unknown",
-              },
-            ]
-          : undefined,
-        metadata: row.Annotator_Metadata
-          ? JSON.parse(row.Annotator_Metadata.toString())
-          : undefined,
-      };
-
-      tasks.push(task);
-    }
+    // Read Parquet file with hyparquet (rowFormat: 'object' returns rows as objects)
+    await parquetRead({
+      file: arrayBuffer,
+      rowFormat: "object",
+      onComplete: (data: unknown[]) => {
+        tasks = data.map((row: unknown): GaiaTask => {
+          const r = row as Record<string, unknown>;
+          const levelNum = Number.parseInt(String(r.Level), 10) || 1;
+          const level = (levelNum >= 1 && levelNum <= 3 ? levelNum : 1) as 1 | 2 | 3;
+          
+          return {
+            id: String(r.task_id || ""),
+            question: String(r.Question || ""),
+            level,
+            answer: String(r.Final_answer || ""),
+            files: r.file_name
+              ? [
+                  {
+                    name: String(r.file_name),
+                    path: String(r.file_path || ""),
+                    type: "unknown",
+                  },
+                ]
+              : undefined,
+            metadata: (r.Annotator_Metadata as Record<string, unknown>) || {},
+          };
+        });
+      },
+    });
 
     console.log(`✅ Downloaded ${tasks.length} tasks`);
     return tasks;
@@ -115,8 +156,14 @@ async function evaluateTask(task: GaiaTask, verbose: boolean): Promise<GaiaBench
   const startTime = Date.now();
 
   if (verbose) {
-    console.log(`\n📋 Task ${task.id} (Level ${task.level})`);
-    console.log(`Question: ${task.question.slice(0, 100)}...`);
+    console.log(`\n${"=".repeat(80)}`);
+    console.log(`📋 Task ${task.id} (Level ${task.level})`);
+    console.log(`${"=".repeat(80)}`);
+    console.log(`Question: ${task.question}`);
+    if (task.files && task.files.length > 0) {
+      console.log(`Files: ${task.files.map((f) => f.name).join(", ")}`);
+    }
+    console.log(`${"=".repeat(80)}\n`);
   }
 
   try {
@@ -134,10 +181,31 @@ async function evaluateTask(task: GaiaTask, verbose: boolean): Promise<GaiaBench
       : false;
 
     if (verbose) {
-      console.log(`Agent answer: ${answer.slice(0, 100)}...`);
-      console.log(`Expected: ${task.answer || "N/A"}`);
-      console.log(`Result: ${correct ? "✅ CORRECT" : "❌ WRONG"}`);
-      console.log(`Duration: ${durationMs}ms`);
+      console.log(`\n${"=".repeat(80)}`);
+      console.log(`🤖 Agent Response:`);
+      console.log(`${"=".repeat(80)}`);
+      console.log(answer);
+      console.log(`\n${"=".repeat(80)}`);
+      console.log(`📊 Evaluation:`);
+      console.log(`${"=".repeat(80)}`);
+      console.log(`Expected Answer: ${task.answer || "N/A"}`);
+      console.log(`Agent Answer: ${answer}`);
+      console.log(`Normalized Expected: ${task.answer ? normalizeAnswer(task.answer) : "N/A"}`);
+      console.log(`Normalized Agent: ${normalizeAnswer(answer)}`);
+      console.log(`Result: ${correct ? "✅ CORRECT" : "❌ INCORRECT"}`);
+      console.log(`Duration: ${(durationMs / 1000).toFixed(2)}s (${durationMs}ms)`);
+      console.log(`Steps: ${result.steps?.length || 0}`);
+      if (result.steps && result.steps.length > 0) {
+        console.log(`\n🔧 Tool Calls:`);
+        for (const [idx, step] of result.steps.entries()) {
+          if ("toolCalls" in step && step.toolCalls) {
+            for (const toolCall of step.toolCalls) {
+              console.log(`  ${idx + 1}. ${toolCall.toolName}`);
+            }
+          }
+        }
+      }
+      console.log(`${"=".repeat(80)}\n`);
     }
 
     return {
@@ -180,8 +248,16 @@ async function runBenchmark(config: BenchmarkConfig): Promise<GaiaBenchmarkResul
     console.log(`🔍 Filtered to ${tasks.length} tasks (Level ${config.level})`);
   }
 
+  // Random mode: pick one random task
+  if (config.random) {
+    const randomIndex = Math.floor(Math.random() * tasks.length);
+    const selectedTask = tasks[randomIndex];
+    tasks = [selectedTask];
+    console.log(`🎲 Randomly selected 1 task: ${selectedTask.id} (Level ${selectedTask.level})`);
+    console.log(`   Question: ${selectedTask.question.substring(0, 100)}${selectedTask.question.length > 100 ? "..." : ""}`);
+  }
   // Limit number of tasks if specified
-  if (config.limit) {
+  else if (config.limit) {
     tasks = tasks.slice(0, config.limit);
     console.log(`🔍 Limited to ${config.limit} tasks`);
   }
@@ -281,6 +357,7 @@ async function main() {
     limit: args.includes("--limit")
       ? Number.parseInt(args[args.indexOf("--limit") + 1], 10)
       : undefined,
+    random: args.includes("--random"),
     outputDir: args.includes("--output")
       ? args[args.indexOf("--output") + 1]
       : "./benchmark-results",
@@ -292,6 +369,7 @@ async function main() {
   console.log(`Dataset:  ${config.dataset}`);
   console.log(`Level:    ${config.level || "all"}`);
   console.log(`Limit:    ${config.limit || "none"}`);
+  console.log(`Random:   ${config.random ? "yes" : "no"}`);
   console.log(`Output:   ${config.outputDir}`);
   console.log(`Verbose:  ${config.verbose}`);
   console.log(`${"=".repeat(60)}\n`);

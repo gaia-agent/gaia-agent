@@ -41,12 +41,22 @@ pnpm lint        # Lint with auto-fix (biome lint --write)
 pnpm check       # Format + lint + organize imports (biome check --write)
 ```
 
-**Benchmarking** (GAIA official benchmark):
+**Testing** (Vitest):
 ```bash
-pnpm bench                 # Run validation set
-pnpm bench:test            # Run test set
-pnpm bench:level1          # Filter by difficulty level
-pnpm bench:limit 5         # Limit number of questions
+pnpm test              # Run all tests
+pnpm test:watch        # Watch mode (re-runs on changes)
+pnpm test:ui           # Interactive UI
+pnpm test:coverage     # Coverage report
+```
+
+**Benchmarking** (GAIA official benchmark - modular architecture):
+```bash
+pnpm benchmark                 # Run validation set
+pnpm benchmark:test            # Run test set
+pnpm benchmark:level1          # Filter by difficulty level
+pnpm benchmark:quick           # 5 tasks with verbose output
+pnpm benchmark:random          # Random single task
+pnpm benchmark:random --stream # Stream mode (real-time agent thinking)
 ```
 
 ## Adding New Providers
@@ -132,11 +142,13 @@ export { mem0Search, mem0Store } from './mem0';
   ```
 
 **File Organization**:
-- `src/` - Source TypeScript files
+- `src/` - Source TypeScript files (library code)
 - `dist/` - Compiled JavaScript (git-ignored)
-- `src/docs/` - Documentation (gaia-benchmark.md, providers.md)
-- `ARCHITECTURE.md` - Design patterns deep dive
-- `REFACTORING_SUMMARY.md` - Pattern explanations + code metrics
+- `benchmark/` - Modular benchmark runner (excluded from build)
+- `test/` - Unit tests with Vitest (excluded from build)
+- `docs/` - Documentation (gaia-benchmark.md, providers.md, guides)
+- `changelog/` - Project changelogs with dates (major changes, refactorings, etc.)
+- `changelog/REFACTORING_2025_11_11.md` - Latest refactoring summary (benchmark + testing)
 
 **Biome Configuration**:
 - Line width: 100 characters
@@ -171,6 +183,20 @@ const sandboxTools = createSandboxTools('e2b', { apiKey: '...' });
 
 ## Testing & Debugging
 
+**Unit Testing** (Vitest):
+```bash
+pnpm test              # Run all tests once
+pnpm test:watch        # Watch mode (re-runs on changes)
+pnpm test:ui           # Interactive UI
+pnpm test:coverage     # Coverage report
+```
+
+**Test Structure**:
+- `test/benchmark.test.ts` - Benchmark utilities tests (normalizeAnswer, etc.)
+- `test/tools.test.ts` - Core tools validation tests
+- All tests use TypeScript with strict mode
+- Coverage excludes: `node_modules/`, `dist/`, `benchmark/`, test files
+
 **TypeScript Errors**:
 1. Run `pnpm typecheck` to see all errors
 2. Check AI SDK v6 beta compatibility (breaking changes common)
@@ -181,9 +207,14 @@ const sandboxTools = createSandboxTools('e2b', { apiKey: '...' });
 - Suppress false positives with `// biome-ignore lint/suspicious/noExplicitAny: <reason>`
 
 **Benchmark Debugging**:
-- Use `pnpm bench:limit 1` to test single question
-- Check `gaiaConfig.json` for API keys and model configuration
-- Review `src/benchmark-runner.ts` for GAIA validation logic
+- Use `pnpm benchmark --limit 1` to test single task
+- Use `pnpm benchmark --random --verbose` for detailed output
+- Use `pnpm benchmark --stream` for real-time agent thinking
+- Check `benchmark/` folder for modular architecture:
+  - `downloader.ts` - Dataset download from Hugging Face
+  - `evaluator.ts` - Task evaluation with streaming support
+  - `reporter.ts` - Results reporting
+  - `run.ts` - CLI entry point
 
 ## Key Design Decisions
 
@@ -226,7 +257,9 @@ const sandboxTools = createSandboxTools('e2b', { apiKey: '...' });
 ---
 
 **References**:
-- [ARCHITECTURE.md](../ARCHITECTURE.md) - Full design pattern documentation
-- [REFACTORING_SUMMARY.md](../REFACTORING_SUMMARY.md) - Refactoring journey + metrics
 - [README.md](../README.md) - User-facing documentation + API reference
 - [tools/memory/README.md](../src/tools/memory/README.md) - Pattern implementation example
+- [docs/benchmark.md](../docs/benchmark.md) - Benchmark module documentation
+- [docs/testing.md](../docs/testing.md) - Testing guide
+- [changelog/REFACTORING_2025_11_11.md](../changelog/REFACTORING_2025_11_11.md) - Latest refactoring summary
+- [changelog/](../changelog/) - Project changelogs with dates

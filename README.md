@@ -4,9 +4,11 @@ Build a GAIA-benchmark-ready super agent in seconds, not days or weeks.
 🤖 **GAIA-benchmark-ready Headless AI agent with 16+ tools and swappable providers** - Built on AI SDK v6 ToolLoopAgent & ToolSDK.ai
 
 ```typescript
-import { gaiaAgent } from 'gaia-agent';
+import { createGaiaAgent } from 'gaia-agent';
 
-const result = await gaiaAgent.generate({
+const agent = createGaiaAgent();
+
+const result = await agent.generate({
   prompt: 'Search for recent AI breakthroughs and summarize the top 3',
 });
 ```
@@ -54,10 +56,12 @@ npm install gaia-agent ai @ai-sdk/openai zod
 ### Basic Usage
 
 ```typescript
-import { gaiaAgent } from 'gaia-agent';
+import { createGaiaAgent } from 'gaia-agent';
 
-// Use immediately - no configuration needed
-const result = await gaiaAgent.generate({
+// Create the agent - reads from environment variables
+const agent = createGaiaAgent();
+
+const result = await agent.generate({
   prompt: 'Calculate 15 * 23 and search for the latest AI papers',
 });
 
@@ -119,16 +123,69 @@ const agent = createGaiaAgent({
 
 ## GAIA Benchmark
 
-Run official GAIA benchmarks with one command:
+Run official GAIA benchmarks with modular architecture and streaming support:
 
 ```bash
-pnpm run benchmark          # Validation set
-pnpm run benchmark:test     # Test set
-pnpm run benchmark:level2   # Filter by difficulty
-pnpm run benchmark:quick    # 5 tasks (testing)
+pnpm run benchmark           # Validation set
+pnpm run benchmark:test      # Test set
+pnpm run benchmark:level2    # Filter by difficulty
+pnpm run benchmark:quick     # 5 tasks (testing)
+pnpm run benchmark:random    # Random 1 task with verbose output
+```
+
+**Stream mode** shows agent's thinking process in real-time:
+```bash
+pnpm benchmark --stream --random
+
+# Or use with other commands
+pnpm benchmark:random --stream
+
+# Output:
+# 🤖 Agent thinking (streaming)...
+# I need to search for information about...
+# Let me calculate 15 * 23...
+# The result is 345...
+```
+
+**Custom options:**
+```bash
+pnpm benchmark --random --verbose   # Random task with detailed logs
+pnpm benchmark:random --stream      # Streaming + random task
+pnpm benchmark --limit 3 --verbose  # 3 tasks with detailed logs
+pnpm benchmark --level 1 --random   # Random Level 1 task
 ```
 
 📖 **[See GAIA requirements and setup →](./docs/gaia-benchmark.md)**
+📖 **[See benchmark module documentation →](./docs/benchmark.md)**
+
+## Testing
+
+Run unit tests with vitest:
+
+```bash
+pnpm test                # Run all tests
+pnpm test:watch          # Watch mode
+pnpm test:ui             # Interactive UI
+pnpm test:coverage       # Coverage report
+```
+
+## Project Structure
+
+```
+gaia-agent/
+├── src/                 # Library source code
+│   ├── index.ts         # Main exports
+│   ├── types.ts         # Type definitions
+│   └── tools/           # Tool implementations
+├── benchmark/           # Modular benchmark runner (excluded from build)
+│   ├── types.ts         # Benchmark types
+│   ├── downloader.ts    # Dataset downloader
+│   ├── evaluator.ts     # Task evaluator with streaming
+│   ├── reporter.ts      # Results reporter
+│   └── run.ts           # CLI entry point
+├── test/                # Unit tests (vitest)
+└── dist/                # Compiled output
+```
 
 ## Advanced Usage
 
@@ -257,6 +314,18 @@ import { mem0Remember, mem0Recall } from 'gaia-agent/tools/memory';
 ## License
 
 MIT
+
+## Contributing
+
+This project uses automated NPM publishing. When changes are merged to `main`:
+
+1. ✅ Tests run automatically
+2. 📦 Version bumps to next patch (e.g., 0.1.0 → 0.1.1)
+3. 📝 Changelog created in `changelog/`
+4. 🚀 Published to NPM
+5. 🏷️ Git tag created
+
+For manual version bumps (minor/major), see [docs/NPM_PUBLISH_SETUP.md](./docs/NPM_PUBLISH_SETUP.md).
 
 ## Links
 
