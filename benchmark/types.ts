@@ -2,7 +2,7 @@
  * Benchmark-specific type definitions
  */
 
-import type { GaiaBenchmarkResult, GaiaTask } from "../src/types.js";
+import type { GaiaBenchmarkResult, GaiaTask, StepDetail } from "../src/types.js";
 
 export interface BenchmarkConfig {
   dataset: "validation" | "test";
@@ -24,4 +24,4 @@ export interface HuggingFaceTask {
   Annotator_Metadata?: Record<string, unknown>;
 }
 
-export type { GaiaBenchmarkResult, GaiaTask };
+export type { GaiaBenchmarkResult, GaiaTask, StepDetail };

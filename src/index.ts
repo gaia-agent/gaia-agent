@@ -95,36 +95,48 @@ function validateProviderConfig(providers?: ProviderConfig): void {
       : providers?.sandbox || "e2b";
 
   // Validate search provider (skip if explicitly disabled)
-  if (searchProvider === "tavily" && (!process.env.TAVILY_API_KEY || process.env.TAVILY_API_KEY.trim() === "")) {
+  if (
+    searchProvider === "tavily" &&
+    (!process.env.TAVILY_API_KEY || process.env.TAVILY_API_KEY.trim() === "")
+  ) {
     throw new Error(
       "TAVILY_API_KEY environment variable is required for Tavily search.\n" +
         "Get your API key at https://tavily.com\n" +
-        "Or disable search: createGaiaAgent({ providers: { search: undefined } })"
+        "Or disable search: createGaiaAgent({ providers: { search: undefined } })",
     );
   }
 
-  if (searchProvider === "exa" && (!process.env.EXA_API_KEY || process.env.EXA_API_KEY.trim() === "")) {
+  if (
+    searchProvider === "exa" &&
+    (!process.env.EXA_API_KEY || process.env.EXA_API_KEY.trim() === "")
+  ) {
     throw new Error(
       "EXA_API_KEY environment variable is required for Exa search.\n" +
         "Get your API key at https://exa.ai\n" +
-        "Or disable search: createGaiaAgent({ providers: { search: undefined } })"
+        "Or disable search: createGaiaAgent({ providers: { search: undefined } })",
     );
   }
 
   // Validate sandbox provider (skip if explicitly disabled)
-  if (sandboxProvider === "e2b" && (!process.env.E2B_API_KEY || process.env.E2B_API_KEY.trim() === "")) {
+  if (
+    sandboxProvider === "e2b" &&
+    (!process.env.E2B_API_KEY || process.env.E2B_API_KEY.trim() === "")
+  ) {
     throw new Error(
       "E2B_API_KEY environment variable is required for E2B sandbox.\n" +
         "Get your API key at https://e2b.dev\n" +
-        "Or disable sandbox: createGaiaAgent({ providers: { sandbox: undefined } })"
+        "Or disable sandbox: createGaiaAgent({ providers: { sandbox: undefined } })",
     );
   }
 
-  if (sandboxProvider === "sandock" && (!process.env.SANDOCK_API_KEY || process.env.SANDOCK_API_KEY.trim() === "")) {
+  if (
+    sandboxProvider === "sandock" &&
+    (!process.env.SANDOCK_API_KEY || process.env.SANDOCK_API_KEY.trim() === "")
+  ) {
     throw new Error(
       "SANDOCK_API_KEY environment variable is required for Sandock sandbox.\n" +
         "Get your API key at https://sandock.ai\n" +
-        "Or disable sandbox: createGaiaAgent({ providers: { sandbox: undefined } })"
+        "Or disable sandbox: createGaiaAgent({ providers: { sandbox: undefined } })",
     );
   }
 }
@@ -251,7 +263,9 @@ export function getDefaultTools(providers?: ProviderConfig) {
   if (memoryProvider !== undefined) {
     // Check if memory provider has required API key
     const hasMemoryKey =
-      (memoryProvider === "mem0" && process.env.MEM0_API_KEY && process.env.MEM0_API_KEY.trim() !== "") ||
+      (memoryProvider === "mem0" &&
+        process.env.MEM0_API_KEY &&
+        process.env.MEM0_API_KEY.trim() !== "") ||
       (memoryProvider === "agentcore" &&
         process.env.AWS_ACCESS_KEY_ID &&
         process.env.AWS_ACCESS_KEY_ID.trim() !== "");
@@ -391,6 +405,7 @@ export class GAIAAgent extends ToolLoopAgent {
  * const agent = createGaiaAgent({
  *   providers: {
  *     sandbox: 'e2b',  // Use E2B
+ *     browser: undefined, // Disable browser automation
  *   },
  *   additionalTools: {
  *     customTool: tool({

@@ -15,10 +15,10 @@
  *   pnpm run benchmark --verbose    # Detailed output
  */
 
-// Load .env BEFORE importing anything else
-import { config } from "dotenv";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+// Load .env BEFORE importing anything else
+import { config } from "dotenv";
 
 const envPath = join(process.cwd(), ".env");
 if (existsSync(envPath)) {
@@ -26,7 +26,7 @@ if (existsSync(envPath)) {
   console.log("✅ Loaded environment variables from .env file");
 } else {
   console.warn(
-    "⚠️  .env file not found. Please copy .env.example to .env and configure your API keys."
+    "⚠️  .env file not found. Please copy .env.example to .env and configure your API keys.",
   );
   console.warn("   Required: OPENAI_API_KEY");
   console.warn("   Optional: E2B_API_KEY, TAVILY_API_KEY, BROWSERUSE_API_KEY, etc.");
@@ -70,7 +70,7 @@ async function runBenchmark(config: BenchmarkConfig): Promise<GaiaBenchmarkResul
     tasks = [selectedTask];
     console.log(`🎲 Randomly selected 1 task: ${selectedTask.id} (Level ${selectedTask.level})`);
     console.log(
-      `   Question: ${selectedTask.question.substring(0, 100)}${selectedTask.question.length > 100 ? "..." : ""}`
+      `   Question: ${selectedTask.question.substring(0, 100)}${selectedTask.question.length > 100 ? "..." : ""}`,
     );
   }
   // Limit number of tasks if specified
@@ -156,10 +156,7 @@ async function main() {
     console.log("✅ Benchmark completed successfully!");
     process.exit(0);
   } catch (error) {
-    console.error(
-      "\n❌ Benchmark failed:",
-      error instanceof Error ? error.message : String(error)
-    );
+    console.error("\n❌ Benchmark failed:", error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
 }

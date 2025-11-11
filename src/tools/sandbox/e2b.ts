@@ -4,12 +4,7 @@
  */
 
 import { z } from "zod";
-import type {
-  E2BExecuteParams,
-  IE2BProvider,
-  ISandboxSchemas,
-  SandboxResult,
-} from "./types.js";
+import type { E2BExecuteParams, IE2BProvider, ISandboxSchemas, SandboxResult } from "./types.js";
 
 /**
  * E2B schemas

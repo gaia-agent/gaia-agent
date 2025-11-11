@@ -11,6 +11,12 @@ importers:
       '@ai-sdk/openai':
         specifier: ^2.0.32
         version: 2.0.65(zod@4.1.12)
+      '@duckdb/node-api':
+        specifier: 1.4.1-r.5
+        version: 1.4.1-r.5
+      '@huggingface/hub':
+        specifier: ^2.6.12
+        version: 2.6.12
       '@tavily/core':
         specifier: ^0.5.12
         version: 0.5.12
@@ -32,6 +38,9 @@ importers:
       hyparquet:
         specifier: ^1.20.2
         version: 1.20.2
+      mime-types:
+        specifier: ^3.0.1
+        version: 3.0.1
       zod:
         specifier: ^4.1.11
         version: 4.1.12
@@ -39,6 +48,9 @@ importers:
       '@biomejs/biome':
         specifier: ^2.3.4
         version: 2.3.4
+      '@types/mime-types':
+        specifier: ^3.0.1
+        version: 3.0.1
       '@types/node':
         specifier: 24.6.2
         version: 24.6.2
@@ -165,6 +177,37 @@ packages:
     resolution: {integrity: sha512-ARBt64yEyKbanyRETTjcjJuHr2YXorzQo0etyS5+P6oSeW8xEuzajA9g+zDnMcj1hlX2dQE93foIWQGfpru7gQ==}
     peerDependencies:
       '@bufbuild/protobuf': ^2.2.0
+
+  '@duckdb/node-api@1.4.1-r.5':
+    resolution: {integrity: sha512-RBDVqlMp3/GYKF/VhHcUrIYGJoOOMmVN2Ha7FPpm0Qpbqzh5RAY+QSfq30PTkRvIav4IwhM/FOu8gJNUqYCZGw==}
+
+  '@duckdb/node-bindings-darwin-arm64@1.4.1-r.5':
+    resolution: {integrity: sha512-7LhYHy98ZqkGsK5XwDT/p7tCnGBTmZuxiEeNGJ/sdqvLJeDfbJuFnkXwnKMAue8ilgpI1pdET1QmqfdiKgkJyw==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@duckdb/node-bindings-darwin-x64@1.4.1-r.5':
+    resolution: {integrity: sha512-LIHHNPecG5Yk5JS+CnUMvq0dUaJ9glyRyV7w9GedyjxRYqT9d4Sbxl5UCj3a6Pu6Sf8IZrWtWXQB0C/4e6ITKw==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@duckdb/node-bindings-linux-arm64@1.4.1-r.5':
+    resolution: {integrity: sha512-G1dp7PY7gQR0svheXVAQdrsOKv61jQxaM6jhp3FhhSNt2cHlsHld8kjnjXVCDr3OVlTP0vez/1mcbWpLZ7eB+w==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@duckdb/node-bindings-linux-x64@1.4.1-r.5':
+    resolution: {integrity: sha512-BVkWzA7Lrl5VQcPNh3k8mb/83kyH+csZTdHM2sePjxCts0zvji9hnGnBIIn33xarHSd0+3igBDijeqxxiFiPYg==}
+    cpu: [x64]
+    os: [linux]
+
+  '@duckdb/node-bindings-win32-x64@1.4.1-r.5':
+    resolution: {integrity: sha512-Y/+vsLVGXIx9UMMyYDpYCSY3m0hXC1RjSaYfb7jkim8gcWQg0eRlbjTlDnmhth/8Z+eQ2sXXy8UVBd5IZ/bqYw==}
+    cpu: [x64]
+    os: [win32]
+
+  '@duckdb/node-bindings@1.4.1-r.5':
+    resolution: {integrity: sha512-HUncdmpfjT4HxbH5NO6myazzudhddPc9lly7AgsYBdQSfTr1LCaQGb45cGiS5jEafpod9VOlk0bwJVbAIaBDWw==}
 
   '@esbuild/aix-ppc64@0.25.12':
     resolution: {integrity: sha512-Hhmwd6CInZ3dwpuGTF8fJG6yoWmsToE+vYgD4nytZVxcu1ulHpUQRAB1UJ8+N1Am3Mz4+xOByoQoSZf4D+CpkA==}
@@ -322,6 +365,14 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@huggingface/hub@2.6.12':
+    resolution: {integrity: sha512-/AZN2LAtrt4B8S83/Ru4wMorHY4NPwIYXo60SkuD6c/Mr135t1UqffD1vqcqtDYVf0hhLiyVmm1LMU1CXi8iKQ==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  '@huggingface/tasks@0.19.63':
+    resolution: {integrity: sha512-hmd8e5fdjRiIJE7/EYWXS+Pm2SAu89xjZEgfZddN10ubWqlelXLyj2YgHZrVDEVkVA+5+ImMZUpQIez7b2//fw==}
+
   '@isaacs/balanced-match@4.0.1':
     resolution: {integrity: sha512-yzMTt9lEb8Gv7zRioUilSglI0c0smZ9k5D65677DLWLtWJaXIS3CqcGyUFByYKlnUj6TkjLVs54fBl6+TiGQDQ==}
     engines: {node: 20 || >=22}
@@ -473,6 +524,9 @@ packages:
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
+  '@types/mime-types@3.0.1':
+    resolution: {integrity: sha512-xRMsfuQbnRq1Ef+C+RKaENOxXX87Ygl38W1vDfPHRku02TgQr+Qd8iivLtAMcR0KF5/29xlnFihkTlbqFrGOVQ==}
+
   '@types/node@24.6.2':
     resolution: {integrity: sha512-d2L25Y4j+W3ZlNAeMKcy7yDsK425ibcAOO2t7aPTz6gNMH0z2GThtwENCDc0d/Pw9wgyRqE5Px1wkV7naz8ang==}
 
@@ -575,6 +629,10 @@ packages:
   chownr@3.0.0:
     resolution: {integrity: sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==}
     engines: {node: '>=18'}
+
+  cli-progress@3.12.0:
+    resolution: {integrity: sha512-tRkV3HJ1ASwm19THiiLIXLO7Im7wlTuKnvkYaTkyoAPefqjNg7W7DHKUlGRxy9vxDvbyCYQkQozvptuMkGCg8A==}
+    engines: {node: '>=4'}
 
   color-convert@2.0.1:
     resolution: {integrity: sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==}
@@ -790,8 +848,16 @@ packages:
     resolution: {integrity: sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==}
     engines: {node: '>= 0.6'}
 
+  mime-db@1.54.0:
+    resolution: {integrity: sha512-aU5EJuIN2WDemCcAp2vFBfp/m4EAhWJnUNSSw0ixs7/kXbd6Pg64EmwJkNdFhB8aWt1sH2CTXrLxo/iAGV3oPQ==}
+    engines: {node: '>= 0.6'}
+
   mime-types@2.1.35:
     resolution: {integrity: sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==}
+    engines: {node: '>= 0.6'}
+
+  mime-types@3.0.1:
+    resolution: {integrity: sha512-xRc4oEhT6eaBpU1XF7AjpOFD+xQmXNB5OVKwp4tqCuBpHLS/ZbBDrc07mYTDqVMg6PfxUjjNp85O6Cd2Z/5HWA==}
     engines: {node: '>= 0.6'}
 
   minimatch@10.1.1:
@@ -1189,6 +1255,33 @@ snapshots:
     dependencies:
       '@bufbuild/protobuf': 2.10.0
 
+  '@duckdb/node-api@1.4.1-r.5':
+    dependencies:
+      '@duckdb/node-bindings': 1.4.1-r.5
+
+  '@duckdb/node-bindings-darwin-arm64@1.4.1-r.5':
+    optional: true
+
+  '@duckdb/node-bindings-darwin-x64@1.4.1-r.5':
+    optional: true
+
+  '@duckdb/node-bindings-linux-arm64@1.4.1-r.5':
+    optional: true
+
+  '@duckdb/node-bindings-linux-x64@1.4.1-r.5':
+    optional: true
+
+  '@duckdb/node-bindings-win32-x64@1.4.1-r.5':
+    optional: true
+
+  '@duckdb/node-bindings@1.4.1-r.5':
+    optionalDependencies:
+      '@duckdb/node-bindings-darwin-arm64': 1.4.1-r.5
+      '@duckdb/node-bindings-darwin-x64': 1.4.1-r.5
+      '@duckdb/node-bindings-linux-arm64': 1.4.1-r.5
+      '@duckdb/node-bindings-linux-x64': 1.4.1-r.5
+      '@duckdb/node-bindings-win32-x64': 1.4.1-r.5
+
   '@esbuild/aix-ppc64@0.25.12':
     optional: true
 
@@ -1266,6 +1359,14 @@ snapshots:
 
   '@esbuild/win32-x64@0.25.12':
     optional: true
+
+  '@huggingface/hub@2.6.12':
+    dependencies:
+      '@huggingface/tasks': 0.19.63
+    optionalDependencies:
+      cli-progress: 3.12.0
+
+  '@huggingface/tasks@0.19.63': {}
 
   '@isaacs/balanced-match@4.0.1': {}
 
@@ -1378,6 +1479,8 @@ snapshots:
 
   '@types/estree@1.0.8': {}
 
+  '@types/mime-types@3.0.1': {}
+
   '@types/node@24.6.2':
     dependencies:
       undici-types: 7.13.0
@@ -1488,6 +1591,11 @@ snapshots:
   chalk@5.6.2: {}
 
   chownr@3.0.0: {}
+
+  cli-progress@3.12.0:
+    dependencies:
+      string-width: 4.2.3
+    optional: true
 
   color-convert@2.0.1:
     dependencies:
@@ -1724,9 +1832,15 @@ snapshots:
 
   mime-db@1.52.0: {}
 
+  mime-db@1.54.0: {}
+
   mime-types@2.1.35:
     dependencies:
       mime-db: 1.52.0
+
+  mime-types@3.0.1:
+    dependencies:
+      mime-db: 1.54.0
 
   minimatch@10.1.1:
     dependencies:

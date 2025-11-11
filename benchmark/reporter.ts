@@ -37,7 +37,7 @@ export function displaySummary(results: GaiaBenchmarkResult[]): void {
 export async function saveResults(
   results: GaiaBenchmarkResult[],
   outputDir: string,
-  dataset: string
+  dataset: string,
 ): Promise<void> {
   if (!existsSync(outputDir)) {
     await mkdir(outputDir, { recursive: true });

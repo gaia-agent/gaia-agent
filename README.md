@@ -74,13 +74,37 @@ console.log(result.text);
 # Required
 OPENAI_API_KEY=sk-...
 
-# Optional - Choose your providers
-E2B_API_KEY=...              # E2B sandbox (recommended)
-BROWSERUSE_API_KEY=...       # BrowserUse automation (recommended)
-TAVILY_API_KEY=...           # Tavily search
-EXA_API_KEY=...              # Exa search (optional)
-MEM0_API_KEY=...             # Memory (optional)
+# Required - Default providers (can be swapped)
+TAVILY_API_KEY=...           # Search provider (default: Tavily)
+E2B_API_KEY=...              # Sandbox provider (default: E2B)
+BROWSERUSE_API_KEY=...       # Browser provider (default: BrowserUse)
+
+# Optional - Alternative providers
+EXA_API_KEY=...              # Alternative search (Exa)
+SANDOCK_API_KEY=...          # Alternative sandbox (Sandock)
+
+# Optional - Memory (not required for basic usage)
+MEM0_API_KEY=...             # Memory provider (Mem0)
+AWS_ACCESS_KEY_ID=...        # Alternative memory (AWS AgentCore)
+AWS_SECRET_ACCESS_KEY=...
 ```
+
+### Default Providers
+
+**gaia-agent** comes with pre-configured providers optimized for GAIA benchmarks:
+
+| Category | Default Provider | Required | Alternative Options |
+|----------|-----------------|----------|---------------------|
+| 🔍 **Search** | Tavily | ✅ Yes | Exa |
+| 🛡️ **Sandbox** | E2B | ✅ Yes | Sandock |
+| 🖥️ **Browser** | BrowserUse | ✅ Yes | AWS AgentCore |
+| 🧠 **Memory** | Mem0 | ❌ Optional | AWS AgentCore |
+
+**Why these defaults?**
+- **Tavily**: AI-optimized search with best Q&A results
+- **E2B**: Cloud sandbox with full filesystem + multi-language support
+- **BrowserUse**: Modern browser automation with best reliability
+- **Mem0**: Simple memory API (optional, not required for most tasks)
 
 ## Built-in Tools
 
@@ -105,16 +129,33 @@ MEM0_API_KEY=...             # Memory (optional)
 
 ## Swap Providers
 
+You can easily switch between providers or use alternative implementations:
+
 ```typescript
 import { createGaiaAgent } from 'gaia-agent';
-import { e2bSandbox } from 'gaia-agent/tools/sandbox';
-import { browserUseTool } from 'gaia-agent/tools/browser';
 
-// Use E2B + BrowserUse instead of defaults
+// Use alternative providers
+const agent = createGaiaAgent({
+  providers: {
+    search: 'exa',              // Use Exa instead of Tavily
+    sandbox: 'sandock',         // Use Sandock instead of E2B
+    memory: 'agentcore',        // Use AWS AgentCore instead of Mem0
+  },
+});
+```
+
+**Or customize individual tools:**
+
+```typescript
+import { createGaiaAgent, getDefaultTools } from 'gaia-agent';
+import { exaSearch } from 'gaia-agent/tools/search';
+import { sandockExecute } from 'gaia-agent/tools/sandbox';
+
 const agent = createGaiaAgent({
   tools: {
-    sandbox: e2bSandbox,
-    browser: browserUseTool,
+    ...getDefaultTools(),
+    search: exaSearch,          // Override search tool
+    sandbox: sandockExecute,    // Override sandbox tool
   },
 });
 ```

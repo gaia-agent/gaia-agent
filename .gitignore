@@ -11,6 +11,9 @@ coverage/
 # Benchmark results
 benchmark-results/
 
+# GAIA dataset cache
+.gaia-cache/
+
 # Environment variables
 .env
 .env.local

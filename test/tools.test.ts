@@ -3,8 +3,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { calculator, httpRequest } from "../src/tools/core.js";
 import { createGaiaAgent, getDefaultTools } from "../src/index.js";
+import { calculator, httpRequest } from "../src/tools/core.js";
 
 describe("calculator tool", () => {
   it("should be defined and have description", () => {

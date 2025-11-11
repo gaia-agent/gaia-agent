@@ -27,10 +27,56 @@ export interface GaiaTask {
     name: string;
     path: string;
     type: string;
+    data?: string; // Base64 data URL for file content
   }>;
 
   /** Additional metadata */
   metadata?: Record<string, unknown>;
+}
+
+/**
+ * Tool call details for benchmark results
+ */
+export interface ToolCallDetail {
+  /** Tool name */
+  toolName: string;
+
+  /** Tool call ID */
+  toolCallId: string;
+
+  /** Tool arguments */
+  args: Record<string, unknown>;
+}
+
+/**
+ * Tool result details for benchmark results
+ */
+export interface ToolResultDetail {
+  /** Tool name */
+  toolName: string;
+
+  /** Tool call ID */
+  toolCallId: string;
+
+  /** Tool result data */
+  result: unknown;
+}
+
+/**
+ * Step details for benchmark results
+ */
+export interface StepDetail {
+  /** Step index */
+  stepIndex: number;
+
+  /** Tool calls in this step */
+  toolCalls?: ToolCallDetail[];
+
+  /** Tool results in this step */
+  toolResults?: ToolResultDetail[];
+
+  /** Text generated in this step */
+  text?: string;
 }
 
 /**
@@ -54,6 +100,9 @@ export interface GaiaBenchmarkResult {
 
   /** Number of iterations/steps */
   steps: number;
+
+  /** Detailed step execution data */
+  stepDetails?: StepDetail[];
 
   /** Error message if failed */
   error?: string;

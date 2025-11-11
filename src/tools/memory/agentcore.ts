@@ -139,8 +139,13 @@ export const agentcoreProvider: IAgentCoreProvider = {
 
   async delete(params: AgentCoreDeleteParams): Promise<MemoryResult> {
     try {
-      const { sessionId, memoryId, awsRegion = "us-east-1", awsAccessKeyId, awsSecretAccessKey } =
-        params;
+      const {
+        sessionId,
+        memoryId,
+        awsRegion = "us-east-1",
+        awsAccessKeyId,
+        awsSecretAccessKey,
+      } = params;
 
       const accessKeyId = awsAccessKeyId || process.env.AWS_ACCESS_KEY_ID;
       const secretAccessKey = awsSecretAccessKey || process.env.AWS_SECRET_ACCESS_KEY;

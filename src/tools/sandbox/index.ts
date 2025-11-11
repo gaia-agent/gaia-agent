@@ -3,11 +3,11 @@
  * Swappable providers: E2B, Sandock
  */
 
-import { tool } from "ai";
 import type { Tool } from "ai";
-import type { SandboxProvider } from "./types.js";
+import { tool } from "ai";
 import { e2bProvider, e2bSchemas } from "./e2b.js";
 import { sandockProvider, sandockSchemas } from "./sandock.js";
+import type { SandboxProvider } from "./types.js";
 
 /**
  * Sandbox execute tool factory

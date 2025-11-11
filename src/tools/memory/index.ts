@@ -3,11 +3,11 @@
  * Swappable providers: Mem0, AWS AgentCore Memory
  */
 
-import { tool } from "ai";
 import type { Tool } from "ai";
-import type { MemoryProvider } from "./types.js";
+import { tool } from "ai";
 import { agentcoreProvider, agentcoreSchemas } from "./agentcore.js";
 import { mem0Provider, mem0Schemas } from "./mem0.js";
+import type { MemoryProvider } from "./types.js";
 
 /**
  * Memory store/remember tool factory
@@ -86,7 +86,7 @@ export const createMemoryTools = (provider: MemoryProvider = "mem0") => {
   };
 };
 
+export { agentcoreProvider, agentcoreSchemas } from "./agentcore.js";
 // Export provider instances and schemas for advanced use
 export { mem0Provider, mem0Schemas } from "./mem0.js";
-export { agentcoreProvider, agentcoreSchemas } from "./agentcore.js";
 export type { MemoryProvider } from "./types.js";
