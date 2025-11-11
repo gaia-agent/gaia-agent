@@ -58,14 +58,14 @@ async function downloadGaiaDataset(dataset: "validation" | "test"): Promise<Gaia
     // Read Parquet file using Apache Arrow
     const buffer = await response.arrayBuffer();
     const table = tableFromIPC(new Uint8Array(buffer));
-    
+
     const tasks: GaiaTask[] = [];
-    
+
     // Convert Arrow table to GaiaTask format
     for (let i = 0; i < table.numRows; i++) {
       const row = table.get(i);
       if (!row) continue;
-      
+
       const task: GaiaTask = {
         id: row.task_id?.toString() || `task-${i}`,
         level: (Number(row.Level) as 1 | 2 | 3) || 1,
@@ -80,9 +80,11 @@ async function downloadGaiaDataset(dataset: "validation" | "test"): Promise<Gaia
               },
             ]
           : undefined,
-        metadata: row.Annotator_Metadata ? JSON.parse(row.Annotator_Metadata.toString()) : undefined,
+        metadata: row.Annotator_Metadata
+          ? JSON.parse(row.Annotator_Metadata.toString())
+          : undefined,
       };
-      
+
       tasks.push(task);
     }
 

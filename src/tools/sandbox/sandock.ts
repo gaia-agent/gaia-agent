@@ -1,70 +1,76 @@
 /**
- * Sandock Sandbox Tool (Placeholder)
+ * Sandock Sandbox Provider
  * Awaiting official SDK from https://sandock.ai
  */
 
-import { tool } from "ai";
 import { z } from "zod";
+import type {
+  ISandboxSchemas,
+  ISandockProvider,
+  SandboxResult,
+  SandockExecuteParams,
+} from "./types.js";
 
 /**
- * Sandock sandbox tool
- * Note: This is a placeholder. Install official Sandock SDK when available.
+ * Sandock schemas
  */
-export const sandockExecute = tool({
-	description:
-		"Execute code in a secure Sandock sandbox. Supports Python, JavaScript, Bash, and browser automation via Sandock API (https://sandock.ai)",
-	parameters: z.object({
-		language: z
-			.enum(["python", "javascript", "bash", "browser"])
-			.describe("Execution environment"),
-		code: z.string().describe("Code to execute or browser commands"),
-		sandockApiKey: z.string().optional().describe("Sandock API key (if not in env)"),
-	}),
-	execute: async ({ language, code, sandockApiKey }) => {
-		try {
-			const apiKey = sandockApiKey || process.env.SANDOCK_API_KEY;
+export const sandockSchemas: ISandboxSchemas = {
+  executeSchema: z.object({
+    language: z.enum(["python", "javascript", "bash", "browser"]).describe("Execution environment"),
+    code: z.string().describe("Code to execute or browser commands"),
+    sandockApiKey: z.string().optional().describe("Sandock API key (if not in env)"),
+  }),
+};
 
-			if (!apiKey) {
-				return {
-					success: false,
-					error:
-						"Sandock API key not configured. Set SANDOCK_API_KEY environment variable.",
-				};
-			}
+/**
+ * Sandock provider implementation
+ */
+export const sandockProvider: ISandockProvider = {
+  async execute(params: SandockExecuteParams): Promise<SandboxResult> {
+    try {
+      const { language, code, sandockApiKey } = params;
+      const apiKey = sandockApiKey || process.env.SANDOCK_API_KEY;
 
-			// TODO: Use official Sandock SDK when available
-			// For now, use REST API
-			const response = await fetch("https://api.sandock.ai/v1/execute", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${apiKey}`,
-				},
-				body: JSON.stringify({
-					language,
-					code,
-				}),
-			});
+      if (!apiKey) {
+        return {
+          success: false,
+          error: "Sandock API key not configured. Set SANDOCK_API_KEY environment variable.",
+        };
+      }
 
-			if (!response.ok) {
-				return {
-					success: false,
-					error: `Sandock API error: ${response.statusText}`,
-				};
-			}
+      // TODO: Use official Sandock SDK when available
+      // For now, use REST API
+      const response = await fetch("https://api.sandock.ai/v1/execute", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          language,
+          code,
+        }),
+      });
 
-			const result = await response.json();
+      if (!response.ok) {
+        return {
+          success: false,
+          error: `Sandock API error: ${response.statusText}`,
+        };
+      }
 
-			return {
-				success: true,
-				language,
-				output: result,
-			};
-		} catch (error) {
-			return {
-				error: error instanceof Error ? error.message : "Code execution failed",
-				success: false,
-			};
-		}
-	},
-});
+      const result = await response.json();
+
+      return {
+        success: true,
+        language,
+        output: result,
+      };
+    } catch (error) {
+      return {
+        error: error instanceof Error ? error.message : "Code execution failed",
+        success: false,
+      };
+    }
+  },
+};

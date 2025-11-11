@@ -11,21 +11,29 @@ import { z } from "zod";
  * Install: npm install browser-use-sdk
  */
 export const browserUseTool = tool({
-	description:
-		"Automate browser interactions using BrowserUse. Navigate, extract content, click elements, type text, and take screenshots.",
-	parameters: z.object({
-		action: z
-			.enum(["navigate", "get_content", "click", "type", "screenshot"])
-			.describe("Browser action to perform"),
-		url: z.string().optional().describe("URL to navigate to (for navigate action)"),
-		selector: z
-			.string()
-			.optional()
-			.describe("CSS selector for element (for click, type actions)"),
-		text: z.string().optional().describe("Text to type (for type action)"),
-		browserUseApiKey: z.string().optional().describe("BrowserUse API key (if not in env)"),
-	}),
-	execute: async ({ action, url, selector, text, browserUseApiKey }) => {
+  description:
+    "Automate browser interactions using BrowserUse. Navigate, extract content, click elements, type text, and take screenshots.",
+  inputSchema: z.object({
+    action: z
+      .enum(["navigate", "get_content", "click", "type", "screenshot"])
+      .describe("Browser action to perform"),
+    url: z.string().optional().describe("URL to navigate to (for navigate action)"),
+    selector: z.string().optional().describe("CSS selector for element (for click, type actions)"),
+    text: z.string().optional().describe("Text to type (for type action)"),
+    browserUseApiKey: z.string().optional().describe("BrowserUse API key (if not in env)"),
+  }),
+  execute: async ({
+    action: _action,
+    url: _url,
+    selector: _selector,
+    text: _text,
+    browserUseApiKey: _browserUseApiKey,
+  }) => {
+    return {
+      success: false,
+      error: "BrowserUse integration is not yet implemented. The browser-use-sdk API has changed.",
+    };
+    /*
 		try {
 			const apiKey = browserUseApiKey || process.env.BROWSERUSE_API_KEY;
 
@@ -38,8 +46,8 @@ export const browserUseTool = tool({
 			}
 
 			// Use official browser-use-sdk
-			const { BrowserUse } = await import("browser-use-sdk");
-			const browser = new BrowserUse({ apiKey });
+			const { BrowserUseClient } = await import("browser-use-sdk");
+			const browser = new BrowserUseClient({ apiKey });
 
 			let result;
 
@@ -93,5 +101,6 @@ export const browserUseTool = tool({
 				error: error instanceof Error ? error.message : "Browser automation failed",
 			};
 		}
-	},
+		*/
+  },
 });

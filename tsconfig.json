@@ -27,5 +27,12 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", ".turbo", "**/*.test.ts", "**/*.spec.ts", "src/benchmark-runner.ts"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".turbo",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "src/benchmark-runner.ts"
+  ]
 }

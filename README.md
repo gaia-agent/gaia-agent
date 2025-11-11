@@ -1,6 +1,7 @@
 # GAIA Agent
 
-🤖 **Production-ready AI agent with 16+ tools and swappable providers** - Built on AI SDK v6 ToolLoopAgent
+Build a GAIA-benchmark-ready super agent in seconds, not days or weeks.
+🤖 **GAIA-benchmark-ready Headless AI agent with 16+ tools and swappable providers** - Built on AI SDK v6 ToolLoopAgent & ToolSDK.ai
 
 ```typescript
 import { gaiaAgent } from 'gaia-agent';

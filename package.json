@@ -89,7 +89,13 @@
   ],
   "scripts": {
     "build": "tsc",
-    "postinstall": "npm run build",
+    "typecheck": "tsc --noEmit",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
     "benchmark": "tsx src/benchmark-runner.ts",
     "benchmark:test": "tsx src/benchmark-runner.ts --test",
     "benchmark:level1": "tsx src/benchmark-runner.ts --level 1",
@@ -123,13 +129,14 @@
   "dependencies": {
     "@ai-sdk/openai": "^2.0.32",
     "@tavily/core": "^0.5.12",
-    "ai": "^6.0.0-beta.1",
+    "ai": "6.0.0-beta.98",
     "browser-use-sdk": "^2.0.4",
     "e2b": "^2.6.3",
     "exa-js": "^2.0.0",
     "zod": "^4.1.11"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.4",
     "@types/node": "24.6.2",
     "apache-arrow": "^21.1.0",
     "tsx": "^4.19.2",

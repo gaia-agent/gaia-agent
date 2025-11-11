@@ -4,8 +4,7 @@
  * Re-exports from AI SDK v6 for convenience
  */
 
-export type { CoreMessage, CoreTool } from "ai";
-export type { ToolLoopAgent } from "ai/agent";
+export type { CoreMessage, Tool, ToolLoopAgent } from "ai";
 
 /**
  * GAIA benchmark task definition
@@ -78,7 +77,7 @@ export type SearchProvider = "tavily" | "exa";
 /**
  * Available memory providers
  */
-export type MemoryProvider = "mem0";
+export type MemoryProvider = "mem0" | "agentcore";
 
 /**
  * Provider configuration for agent tools

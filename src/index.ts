@@ -55,25 +55,25 @@
 
 import { openai } from "@ai-sdk/openai";
 import type { LanguageModel } from "ai";
-import { ToolLoopAgent } from "ai";
+import { stepCountIs, ToolLoopAgent } from "ai";
 import {
-  browserClick,
-  browserGetContent,
-  browserNavigate,
-  browserScreenshot,
-  browserType,
-  browserUseTool,
+  // Browser tools temporarily disabled until APIs are updated
+  // browserClick,
+  // browserGetContent,
+  // browserNavigate,
+  // browserScreenshot,
+  // browserType,
+  // browserUseTool,
   calculator,
   e2bSandbox,
   exaFindSimilar,
   exaGetContents,
   exaSearch,
   httpRequest,
-  mem0Recall,
-  mem0Remember,
   sandockExecute,
   tavilySearch,
 } from "./tools/index.js";
+import { createMemoryTools } from "./tools/memory/index.js";
 import type { ProviderConfig } from "./types.js";
 
 /**
@@ -92,7 +92,8 @@ You have access to various tools:
 - sandockExecute: Execute code in Sandock sandbox (https://sandock.ai)
 - browserUseTool: Browser automation via BrowserUse (official browser-use-sdk)
 - browserNavigate/browserGetContent/browserClick/browserType/browserScreenshot: Browser automation via AWS Bedrock AgentCore
-- mem0Remember/mem0Recall: Store and retrieve information from memory
+- mem0Remember/mem0Recall: Store and retrieve information from memory (Mem0)
+- memoryStore/memoryRetrieve/memoryDelete: Store, retrieve, and delete information from memory (AWS AgentCore Memory)
 
 Note: File operations (readFile, writeFile) are available within the E2B sandbox environment.
 
@@ -133,7 +134,7 @@ When you have completed the task, provide a final answer.`;
  * ```
  */
 export function getDefaultTools(providers?: ProviderConfig) {
-  const browserProvider = providers?.browser || "browseruse";
+  const _browserProvider = providers?.browser || "browseruse";
   const sandboxProvider = providers?.sandbox || "e2b";
   const searchProvider = providers?.search || "tavily";
   const memoryProvider = providers?.memory || "mem0";
@@ -160,6 +161,8 @@ export function getDefaultTools(providers?: ProviderConfig) {
   }
 
   // Add browser tools based on provider
+  // Temporarily disabled until browser APIs are updated
+  /*
   if (browserProvider === "browseruse") {
     tools.browser = browserUseTool;
   } else if (browserProvider === "aws-agentcore") {
@@ -169,12 +172,11 @@ export function getDefaultTools(providers?: ProviderConfig) {
     tools.browserType = browserType;
     tools.browserScreenshot = browserScreenshot;
   }
+  */
 
-  // Add memory tools based on provider
-  if (memoryProvider === "mem0") {
-    tools.memoryRemember = mem0Remember;
-    tools.memoryRecall = mem0Recall;
-  }
+  // Add memory tools based on provider using factory pattern
+  const memoryTools = createMemoryTools(memoryProvider);
+  Object.assign(tools, memoryTools);
 
   return tools;
 }
@@ -247,14 +249,10 @@ export class GAIAAgent extends ToolLoopAgent {
     };
 
     super({
-      model:
-        config?.model ||
-        openai(process.env.OPENAI_MODEL || "gpt-4o", {
-          apiKey: config?.apiKey || process.env.OPENAI_API_KEY,
-        }),
+      model: config?.model || openai(process.env.OPENAI_MODEL || "gpt-4o"),
       instructions: config?.instructions || DEFAULT_INSTRUCTIONS,
       tools,
-      maxSteps: config?.maxSteps || 15,
+      stopWhen: stepCountIs(config?.maxSteps || 15),
     });
   }
 }
@@ -349,11 +347,34 @@ export function createGaiaAgent(config?: {
   return new GAIAAgent(config);
 }
 
-export type { LanguageModel } from "ai";
 /**
  * Export types for TypeScript users
  */
-export type { ToolLoopAgent } from "ai";
+export type { LanguageModel, ToolLoopAgent } from "ai";
+/**
+ * Export tools for custom agent configuration
+ */
+export {
+  // Browser tools temporarily disabled until APIs are updated
+  // browserClick,
+  // browserGetContent,
+  // browserNavigate,
+  // browserScreenshot,
+  // browserType,
+  // browserUseTool,
+  calculator,
+  e2bSandbox,
+  exaFindSimilar,
+  exaGetContents,
+  exaSearch,
+  httpRequest,
+  sandockExecute,
+  tavilySearch,
+} from "./tools/index.js";
+
+// Export memory tools factory
+export { createMemoryTools } from "./tools/memory/index.js";
+
 export type {
   BrowserProvider,
   GaiaBenchmarkResult,
@@ -363,25 +384,3 @@ export type {
   SandboxProvider,
   SearchProvider,
 } from "./types.js";
-
-/**
- * Export tools for custom agent configuration
- */
-export {
-  browserClick,
-  browserGetContent,
-  browserNavigate,
-  browserScreenshot,
-  browserType,
-  browserUseTool,
-  calculator,
-  e2bSandbox,
-  exaFindSimilar,
-  exaGetContents,
-  exaSearch,
-  httpRequest,
-  mem0Recall,
-  mem0Remember,
-  sandockExecute,
-  tavilySearch,
-} from "./tools/index.js";

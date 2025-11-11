@@ -1,6 +1,6 @@
 /**
  * GAIA Agent Tools - Organized by category with swappable providers
- * 
+ *
  * Structure:
  * - core: calculator, HTTP requests (file ops moved to sandbox)
  * - search: Tavily (AI search), Exa (neural search)
@@ -9,17 +9,13 @@
  * - memory: Mem0
  */
 
-// Core tools
-export { calculator, httpRequest } from "./core.js";
-
-// Search tools
-export * from "./search/index.js";
-
-// Sandbox tools (swappable providers)
-export * from "./sandbox/index.js";
-
 // Browser tools (swappable providers)
 export * from "./browser/index.js";
-
+// Core tools
+export { calculator, httpRequest } from "./core.js";
 // Memory tools
 export * from "./memory/index.js";
+// Sandbox tools (swappable providers)
+export * from "./sandbox/index.js";
+// Search tools
+export * from "./search/index.js";
