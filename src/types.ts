@@ -111,7 +111,10 @@ export interface GaiaBenchmarkResult {
 /**
  * Available browser providers
  */
-export type BrowserProvider = "browseruse" | "aws-agentcore";
+/**
+ * Browser provider types
+ */
+export type BrowserProvider = "steel" | "browseruse" | "aws-bedrock-agentcore";
 
 /**
  * Available sandbox providers

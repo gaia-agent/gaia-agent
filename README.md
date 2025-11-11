@@ -132,7 +132,7 @@ OPENAI_BASE_URL=https://api.openai.com/v1  # Custom endpoint
 # Optional - Provider Selection
 GAIA_AGENT_SEARCH_PROVIDER=tavily      # Search: tavily | exa
 GAIA_AGENT_SANDBOX_PROVIDER=e2b        # Sandbox: e2b | sandock
-GAIA_AGENT_BROWSER_PROVIDER=browseruse # Browser: browseruse | aws-agentcore
+GAIA_AGENT_BROWSER_PROVIDER=browseruse # Browser: browseruse | aws-bedrock-agentcore
 GAIA_AGENT_MEMORY_PROVIDER=mem0        # Memory: mem0 | agentcore (optional)
 
 # Required - Default provider API keys

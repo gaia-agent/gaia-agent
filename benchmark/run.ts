@@ -54,9 +54,9 @@ if (!process.env.OPENAI_API_KEY) {
 }
 
 // Now import other modules AFTER env is loaded
-import { openai } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
 import { createGaiaAgent } from "../src/index.js";
-import type { GaiaTask } from "../src/types.js";
+import type { GaiaTask, ProviderConfig } from "../src/types.js";
 import { downloadGaiaDataset } from "./downloader.js";
 import { evaluateTask } from "./evaluator.js";
 import { displaySummary, saveResults } from "./reporter.js";
@@ -67,19 +67,17 @@ import type { BenchmarkConfig, GaiaBenchmarkResult } from "./types.js";
  */
 function getOpenAIModel() {
   const modelName = process.env.OPENAI_MODEL || "gpt-4o";
-  return openai(modelName);
+  return createOpenAI({
+    baseURL: process.env.OPENAI_BASE_URL,
+    apiKey: process.env.OPENAI_API_KEY,
+  })(modelName);
 }
 
 /**
  * Get provider configuration from environment variables
  */
-function getProviderConfigFromEnv() {
-  const config: {
-    search?: "tavily" | "exa";
-    sandbox?: "e2b" | "sandock";
-    browser?: "browseruse" | "aws-agentcore";
-    memory?: "mem0" | "agentcore";
-  } = {};
+function getProviderConfigFromEnv(): ProviderConfig | undefined {
+  const config: ProviderConfig = {};
 
   if (process.env.GAIA_AGENT_SEARCH_PROVIDER) {
     const provider = process.env.GAIA_AGENT_SEARCH_PROVIDER.toLowerCase();
@@ -97,15 +95,15 @@ function getProviderConfigFromEnv() {
 
   if (process.env.GAIA_AGENT_BROWSER_PROVIDER) {
     const provider = process.env.GAIA_AGENT_BROWSER_PROVIDER.toLowerCase();
-    if (provider === "browseruse" || provider === "aws-agentcore") {
-      config.browser = provider as "browseruse" | "aws-agentcore";
+    if (provider === "browseruse" || provider === "aws-bedrock-agentcore") {
+      config.browser = provider;
     }
   }
 
   if (process.env.GAIA_AGENT_MEMORY_PROVIDER) {
     const provider = process.env.GAIA_AGENT_MEMORY_PROVIDER.toLowerCase();
     if (provider === "mem0" || provider === "agentcore") {
-      config.memory = provider as "mem0" | "agentcore";
+      config.memory = provider;
     }
   }
 
@@ -278,7 +276,7 @@ async function main() {
   const providers = getProviderConfigFromEnv();
   const searchProvider = providers?.search || "tavily";
   const sandboxProvider = providers?.sandbox || "e2b";
-  const browserProvider = providers?.browser || "browseruse";
+  const browserProvider = providers?.browser || "steel";
   const memoryProvider = providers?.memory || "mem0";
 
   console.log("🤖 GAIA Benchmark Runner");
