@@ -229,7 +229,9 @@ const agent = createGaiaAgent({
 
 📖 **[See full provider comparison →](./docs/providers.md)**
 
-## GAIA Benchmark
+---
+
+## 🎯 GAIA Benchmark
 
 Run official GAIA benchmarks with modular architecture and streaming support:
 
@@ -274,10 +276,12 @@ pnpm benchmark:code --random --verbose        # Random code task
 pnpm benchmark --category search --level 2    # Advanced search tasks
 ```
 
-📖 **[See GAIA requirements and setup →](./docs/gaia-benchmark.md)**
+📖 **[See GAIA requirements and setup →](./docs/gaia-benchmark.md)**  
 📖 **[See benchmark module documentation →](./docs/benchmark.md)**
 
-## Testing
+---
+
+## 🧪 Testing
 
 Run unit tests with vitest:
 
@@ -288,7 +292,9 @@ pnpm test:ui             # Interactive UI
 pnpm test:coverage       # Coverage report
 ```
 
-## Project Structure
+---
+
+## 📂 Project Structure
 
 ```
 gaia-agent/
@@ -306,7 +312,9 @@ gaia-agent/
 └── dist/                # Compiled output
 ```
 
-## Advanced Usage
+---
+
+## 🚀 Advanced Usage
 
 ### Custom Tools
 
@@ -344,14 +352,36 @@ class ResearchAgent extends GAIAAgent {
 
 📖 **[See advanced patterns →](./docs/advanced-usage.md)**
 
-## Documentation
+---
 
-- **[GAIA Benchmark Guide](./docs/gaia-benchmark.md)** - Requirements, setup, provider recommendations
-- **[Provider Comparison](./docs/providers.md)** - Detailed comparison of E2B/Sandock, BrowserUse/AWS, Tavily/Exa
-- **[Tools Reference](./docs/tools-reference.md)** - Complete tool API documentation
-- **[Advanced Usage](./docs/advanced-usage.md)** - Extension examples, custom agents, ToolSDK integration
+## 📚 Documentation
 
-## API Reference
+<table>
+<tr>
+<td width="50%">
+
+### 📖 Guides
+- **[GAIA Benchmark Guide](./docs/gaia-benchmark.md)**  
+  Requirements, setup, provider recommendations
+- **[Provider Comparison](./docs/providers.md)**  
+  Detailed comparison of E2B/Sandock, BrowserUse/AWS, Tavily/Exa
+
+</td>
+<td width="50%">
+
+### 🔧 Reference
+- **[Tools Reference](./docs/tools-reference.md)**  
+  Complete tool API documentation
+- **[Advanced Usage](./docs/advanced-usage.md)**  
+  Extension examples, custom agents, ToolSDK integration
+
+</td>
+</tr>
+</table>
+
+---
+
+## 📖 API Reference
 
 ### `gaiaAgent`
 
@@ -405,7 +435,9 @@ const tools = {
 };
 ```
 
-## Package Exports
+---
+
+## 📦 Package Exports
 
 ```typescript
 import { gaiaAgent, createGaiaAgent, GAIAAgent, getDefaultTools } from 'gaia-agent';
@@ -419,22 +451,40 @@ import { browserUseTool } from 'gaia-agent/tools/browser';
 import { mem0Remember, mem0Recall } from 'gaia-agent/tools/memory';
 ```
 
-## Dependencies
+---
 
-- `ai@^6.0.0-beta.1` - Vercel AI SDK 6 beta
-- `@ai-sdk/openai@^2.0.32` - OpenAI provider
-- `zod@^4.1.11` - Schema validation
-- `@tavily/core@^0.5.12` - Tavily search SDK
-- `exa-js@^2.0.0` - Exa search SDK
-- `e2b@^2.6.3` - E2B sandbox SDK
-- `browser-use-sdk@^2.0.4` - BrowserUse SDK
-- `apache-arrow@^21.1.0` - Parquet support for GAIA
+## 🔗 Links
 
-## License
+<table>
+<tr>
+<td width="50%">
 
-MIT
+### 🔍 Search Providers
+- [Tavily](https://tavily.com) - AI-optimized web search
+- [Exa](https://exa.ai) - Neural semantic search
 
-## Contributing
+### 🛡️ Sandbox Providers
+- [E2B](https://e2b.dev) - Cloud code sandboxes
+- [Sandock](https://sandock.ai) - Code execution sandbox
+
+</td>
+<td width="50%">
+
+### 🖥️ Browser Providers
+- [BrowserUse](https://browseruse.com) - AI browser automation
+- [AWS Bedrock AgentCore](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/browser-tool.html) - AWS browser tools
+
+### 🧠 Memory & Data
+- [Mem0](https://mem0.ai) - Agent memory
+- [GAIA Benchmark](https://huggingface.co/datasets/gaia-benchmark/GAIA) - Official dataset
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🤝 Contributing
 
 This project uses automated NPM publishing. When changes are merged to `main`:
 
@@ -446,13 +496,21 @@ This project uses automated NPM publishing. When changes are merged to `main`:
 
 For manual version bumps (minor/major), see [docs/NPM_PUBLISH_SETUP.md](./docs/NPM_PUBLISH_SETUP.md).
 
-## Links
+---
 
-- [Tavily](https://tavily.com) - AI-optimized web search
-- [Exa](https://exa.ai) - Neural semantic search
-- [E2B](https://e2b.dev) - Cloud code sandboxes
-- [BrowserUse](https://browseruse.com) - AI browser automation
-- [AWS Bedrock AgentCore](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/browser-tool.html) - AWS browser tools
-- [Sandock](https://sandock.ai) - Code execution sandbox
-- [Mem0](https://mem0.ai) - Agent memory
-- [GAIA Benchmark](https://huggingface.co/datasets/gaia-benchmark/GAIA) - Official dataset
+## 📄 License
+
+MIT
+
+---
+
+<div align="center">
+  <p>Made with ❤️ for the AI community</p>
+  <p>
+    <a href="https://github.com/yourusername/gaia-agent/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/yourusername/gaia-agent/issues">Request Feature</a>
+    ·
+    <a href="https://twitter.com/yourusername">Follow Updates</a>
+  </p>
+</div>
