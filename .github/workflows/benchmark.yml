@@ -24,21 +24,23 @@ on:
           - test
       
       level:
-        description: 'Difficulty Level (empty for all)'
+        description: 'Difficulty Level'
         required: false
         type: choice
+        default: 'all'
         options:
-          - ''
+          - 'all'
           - '1'
           - '2'
           - '3'
       
       category:
-        description: 'Task Category (empty for all)'
+        description: 'Task Category'
         required: false
         type: choice
+        default: 'all'
         options:
-          - ''
+          - 'all'
           - files
           - code
           - search
@@ -132,12 +134,12 @@ jobs:
           fi
           
           # Add level filter
-          if [ -n "${{ inputs.level }}" ]; then
+          if [ "${{ inputs.level }}" != "all" ]; then
             CMD="$CMD --level ${{ inputs.level }}"
           fi
           
           # Add category filter
-          if [ -n "${{ inputs.category }}" ]; then
+          if [ "${{ inputs.category }}" != "all" ]; then
             CMD="$CMD --category ${{ inputs.category }}"
           fi
           
