@@ -87,6 +87,11 @@ ESM with granular exports, TypeScript-first
 
 **Time savings:** From weeks of infrastructure setup → 3 lines of code
 
+### 🌟 What is the GAIA Benchmark?
+The [GAIA Benchmark](https://huggingface.co/datasets/gaia-benchmark/GAIA) is a comprehensive evaluation suite designed to test the capabilities of AI agents across a wide range of tasks, including reasoning, search, code execution, and browser automation. It provides a standardized way to measure and compare agent performance, ensuring reliability and robustness in real-world scenarios.
+
+For more insights, check out the [GAIA Benchmark paper](https://arxiv.org/abs/2311.12983).
+
 ---
 
 ## 🚀 Quick Start
