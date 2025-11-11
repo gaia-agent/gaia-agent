@@ -1,0 +1,47 @@
+# Build output
+dist/
+*.tsbuildinfo
+
+# Dependencies
+node_modules/
+
+# Testing
+coverage/
+*.test.ts
+*.spec.ts
+
+# Benchmark results
+benchmark-results/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Turbo
+.turbo/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

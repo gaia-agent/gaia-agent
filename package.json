@@ -1,0 +1,138 @@
+{
+  "name": "gaia-agent",
+  "version": "0.1.0",
+  "description": "Production-ready AI agent library using AI SDK v6 ToolLoopAgent for GAIA benchmarks with swappable providers",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js",
+      "default": "./dist/types.js"
+    },
+    "./tools": {
+      "types": "./dist/tools/index.d.ts",
+      "import": "./dist/tools/index.js",
+      "default": "./dist/tools/index.js"
+    },
+    "./tools/core": {
+      "types": "./dist/tools/core.d.ts",
+      "import": "./dist/tools/core.js",
+      "default": "./dist/tools/core.js"
+    },
+    "./tools/search": {
+      "types": "./dist/tools/search/index.d.ts",
+      "import": "./dist/tools/search/index.js",
+      "default": "./dist/tools/search/index.js"
+    },
+    "./tools/search/tavily": {
+      "types": "./dist/tools/search/tavily.d.ts",
+      "import": "./dist/tools/search/tavily.js",
+      "default": "./dist/tools/search/tavily.js"
+    },
+    "./tools/search/exa": {
+      "types": "./dist/tools/search/exa.d.ts",
+      "import": "./dist/tools/search/exa.js",
+      "default": "./dist/tools/search/exa.js"
+    },
+    "./tools/sandbox": {
+      "types": "./dist/tools/sandbox/index.d.ts",
+      "import": "./dist/tools/sandbox/index.js",
+      "default": "./dist/tools/sandbox/index.js"
+    },
+    "./tools/sandbox/e2b": {
+      "types": "./dist/tools/sandbox/e2b.d.ts",
+      "import": "./dist/tools/sandbox/e2b.js",
+      "default": "./dist/tools/sandbox/e2b.js"
+    },
+    "./tools/sandbox/sandock": {
+      "types": "./dist/tools/sandbox/sandock.d.ts",
+      "import": "./dist/tools/sandbox/sandock.js",
+      "default": "./dist/tools/sandbox/sandock.js"
+    },
+    "./tools/browser": {
+      "types": "./dist/tools/browser/index.d.ts",
+      "import": "./dist/tools/browser/index.js",
+      "default": "./dist/tools/browser/index.js"
+    },
+    "./tools/browser/browseruse": {
+      "types": "./dist/tools/browser/browseruse.d.ts",
+      "import": "./dist/tools/browser/browseruse.js",
+      "default": "./dist/tools/browser/browseruse.js"
+    },
+    "./tools/browser/aws-agentcore": {
+      "types": "./dist/tools/browser/aws-agentcore.d.ts",
+      "import": "./dist/tools/browser/aws-agentcore.js",
+      "default": "./dist/tools/browser/aws-agentcore.js"
+    },
+    "./tools/memory": {
+      "types": "./dist/tools/memory/index.d.ts",
+      "import": "./dist/tools/memory/index.js",
+      "default": "./dist/tools/memory/index.js"
+    },
+    "./tools/memory/mem0": {
+      "types": "./dist/tools/memory/mem0.d.ts",
+      "import": "./dist/tools/memory/mem0.js",
+      "default": "./dist/tools/memory/mem0.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "postinstall": "npm run build",
+    "benchmark": "tsx src/benchmark-runner.ts",
+    "benchmark:test": "tsx src/benchmark-runner.ts --test",
+    "benchmark:level1": "tsx src/benchmark-runner.ts --level 1",
+    "benchmark:level2": "tsx src/benchmark-runner.ts --level 2",
+    "benchmark:level3": "tsx src/benchmark-runner.ts --level 3",
+    "benchmark:quick": "tsx src/benchmark-runner.ts --limit 5 --verbose",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "autonomous",
+    "gaia",
+    "benchmark",
+    "llm",
+    "tools",
+    "ai-sdk",
+    "toolloop",
+    "tree-shaking",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vikadata/kapps.git",
+    "directory": "packages/gaia-agent"
+  },
+  "packageManager": "pnpm@10.15.1",
+  "sideEffects": false,
+  "dependencies": {
+    "@ai-sdk/openai": "^2.0.32",
+    "@tavily/core": "^0.5.12",
+    "ai": "^6.0.0-beta.1",
+    "browser-use-sdk": "^2.0.4",
+    "e2b": "^2.6.3",
+    "exa-js": "^2.0.0",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "@types/node": "24.6.2",
+    "apache-arrow": "^21.1.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
