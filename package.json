@@ -1,6 +1,6 @@
 {
   "name": "@gaia-agent/sdk",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Production-ready AI agent library using AI SDK v6 ToolLoopAgent for GAIA benchmarks with swappable providers",
   "type": "module",
   "main": "./dist/index.js",
@@ -143,6 +143,7 @@
     "@aws-sdk/client-bedrock-agentcore": "^3.928.0",
     "@aws-sdk/signature-v4": "^3.374.0",
     "@aws-sdk/signature-v4-multi-region": "^3.928.0",
+    "@aws-sdk/util-format-url": "^3.922.0",
     "@duckdb/node-api": "1.4.1-r.5",
     "@huggingface/hub": "^2.6.12",
     "@smithy/protocol-http": "^5.3.5",

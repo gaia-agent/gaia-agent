@@ -5,10 +5,8 @@
  * Demonstrates improved GAIA benchmark performance
  */
 
-import { REACT_PLANNER_INSTRUCTIONS } from "../src/config/react-planner.js";
 import { createGaiaAgent } from "../src/index.js";
 import { estimateConfidence } from "../src/strategies/index.js";
-import type { GaiaBenchmarkResult } from "../src/types.js";
 
 // Simple test to verify ReAct planner works
 async function testReActPlanner() {
@@ -36,7 +34,7 @@ async function testReActPlanner() {
   console.log(`Expected Answer: ${expectedAnswer}\n`);
 
   // Run with default agent
-  console.log("\n" + "─".repeat(80));
+  console.log(`\n${"─".repeat(80)}`);
   console.log("Running with DEFAULT instructions...");
   console.log("─".repeat(80));
 
@@ -58,7 +56,7 @@ async function testReActPlanner() {
   }
 
   // Run with ReAct agent
-  console.log("\n" + "─".repeat(80));
+  console.log(`\n${"─".repeat(80)}`);
   console.log("Running with REACT PLANNER instructions...");
   console.log("─".repeat(80));
 
@@ -79,7 +77,7 @@ async function testReActPlanner() {
     console.error(`✗ Error: ${error instanceof Error ? error.message : String(error)}`);
   }
 
-  console.log("\n" + "=".repeat(80));
+  console.log(`\n${"=".repeat(80)}`);
   console.log("\n✅ ReAct Planner Test Complete!");
   console.log("\n📝 Key Features Demonstrated:");
   console.log("  • Enhanced structured reasoning (Think → Plan → Act → Observe → Reflect)");

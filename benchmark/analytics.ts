@@ -280,7 +280,7 @@ export function recognizeFailurePatterns(
   // Pattern 3: File processing failures
   const fileFailures = failedResults.filter((r) => {
     const task = taskMap.get(r.taskId);
-    return task && task.files && task.files.length > 0;
+    return task?.files && task.files.length > 0;
   });
   if (fileFailures.length > 0) {
     patterns.push({
@@ -521,7 +521,7 @@ export function generateAnalysisReport(
  * Display analysis report in console
  */
 export function displayAnalysisReport(report: AnalysisReport): void {
-  console.log("\n" + "=".repeat(80));
+  console.log(`\n${"=".repeat(80)}`);
   console.log("📊 COMPREHENSIVE ANALYSIS REPORT");
   console.log("=".repeat(80));
 
@@ -598,5 +598,5 @@ export function displayAnalysisReport(report: AnalysisReport): void {
     }
   }
 
-  console.log("\n" + "=".repeat(80) + "\n");
+  console.log(`\n${"=".repeat(80)}\n`);
 }

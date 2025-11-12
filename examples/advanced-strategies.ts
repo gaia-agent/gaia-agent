@@ -3,14 +3,7 @@
  * Demonstrates all enhancement features: ReAct, reflection, confidence, multi-strategy
  */
 
-import {
-  createGaiaAgent,
-  createTaskAwareInstructions,
-  estimateConfidence,
-  iterativeAnswering,
-  multiStrategyAnswering,
-  reflectOnAnswer,
-} from "../src/index.js";
+import { createGaiaAgent, createTaskAwareInstructions, estimateConfidence } from "../src/index.js";
 import type { GaiaTask } from "../src/types.js";
 
 console.log("🚀 Advanced GAIA Benchmark Strategy Examples\n");
@@ -27,7 +20,7 @@ const sampleTask: GaiaTask = {
 /**
  * Example 1: Basic ReAct Planner Usage
  */
-async function example1_basicReAct() {
+async function _example1_basicReAct() {
   console.log("\n📌 Example 1: Basic ReAct Planner");
   console.log("─".repeat(80));
 
@@ -50,7 +43,7 @@ async function example1_basicReAct() {
 /**
  * Example 2: Task-Aware Instructions
  */
-async function example2_taskAware() {
+async function _example2_taskAware() {
   console.log("\n📌 Example 2: Task-Aware Instructions");
   console.log("─".repeat(80));
 
@@ -82,7 +75,7 @@ async function example2_taskAware() {
 /**
  * Example 3: Confidence Estimation
  */
-async function example3_confidence() {
+async function _example3_confidence() {
   console.log("\n📌 Example 3: Confidence Estimation");
   console.log("─".repeat(80));
 
@@ -125,7 +118,7 @@ async function example3_confidence() {
   }
 }
 
-console.log("\n" + "=".repeat(80));
+console.log(`\n${"=".repeat(80)}`);
 console.log("✅ Examples loaded! Run with: pnpm tsx examples/advanced-strategies.ts");
 console.log("\n📚 Available examples:");
 console.log("  1. Basic ReAct Planner");

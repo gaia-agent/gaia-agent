@@ -185,7 +185,7 @@ function printToolCall(toolCall: any, toolIdx: number) {
 
       const valueStr =
         typeof value === "string" && value.length > 100
-          ? value.substring(0, 100) + "..."
+          ? `${value.substring(0, 100)}...`
           : JSON.stringify(value);
       console.log(`       ${key}: ${valueStr}`);
     }
@@ -209,13 +209,13 @@ function printToolResult(result: any, resultIdx: number) {
     if (typeof resultData === "string") {
       resultStr =
         resultData.length > 1000
-          ? resultData.substring(0, 1000) + `... (${resultData.length} chars total)`
+          ? `${resultData.substring(0, 1000)}... (${resultData.length} chars total)`
           : resultData;
     } else if (typeof resultData === "object") {
       const jsonStr = JSON.stringify(resultData, null, 2);
       resultStr =
         jsonStr.length > 2000
-          ? jsonStr.substring(0, 2000) + `...\n       (${jsonStr.length} chars total)`
+          ? `${jsonStr.substring(0, 2000)}...\n       (${jsonStr.length} chars total)`
           : jsonStr;
     } else {
       resultStr = String(resultData);
@@ -223,7 +223,7 @@ function printToolResult(result: any, resultIdx: number) {
     console.log(
       `     Result:\n${resultStr
         .split("\n")
-        .map((line) => "       " + line)
+        .map((line) => `       ${line}`)
         .join("\n")}`,
     );
   }
@@ -360,7 +360,7 @@ export async function evaluateTask(
             // Show text generated in this step
             if ("text" in step && step.text) {
               const stepText =
-                step.text.length > 150 ? step.text.substring(0, 150) + "..." : step.text;
+                step.text.length > 150 ? `${step.text.substring(0, 150)}...` : step.text;
               console.log(`\n  💬 Agent Response: ${stepText}`);
             }
           }
@@ -449,7 +449,7 @@ export async function evaluateTask(
             // Show text generated in this step
             if ("text" in step && step.text) {
               const stepText =
-                step.text.length > 150 ? step.text.substring(0, 150) + "..." : step.text;
+                step.text.length > 150 ? `${step.text.substring(0, 150)}...` : step.text;
               console.log(`\n  💬 Agent Response: ${stepText}`);
             }
           }

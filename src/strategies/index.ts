@@ -173,7 +173,7 @@ export async function iterativeAnswering(
     }
 
     // Generate answer with task-aware instructions
-    const taskInstructions = createTaskAwareInstructions(
+    const _taskInstructions = createTaskAwareInstructions(
       task.question,
       Boolean(task.files && task.files.length > 0),
     );
