@@ -298,6 +298,36 @@ const agent = createGaiaAgent({
 });
 ```
 
+### ToolSDK Integration
+
+Integrate thousands of tools from [ToolSDK.ai](https://toolsdk.ai) ecosystem:
+
+```typescript
+import { createGaiaAgent, getDefaultTools } from '@gaia-agent/sdk';
+import { ToolSDKApiClient } from 'toolsdk/api'; // npm install toolsdk
+
+// Initialize ToolSDK client
+const toolSDK = new ToolSDKApiClient({ apiKey: process.env.TOOLSDK_AI_API_KEY });
+
+// Load tools from ToolSDK packages
+const emailTool = await toolSDK.package('@toolsdk.ai/mcp-send-email', {
+  RESEND_API_KEY: process.env.RESEND_API_KEY,
+}).getAISDKTool("send-email");
+
+const agent = createGaiaAgent({
+  tools: {
+    ...getDefaultTools(),
+    emailTool
+  },
+});
+
+const result = await agent.generate({
+  prompt: 'Help me search for the latest AI news and send it to john@example.com',
+});
+```
+
+📖 **[ToolSDK Packages →](https://toolsdk.ai)**
+
 ### Extend GAIAAgent Class
 
 ```typescript
