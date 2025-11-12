@@ -38,7 +38,7 @@ export interface BrowserUseBrowserParams {
 /**
  * Browser action schema - supports Playwright-like operations
  */
-export const BrowserActionSchema = z.discriminatedUnion('action', [
+export const BrowserActionSchema = z.discriminatedUnion("action", [
   // Session Management
   // z.object({
   //   action: z.literal('launch'),
@@ -172,7 +172,6 @@ export const BrowserActionSchema = z.discriminatedUnion('action', [
 ]);
 export type BrowserAction = z.infer<typeof BrowserActionSchema>;
 
-
 /**
  * AWS AgentCore specific types
  */
@@ -186,12 +185,35 @@ export const AWSBrowserParamsSchema = z.object({
   awsSecretAccessKey: z.string().optional().describe("AWS secret access key"),
 
   // launch options
-  sessionName: z.string().optional().describe("The name of the browser session. This name helps you identify and manage the session. The name does not need to be unique."),
-  sessionTimeoutSeconds: z.number().optional().describe("The time in seconds after which the session automatically terminates if there is no activity. The default value is 3600 seconds (1 hour). The minimum allowed value is 60 seconds, and the maximum allowed value is 28800 seconds (8 hours)."),
-  viewPort: z.object({
-    width: z.number().describe("The width of the viewport in pixels. This value determines the horizontal dimension of the visible area. Valid values range from 800 to 1920 pixels."),
-    height: z.number().describe("The height of the viewport in pixels. This value determines the vertical dimension of the visible area. Valid values range from 600 to 1080 pixels."),
-  }).optional().describe("The dimensions of the browser viewport for this session. This determines the visible area of the web content and affects how web pages are rendered. If not specified, Amazon Bedrock uses a default viewport size."),
+  sessionName: z
+    .string()
+    .optional()
+    .describe(
+      "The name of the browser session. This name helps you identify and manage the session. The name does not need to be unique.",
+    ),
+  sessionTimeoutSeconds: z
+    .number()
+    .optional()
+    .describe(
+      "The time in seconds after which the session automatically terminates if there is no activity. The default value is 3600 seconds (1 hour). The minimum allowed value is 60 seconds, and the maximum allowed value is 28800 seconds (8 hours).",
+    ),
+  viewPort: z
+    .object({
+      width: z
+        .number()
+        .describe(
+          "The width of the viewport in pixels. This value determines the horizontal dimension of the visible area. Valid values range from 800 to 1920 pixels.",
+        ),
+      height: z
+        .number()
+        .describe(
+          "The height of the viewport in pixels. This value determines the vertical dimension of the visible area. Valid values range from 600 to 1080 pixels.",
+        ),
+    })
+    .optional()
+    .describe(
+      "The dimensions of the browser viewport for this session. This determines the visible area of the web content and affects how web pages are rendered. If not specified, Amazon Bedrock uses a default viewport size.",
+    ),
 
   // Batch operation support - execute multiple actions in sequence
   actions: z

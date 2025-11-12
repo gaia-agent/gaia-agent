@@ -14,16 +14,14 @@
  */
 
 import {
-  AWSBrowserParamsSchema,
-  BrowserAction,
   type AWSBrowserParams,
+  AWSBrowserParamsSchema,
+  type BrowserAction,
   type BrowserResult,
   type IAWSAgentCoreProvider,
 } from "./types.js";
 
-
-const DEFAULT_IDENTIFIER = 'aws.browser.v1';
-
+const DEFAULT_IDENTIFIER = "aws.browser.v1";
 
 /**
  * AWS AgentCore browser provider implementation
@@ -31,9 +29,20 @@ const DEFAULT_IDENTIFIER = 'aws.browser.v1';
  */
 export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
   execute: async (params: AWSBrowserParams): Promise<BrowserResult> => {
-    const { task, browserIdentifier, awsRegion, awsAccessKeyId, awsSecretAccessKey, sessionName, sessionTimeoutSeconds, viewPort, actions } = params;
-    const { BedrockAgentCoreClient, StartBrowserSessionCommand, StopBrowserSessionCommand } = (await import("@aws-sdk/client-bedrock-agentcore"));
-    const { chromium } = (await import("playwright"));
+    const {
+      task,
+      browserIdentifier,
+      awsRegion,
+      awsAccessKeyId,
+      awsSecretAccessKey,
+      sessionName,
+      sessionTimeoutSeconds,
+      viewPort,
+      actions,
+    } = params;
+    const { BedrockAgentCoreClient, StartBrowserSessionCommand, StopBrowserSessionCommand } =
+      await import("@aws-sdk/client-bedrock-agentcore");
+    const { chromium } = await import("playwright");
 
     const accessKeyId = awsAccessKeyId || process.env.AWS_ACCESS_KEY_ID;
     const secretAccessKey = awsSecretAccessKey || process.env.AWS_SECRET_ACCESS_KEY;
@@ -80,24 +89,28 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
       };
     }
 
-    const generateWsConnection = async (): Promise<{ wsUrl: string; headers: Record<string, string> }> => {
-      const planeEndpoint = process.env.BEDROCK_AGENTCORE_DP_ENDPOINT ||
+    const generateWsConnection = async (): Promise<{
+      wsUrl: string;
+      headers: Record<string, string>;
+    }> => {
+      const planeEndpoint =
+        process.env.BEDROCK_AGENTCORE_DP_ENDPOINT ||
         `https://bedrock-agentcore.${region}.amazonaws.com`;
       const path = `/browser-streams/${identifier}/sessions/${sessionId}/automation`;
 
       const endpointUrl = new URL(planeEndpoint);
       const host = endpointUrl.host;
 
-      const { Sha256 } = await import('@aws-crypto/sha256-js');
-      const { SignatureV4 } = await import('@aws-sdk/signature-v4');
-      const { formatUrl } = await import('@aws-sdk/util-format-url');
-      const { HttpRequest } = await import('@smithy/protocol-http');
+      const { Sha256 } = await import("@aws-crypto/sha256-js");
+      const { SignatureV4 } = await import("@aws-sdk/signature-v4");
+      const { formatUrl } = await import("@aws-sdk/util-format-url");
+      const { HttpRequest } = await import("@smithy/protocol-http");
 
       // Generate a presigned URL for the WebSocket connection
       const httpReq = new HttpRequest({
-        protocol: endpointUrl.protocol || 'https:',
+        protocol: endpointUrl.protocol || "https:",
         hostname: host,
-        method: 'GET',
+        method: "GET",
         path,
         headers: {
           host,
@@ -106,24 +119,24 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
 
       // Use SigV4 presigning, placed in query parameters
       const credentials =
-        typeof client.config.credentials === 'function'
+        typeof client.config.credentials === "function"
           ? await client.config.credentials()
           : client.config.credentials;
       const presigner = new SignatureV4({
         credentials,
         region,
-        service: 'bedrock-agentcore',
+        service: "bedrock-agentcore",
         sha256: Sha256,
       });
 
       const presigned = await presigner.presign(httpReq);
       const httpsUrl = formatUrl(presigned);
-      const wsUrl = httpsUrl.replace(/^https:/, 'wss:');
+      const wsUrl = httpsUrl.replace(/^https:/, "wss:");
 
       // Only keep necessary headers; auth info is in query params
       const headers: Record<string, string> = {
         Host: host,
-        'User-Agent': `BrowserSandbox-Client/1.0 (Session: ${path.split('/').pop()})`,
+        "User-Agent": `BrowserSandbox-Client/1.0 (Session: ${path.split("/").pop()})`,
       };
 
       return { wsUrl, headers };
@@ -136,10 +149,9 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
       const context = browser.contexts()[0] ?? (await browser.newContext());
       const page = context.pages()[0] ?? (await context.newPage());
 
-
       const executeAction = async (
         action: BrowserAction,
-      ): Promise<{ [key: string]: unknown; } | undefined> => {
+      ): Promise<{ [key: string]: unknown } | undefined> => {
         // Execute action based on type
         switch (action.action) {
           case "navigate": {
@@ -213,21 +225,21 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
 
           case "info": {
             const info: Record<string, unknown> = {};
-            const infoTypes = action.infos || ['url', 'title', 'content'];
+            const infoTypes = action.infos || ["url", "title", "content"];
 
-            if (infoTypes.includes('all') || infoTypes.includes("url")) {
+            if (infoTypes.includes("all") || infoTypes.includes("url")) {
               info.url = page.url();
             }
-            if (infoTypes.includes('all') || infoTypes.includes("title")) {
+            if (infoTypes.includes("all") || infoTypes.includes("title")) {
               info.title = await page.title();
             }
-            if (infoTypes.includes('all') || infoTypes.includes("content")) {
+            if (infoTypes.includes("all") || infoTypes.includes("content")) {
               info.content = await page.content();
             }
-            if (infoTypes.includes('all') || infoTypes.includes("cookies")) {
+            if (infoTypes.includes("all") || infoTypes.includes("cookies")) {
               info.cookies = await context.cookies();
             }
-            if (infoTypes.includes('all') || infoTypes.includes("localStorage")) {
+            if (infoTypes.includes("all") || infoTypes.includes("localStorage")) {
               info.localStorage = await page.evaluate(() => ({ ...localStorage }));
             }
 
@@ -253,7 +265,7 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
             throw new Error(`Unknown action: ${(action as { action: string }).action}`);
         }
         return undefined;
-      }
+      };
 
       try {
         // Normalize to array for batch processing
@@ -277,7 +289,6 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
           content: await page.content(),
           ...results,
         };
-
       } catch (error) {
         return {
           success: false,
@@ -286,9 +297,9 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
         };
       } finally {
         // Clean up Playwright resources
-        await page.close({ runBeforeUnload: true }).catch(() => { });
-        await context.close().catch(() => { });
-        await browser.close().catch(() => { });
+        await page.close({ runBeforeUnload: true }).catch(() => {});
+        await context.close().catch(() => {});
+        await browser.close().catch(() => {});
         // Stop browser session
         const stopCmd = new StopBrowserSessionCommand({
           browserIdentifier: identifier,
@@ -299,7 +310,10 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Aws bedrock agentcore browser automation failed",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Aws bedrock agentcore browser automation failed",
         details: error instanceof Error ? error.stack : undefined,
       };
     }
