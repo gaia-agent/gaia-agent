@@ -29,7 +29,7 @@ import type { ProviderConfig } from "./types.js";
  *       additionalTools: {
  *         weatherTool: tool({
  *           description: 'Get weather',
- *           parameters: z.object({ city: z.string() }),
+ *           inputSchema: z.object({ city: z.string() }),
  *           execute: async ({ city }) => {
  *             // Call weather API
  *             return { temp: 72, condition: 'sunny' };
@@ -140,7 +140,7 @@ export class GAIAAgent extends ToolLoopAgent {
  *   additionalTools: {
  *     customTool: tool({
  *       description: 'Custom tool',
- *       parameters: z.object({ input: z.string() }),
+ *       inputSchema: z.object({ input: z.string() }),
  *       execute: async ({ input }) => ({ result: input }),
  *     }),
  *   },

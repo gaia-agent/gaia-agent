@@ -171,7 +171,7 @@ const agent = createGaiaAgent({
   tools: {
     weatherTool: tool({
       description: 'Get current weather',
-      parameters: z.object({ city: z.string() }),
+      inputSchema: z.object({ city: z.string() }),
       execute: async ({ city }) => {
         // Your weather API call
         return { temp: 72, condition: 'sunny' };

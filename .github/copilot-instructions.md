@@ -158,9 +158,9 @@ export { mem0Search, mem0Store } from './mem0';
 - Indent: 2 spaces
 
 **AI SDK v6 Beta** (Critical API Changes):
-- Tool creation: `tool({ description, parameters, execute })` (no `inputSchema` property in source)
+- Tool creation: `tool({ description, inputSchema, execute })` (no `inputSchema` property in source)
 - Max steps: Use `stepCountIs()` not `maxSteps` property
-- Schema casting: `parameters: z.object({ ... }) as unknown as Tool["inputSchema"]`
+- Schema casting: `inputSchema: z.object({ ... }) as unknown as Tool["inputSchema"]`
 
 ## Integration Points
 
