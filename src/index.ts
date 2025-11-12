@@ -46,20 +46,17 @@
  * ```
  */
 
-// Main exports
-export { GAIAAgent, createGaiaAgent } from "./agent.js";
-
-// Configuration utilities
-export { getDefaultTools } from "./config/tools.js";
-
 // AI SDK types
 export type { LanguageModel, ToolLoopAgent } from "ai";
+// Main exports
+export { createGaiaAgent, GAIAAgent } from "./agent.js";
+// Configuration utilities
+export { getDefaultTools } from "./config/tools.js";
 
 // Tool exports
 export {
   awsBrowserTool,
   browserUseTool,
-  steelBrowserTool,
   calculator,
   e2bSandbox,
   exaFindSimilar,
@@ -67,6 +64,7 @@ export {
   exaSearch,
   httpRequest,
   sandockExecute,
+  steelBrowserTool,
   tavilySearch,
 } from "./tools/index.js";
 

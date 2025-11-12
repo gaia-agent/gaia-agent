@@ -119,4 +119,3 @@ Ask yourself:
 □ Did I remove all explanatory text from final answer?
 
 Remember: ACCURACY and BREVITY are equally important. Use tools wisely, verify facts, and answer concisely.`;
-
