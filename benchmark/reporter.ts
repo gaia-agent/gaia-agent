@@ -48,7 +48,7 @@ export async function saveResults(
 
   // Use fixed filename for incremental updates, timestamped for final save
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const filename = incremental 
+  const filename = incremental
     ? `gaia-${dataset}-latest.json`
     : `gaia-${dataset}-${timestamp}.json`;
   const filepath = join(outputDir, filename);
@@ -72,7 +72,7 @@ export async function saveResults(
   };
 
   await writeFile(filepath, JSON.stringify(output, null, 2));
-  
+
   if (!incremental) {
     console.log(`💾 Results saved to: ${filepath}`);
   } else {

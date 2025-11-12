@@ -3,9 +3,9 @@
  * Downloads complete dataset snapshot from Hugging Face (including attachments)
  */
 
-import { snapshotDownload } from "@huggingface/hub";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { snapshotDownload } from "@huggingface/hub";
 import mime from "mime-types";
 import type { GaiaTask } from "./types.js";
 

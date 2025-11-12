@@ -2,7 +2,7 @@
  * Browser automation tool types and interfaces
  */
 
-import type { z } from "zod";
+import { z } from "zod";
 
 export type BrowserProvider = "steel" | "browseruse" | "aws-bedrock-agentcore";
 
@@ -36,16 +36,193 @@ export interface BrowserUseBrowserParams {
 }
 
 /**
+ * Browser action schema - supports Playwright-like operations
+ */
+export const BrowserActionSchema = z.discriminatedUnion("action", [
+  // Session Management
+  // z.object({
+  //   action: z.literal('launch'),
+  //   // Optional parameters for launch..
+  // }).describe("Launch a new browser session with optional parameters."),
+
+  // z.object({ action: z.literal('close') }),
+
+  // Navigation Actions
+  z
+    .object({
+      action: z.literal("navigate"),
+      url: z.string().describe("URL to navigate to (must be valid HTTP/HTTPS URL)"),
+      waitUntil: z
+        .enum(["load", "domcontentloaded", "networkidle"])
+        .optional()
+        .describe("Wait until specific event. Default: 'load'"),
+      timeout: z
+        .number()
+        .positive()
+        .max(60000)
+        .optional()
+        .describe("Navigation timeout in milliseconds (max 60s)"),
+    })
+    .describe("Navigate to a URL and wait for page load."),
+
+  // Element Interaction
+  z
+    .object({
+      action: z.literal("click"),
+      selector: z.string().describe("CSS selector, XPath, or text selector to click"),
+      button: z
+        .enum(["left", "right", "middle"])
+        .optional()
+        .describe("Mouse button to click. Default: 'left'"),
+      clickCount: z
+        .number()
+        .int()
+        .positive()
+        .max(3)
+        .optional()
+        .describe("Number of clicks (1-3). Default: 1"),
+      timeout: z
+        .number()
+        .positive()
+        .max(30000)
+        .optional()
+        .describe("Wait timeout in milliseconds (max 30s)"),
+    })
+    .describe("Click on an element matching the selector."),
+
+  z
+    .object({
+      action: z.literal("fill"),
+      selector: z.string().describe("CSS selector for input field"),
+      value: z.string().describe("Value to fill (replaces existing content)"),
+    })
+    .describe("Fill an input field (faster than type, no events)."),
+
+  // Content Extraction
+  z
+    .object({
+      action: z.literal("screenshot"),
+      fullPage: z.boolean().optional().describe("Capture full scrollable page. Default: false"),
+      selector: z.string().optional().describe("CSS selector to screenshot specific element"),
+    })
+    .describe("Take a screenshot of the page or specific element."),
+
+  z
+    .object({
+      action: z.literal("extract"),
+      selector: z
+        .string()
+        .optional()
+        .describe("CSS selector to extract from. Default: entire page"),
+      attribute: z.string().optional().describe("Extract specific attribute (e.g., 'href', 'src')"),
+    })
+    .describe("Extract text content or attributes from the page."),
+
+  // Page Information
+  z
+    .object({
+      action: z.literal("info"),
+      infos: z
+        .enum(["url", "title", "content", "cookies", "localStorage", "all"])
+        .array()
+        .optional()
+        .describe("Specific info to retrieve. Default: url, title and content."),
+    })
+    .describe("Get page information (URL, title, cookies, etc.)."),
+
+  // Scroll Operations
+  z
+    .object({
+      action: z.literal("scroll"),
+      x: z.number().optional().describe("Horizontal scroll position in pixels"),
+      y: z.number().optional().describe("Vertical scroll position in pixels"),
+      selector: z.string().optional().describe("Scroll specific element instead of page"),
+    })
+    .describe("Scroll the page or element to specified position."),
+
+  // Wait Operations
+  z
+    .object({
+      action: z.literal("waitForNavigation"),
+      sessionId: z.string().describe("Session ID"),
+      waitUntil: z
+        .enum(["load", "domcontentloaded", "networkidle"])
+        .optional()
+        .describe("Wait until event. Default: 'load'"),
+      timeout: z
+        .number()
+        .positive()
+        .max(60000)
+        .optional()
+        .describe("Timeout in milliseconds (max 60s)"),
+    })
+    .describe("Wait for navigation to complete."),
+
+  z
+    .object({
+      action: z.literal("sleep"),
+      ms: z
+        .number()
+        .int()
+        .positive()
+        .max(60000)
+        .describe("Sleep duration in milliseconds (max 60s)"),
+    })
+    .describe("Wait for specified duration (use sparingly, prefer waitForSelector)."),
+]);
+export type BrowserAction = z.infer<typeof BrowserActionSchema>;
+
+/**
  * AWS AgentCore specific types
  */
-export interface AWSBrowserParams {
-  task: string;
-  url?: string;
-  browserIdentifier?: string;
-  awsRegion?: string;
-  awsAccessKeyId?: string;
-  awsSecretAccessKey?: string;
-}
+export const AWSBrowserParamsSchema = z.object({
+  task: z.string().describe("Browser task description"),
+
+  // Provider configuration
+  browserIdentifier: z.string().optional().describe("Browser identifier"),
+  awsRegion: z.string().optional().describe("AWS region"),
+  awsAccessKeyId: z.string().optional().describe("AWS access key ID"),
+  awsSecretAccessKey: z.string().optional().describe("AWS secret access key"),
+
+  // launch options
+  sessionName: z
+    .string()
+    .optional()
+    .describe(
+      "The name of the browser session. This name helps you identify and manage the session. The name does not need to be unique.",
+    ),
+  sessionTimeoutSeconds: z
+    .number()
+    .optional()
+    .describe(
+      "The time in seconds after which the session automatically terminates if there is no activity. The default value is 3600 seconds (1 hour). The minimum allowed value is 60 seconds, and the maximum allowed value is 28800 seconds (8 hours).",
+    ),
+  viewPort: z
+    .object({
+      width: z
+        .number()
+        .describe(
+          "The width of the viewport in pixels. This value determines the horizontal dimension of the visible area. Valid values range from 800 to 1920 pixels.",
+        ),
+      height: z
+        .number()
+        .describe(
+          "The height of the viewport in pixels. This value determines the vertical dimension of the visible area. Valid values range from 600 to 1080 pixels.",
+        ),
+    })
+    .optional()
+    .describe(
+      "The dimensions of the browser viewport for this session. This determines the visible area of the web content and affects how web pages are rendered. If not specified, Amazon Bedrock uses a default viewport size.",
+    ),
+
+  // Batch operation support - execute multiple actions in sequence
+  actions: z
+    .union([BrowserActionSchema, z.array(BrowserActionSchema)])
+    .describe(
+      "Single browser action or array of actions to execute sequentially. Use array to minimize AI SDK steps.",
+    ),
+});
+export type AWSBrowserParams = z.infer<typeof AWSBrowserParamsSchema>;
 
 /**
  * Provider-specific interfaces
