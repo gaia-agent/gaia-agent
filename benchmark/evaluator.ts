@@ -272,28 +272,28 @@ export async function evaluateTask(
       let stepCount = 0;
       const checkSteps = async () => {
         const steps = await stepsPromise;
-        
+
         // Show tool execution details as they complete
         for (let i = stepCount; i < steps.length; i++) {
           const step = steps[i];
-          
+
           if ("toolCalls" in step && step.toolCalls && step.toolCalls.length > 0) {
             console.log(`\n🔧 Tool Execution (Step ${i + 1}):`);
             for (const toolCall of step.toolCalls) {
               console.log(`  └─ ${toolCall.toolName}`);
             }
           }
-          
+
           if ("toolResults" in step && step.toolResults && step.toolResults.length > 0) {
             for (const result of step.toolResults) {
-              const resultPreview = 
-                typeof result.output === "string" 
+              const resultPreview =
+                typeof result.output === "string"
                   ? result.output.substring(0, 100) + (result.output.length > 100 ? "..." : "")
                   : "[object]";
               console.log(`  ✓ ${result.toolName}: ${resultPreview}`);
             }
           }
-          
+
           stepCount = i + 1;
         }
       };

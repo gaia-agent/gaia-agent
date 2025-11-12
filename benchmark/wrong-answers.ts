@@ -4,7 +4,7 @@
  */
 
 import { existsSync } from "node:fs";
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { GaiaBenchmarkResult, GaiaTask } from "./types.js";
 
@@ -200,7 +200,9 @@ export async function displayWrongAnswersSummary(outputDir: string): Promise<voi
   for (const entry of sorted) {
     const questionPreview =
       entry.question.length > 60 ? `${entry.question.substring(0, 60)}...` : entry.question;
-    console.log(`  [${entry.attemptCount}x] ${entry.taskId.substring(0, 8)}... - ${questionPreview}`);
+    console.log(
+      `  [${entry.attemptCount}x] ${entry.taskId.substring(0, 8)}... - ${questionPreview}`,
+    );
   }
 
   console.log(`\n${"=".repeat(60)}\n`);

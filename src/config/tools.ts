@@ -3,6 +3,7 @@
  * Get all GAIA tools with swappable providers
  */
 
+import { createBrowserTools } from "../tools/browser/index.js";
 import {
   calculator,
   e2bSandbox,
@@ -13,7 +14,6 @@ import {
   sandockExecute,
   tavilySearch,
 } from "../tools/index.js";
-import { createBrowserTools } from "../tools/browser/index.js";
 import { createMemoryTools } from "../tools/memory/index.js";
 import type { ProviderConfig } from "../types.js";
 import { loadProviderConfigFromEnv, validateProviderConfig } from "./providers.js";

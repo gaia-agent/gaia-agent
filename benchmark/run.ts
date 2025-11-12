@@ -55,9 +55,9 @@ if (!process.env.OPENAI_API_KEY) {
   process.exit(1);
 }
 
+import { readFile } from "node:fs/promises";
 // Now import other modules AFTER env is loaded
 import { createOpenAI } from "@ai-sdk/openai";
-import { readFile } from "node:fs/promises";
 import { createGaiaAgent } from "../src/index.js";
 import type { GaiaTask, ProviderConfig } from "../src/types.js";
 import { downloadGaiaDataset } from "./downloader.js";
@@ -172,7 +172,7 @@ function categorizeTask(task: GaiaTask): string[] {
     questionLower.includes("equation") ||
     questionLower.includes("formula") ||
     questionLower.includes("algorithm") ||
-    /\d+\s*[\+\-\*\/]\s*\d+/.test(questionLower)
+    /\d+\s*[+\-*/]\s*\d+/.test(questionLower)
   ) {
     categories.push("code");
   }
@@ -224,9 +224,7 @@ async function runBenchmark(config: BenchmarkConfig): Promise<{
   const providers = getProviderConfigFromEnv();
 
   // Create agent with custom model and providers
-  const gaiaAgent = providers
-    ? createGaiaAgent({ model, providers })
-    : createGaiaAgent({ model });
+  const gaiaAgent = providers ? createGaiaAgent({ model, providers }) : createGaiaAgent({ model });
 
   // Load checkpoint if resuming
   let checkpoint: { results: GaiaBenchmarkResult[]; completedTaskIds: Set<string> } | null = null;
@@ -283,16 +281,14 @@ async function runBenchmark(config: BenchmarkConfig): Promise<{
 
   // Start with checkpoint results if resuming
   const results: GaiaBenchmarkResult[] = checkpoint ? [...checkpoint.results] : [];
-  
+
   // Keep track of all tasks (for final save)
   const allTasks = await downloadGaiaDataset(config.dataset);
 
   // Run tasks sequentially (to avoid rate limits)
   for (const [index, task] of tasks.entries()) {
     const totalCompleted = checkpoint ? checkpoint.results.length + index + 1 : index + 1;
-    const totalTasks = checkpoint
-      ? checkpoint.results.length + tasks.length
-      : tasks.length;
+    const totalTasks = checkpoint ? checkpoint.results.length + tasks.length : tasks.length;
 
     console.log(`[${totalCompleted}/${totalTasks}] Evaluating ${task.id}...`);
 

@@ -29,7 +29,11 @@ export function loadProviderConfigFromEnv(): ProviderConfig | undefined {
 
   // Browser provider
   const browserProvider = process.env.GAIA_AGENT_BROWSER_PROVIDER?.toLowerCase();
-  if (browserProvider === "steel" || browserProvider === "browseruse" || browserProvider === "aws-bedrock-agentcore") {
+  if (
+    browserProvider === "steel" ||
+    browserProvider === "browseruse" ||
+    browserProvider === "aws-bedrock-agentcore"
+  ) {
     envConfig.browser = browserProvider as "steel" | "browseruse" | "aws-bedrock-agentcore";
     hasConfig = true;
   }

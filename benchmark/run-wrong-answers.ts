@@ -96,7 +96,9 @@ async function main() {
     : "./benchmark-results";
   const verbose = args.includes("--verbose") || args.includes("-v");
   const stream = args.includes("--stream");
-  const limit = args.includes("--limit") ? Number.parseInt(args[args.indexOf("--limit") + 1], 10) : undefined;
+  const limit = args.includes("--limit")
+    ? Number.parseInt(args[args.indexOf("--limit") + 1], 10)
+    : undefined;
   const levelFilter = args.includes("--level")
     ? (Number.parseInt(args[args.indexOf("--level") + 1], 10) as 1 | 2 | 3)
     : undefined;
@@ -126,9 +128,7 @@ async function main() {
 
   if (wrongTaskIds.length === 0) {
     console.log("🎉 No wrong answers found! All previous tasks passed.");
-    console.log(
-      "   Run regular benchmark to generate wrong answers: pnpm benchmark --limit 10",
-    );
+    console.log("   Run regular benchmark to generate wrong answers: pnpm benchmark --limit 10");
     process.exit(0);
   }
 
@@ -158,9 +158,7 @@ async function main() {
 
   // Create agent
   const model = getOpenAIModel();
-  const gaiaAgent = providers
-    ? createGaiaAgent({ model, providers })
-    : createGaiaAgent({ model });
+  const gaiaAgent = providers ? createGaiaAgent({ model, providers }) : createGaiaAgent({ model });
 
   const results: GaiaBenchmarkResult[] = [];
 

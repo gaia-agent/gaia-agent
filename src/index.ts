@@ -46,20 +46,29 @@
  * ```
  */
 
-// Main exports
-export { GAIAAgent, createGaiaAgent } from "./agent.js";
-
-// Configuration utilities
-export { getDefaultTools } from "./config/tools.js";
-
 // AI SDK types
 export type { LanguageModel, ToolLoopAgent } from "ai";
-
+// Main exports
+export { createGaiaAgent, GAIAAgent } from "./agent.js";
+// ReAct Planner and enhanced prompts
+export {
+  CONFIDENCE_ESTIMATION_PROMPT,
+  getTaskAwareInstructions,
+  REACT_PLANNER_INSTRUCTIONS,
+  REFLECTION_PROMPT,
+} from "./config/react-planner.js";
+// Configuration utilities
+export { getDefaultTools } from "./config/tools.js";
+// Enhanced strategies for improved GAIA benchmark performance
+export {
+  createTaskAwareInstructions,
+  estimateConfidence,
+  reflectOnAnswer,
+} from "./strategies/index.js";
 // Tool exports
 export {
   awsBrowserTool,
   browserUseTool,
-  steelBrowserTool,
   calculator,
   e2bSandbox,
   exaFindSimilar,
@@ -67,9 +76,9 @@ export {
   exaSearch,
   httpRequest,
   sandockExecute,
+  steelBrowserTool,
   tavilySearch,
 } from "./tools/index.js";
-
 // Memory tools factory
 export { createMemoryTools } from "./tools/memory/index.js";
 
