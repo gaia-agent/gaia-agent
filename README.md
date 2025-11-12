@@ -304,7 +304,7 @@ Integrate thousands of tools from [ToolSDK.ai](https://toolsdk.ai) ecosystem:
 
 ```typescript
 import { createGaiaAgent, getDefaultTools } from '@gaia-agent/sdk';
-import { ToolSDKApiClient } from 'toolsdk/api';
+import { ToolSDKApiClient } from 'toolsdk/api'; // npm install toolsdk
 
 // Initialize ToolSDK client
 const toolSDK = new ToolSDKApiClient({ apiKey: process.env.TOOLSDK_AI_API_KEY });
