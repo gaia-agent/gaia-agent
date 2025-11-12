@@ -7,6 +7,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import type { LanguageModel } from "ai";
 import { stepCountIs, ToolLoopAgent } from "ai";
 import { DEFAULT_INSTRUCTIONS } from "./config/defaults.js";
+import { REACT_PLANNER_INSTRUCTIONS } from "./config/react-planner.js";
 import { getDefaultTools } from "./config/tools.js";
 import type { ProviderConfig } from "./types.js";
 
@@ -70,12 +71,18 @@ export class GAIAAgent extends ToolLoopAgent {
     providers?: ProviderConfig;
     additionalTools?: Record<string, unknown>;
     tools?: Record<string, unknown>;
+    useReActPlanner?: boolean;
   }) {
     const defaultTools = getDefaultTools(config?.providers);
     const tools = config?.tools || {
       ...defaultTools,
       ...config?.additionalTools,
     };
+
+    // Use ReAct planner if requested (enhanced structured reasoning)
+    const defaultInstructions = config?.useReActPlanner
+      ? REACT_PLANNER_INSTRUCTIONS
+      : DEFAULT_INSTRUCTIONS;
 
     super({
       model:
@@ -84,7 +91,7 @@ export class GAIAAgent extends ToolLoopAgent {
           baseURL: process.env.OPENAI_BASE_URL,
           apiKey: process.env.OPENAI_API_KEY,
         })(process.env.OPENAI_MODEL || "gpt-4o"),
-      instructions: config?.instructions || DEFAULT_INSTRUCTIONS,
+      instructions: config?.instructions || defaultInstructions,
       tools,
       stopWhen: stepCountIs(config?.maxSteps || 15),
     });
@@ -111,6 +118,17 @@ export class GAIAAgent extends ToolLoopAgent {
  * const result = await agent.generate({
  *   prompt: 'Task...',
  * });
+ * ```
+ *
+ * @example With Enhanced ReAct Planner
+ * ```typescript
+ * import { createGaiaAgent } from 'gaia-agent';
+ *
+ * const agent = createGaiaAgent({
+ *   useReActPlanner: true,  // Enable enhanced structured reasoning
+ * });
+ *
+ * // The agent will use ReAct framework: Think → Plan → Act → Observe → Reflect
  * ```
  *
  * @example With Provider Selection
@@ -155,6 +173,7 @@ export function createGaiaAgent(config?: {
   providers?: ProviderConfig;
   tools?: Record<string, unknown>;
   additionalTools?: Record<string, unknown>;
+  useReActPlanner?: boolean;
 }) {
   return new GAIAAgent(config);
 }

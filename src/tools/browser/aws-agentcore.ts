@@ -103,7 +103,6 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
 
       const { Sha256 } = await import("@aws-crypto/sha256-js");
       const { SignatureV4 } = await import("@aws-sdk/signature-v4");
-      const { formatUrl } = await import("@aws-sdk/util-format-url");
       const { HttpRequest } = await import("@smithy/protocol-http");
 
       // Generate a presigned URL for the WebSocket connection
@@ -130,6 +129,22 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
       });
 
       const presigned = await presigner.presign(httpReq);
+
+      // Format the presigned request as a URL
+      const formatUrl = (request: typeof presigned): string => {
+        const protocol = request.protocol || "https:";
+        const hostname = request.hostname;
+        const path = request.path || "/";
+        const query = request.query
+          ? `?${Object.entries(request.query)
+              .map(
+                ([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
+              )
+              .join("&")}`
+          : "";
+        return `${protocol}//${hostname}${path}${query}`;
+      };
+
       const httpsUrl = formatUrl(presigned);
       const wsUrl = httpsUrl.replace(/^https:/, "wss:");
 

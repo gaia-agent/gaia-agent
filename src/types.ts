@@ -125,6 +125,13 @@ export interface GaiaBenchmarkResult {
     uniqueTools: string[];
     hadError: boolean;
   };
+
+  /** Additional metadata (e.g., for ReAct planner features) */
+  metadata?: {
+    attempts?: number;
+    confidence?: number;
+    finalReflection?: string;
+  };
 }
 
 /**
