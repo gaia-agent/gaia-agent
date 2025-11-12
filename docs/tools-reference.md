@@ -508,7 +508,7 @@ const agent = createGaiaAgent({
 1. **User sends prompt** to agent
 2. **Agent analyzes** the task
 3. **Agent selects** appropriate tool(s)
-4. **Tool executes** with parameters
+4. **Tool executes** with inputSchema
 5. **Result returned** to agent
 6. **Agent synthesizes** final response
 
@@ -534,7 +534,7 @@ import { z } from 'zod';
 
 const weatherTool = tool({
   description: 'Get current weather for a city',
-  parameters: z.object({
+  inputSchema: z.object({
     city: z.string().describe('City name'),
   }),
   execute: async ({ city }) => {

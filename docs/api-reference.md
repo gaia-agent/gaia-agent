@@ -95,7 +95,7 @@ class MyAgent extends GAIAAgent {
       additionalTools: {
         weatherTool: tool({
           description: 'Get weather information',
-          parameters: z.object({ city: z.string() }),
+          inputSchema: z.object({ city: z.string() }),
           execute: async ({ city }) => {
             // Call weather API
             return { temp: 72, condition: 'sunny' };
@@ -130,7 +130,7 @@ const tools = {
   ...getDefaultTools(),
   customTool: tool({
     description: 'Custom functionality',
-    parameters: z.object({ input: z.string() }),
+    inputSchema: z.object({ input: z.string() }),
     execute: async ({ input }) => {
       return { result: input.toUpperCase() };
     },
@@ -397,7 +397,7 @@ const agent = createGaiaAgent({
   additionalTools: {
     databaseQuery: tool({
       description: 'Query the database',
-      parameters: z.object({
+      inputSchema: z.object({
         sql: z.string(),
       }),
       execute: async ({ sql }) => {
@@ -423,7 +423,7 @@ const tools = {
   search: defaultTools.search,          // Keep search
   myTool: tool({
     description: 'Custom tool',
-    parameters: z.object({ input: z.string() }),
+    inputSchema: z.object({ input: z.string() }),
     execute: async ({ input }) => ({ result: input }),
   }),
 };
@@ -445,7 +445,7 @@ class ResearchAgent extends GAIAAgent {
       additionalTools: {
         arxivSearch: tool({
           description: 'Search arXiv papers',
-          parameters: z.object({ query: z.string() }),
+          inputSchema: z.object({ query: z.string() }),
           execute: async ({ query }) => {
             // Call arXiv API
             return { papers: [] };

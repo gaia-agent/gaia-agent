@@ -38,7 +38,7 @@
  *   additionalTools: {
  *     weatherTool: tool({
  *       description: 'Get weather',
- *       parameters: z.object({ city: z.string() }),
+ *       inputSchema: z.object({ city: z.string() }),
  *       execute: async ({ city }) => ({ temp: 72, condition: 'sunny' }),
  *     }),
  *   },
