@@ -40,6 +40,7 @@
  */
 
 import { existsSync } from "node:fs";
+import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 // Load .env BEFORE importing anything else
 import { config } from "dotenv";
@@ -69,6 +70,7 @@ import { readFile } from "node:fs/promises";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createGaiaAgent, iterativeAnswering } from "../src/index.js";
 import type { GaiaTask, ProviderConfig } from "../src/types.js";
+import { categorizeTask, displayAnalysisReport, generateAnalysisReport } from "./analytics.js";
 import { downloadGaiaDataset } from "./downloader.js";
 import { evaluateTask } from "./evaluator.js";
 import { displaySummary, saveResults } from "./reporter.js";
@@ -160,66 +162,7 @@ function getProviderConfigFromEnv(): ProviderConfig | undefined {
   return Object.keys(config).length > 0 ? config : undefined;
 }
 
-/**
- * Categorize task based on question content and files
- */
-function categorizeTask(task: GaiaTask): string[] {
-  const categories: string[] = [];
-  const questionLower = task.question.toLowerCase();
-
-  // Files: Has attachments
-  if (task.files && task.files.length > 0) {
-    categories.push("files");
-  }
-
-  // Code/Math: Contains code, calculation, or math keywords
-  if (
-    questionLower.includes("calculate") ||
-    questionLower.includes("compute") ||
-    questionLower.includes("code") ||
-    questionLower.includes("program") ||
-    questionLower.includes("equation") ||
-    questionLower.includes("formula") ||
-    questionLower.includes("algorithm") ||
-    /\d+\s*[+\-*/]\s*\d+/.test(questionLower)
-  ) {
-    categories.push("code");
-  }
-
-  // Search: Contains search, find, article, web, website, URL keywords
-  if (
-    questionLower.includes("search") ||
-    questionLower.includes("find") ||
-    questionLower.includes("article") ||
-    questionLower.includes("website") ||
-    questionLower.includes("url") ||
-    questionLower.includes("arxiv") ||
-    questionLower.includes("wikipedia") ||
-    questionLower.includes("published") ||
-    questionLower.includes("journal")
-  ) {
-    categories.push("search");
-  }
-
-  // Browser: Contains browser, navigate, click, screenshot keywords
-  if (
-    questionLower.includes("browser") ||
-    questionLower.includes("navigate") ||
-    questionLower.includes("click") ||
-    questionLower.includes("screenshot") ||
-    questionLower.includes("webpage") ||
-    questionLower.includes("web page")
-  ) {
-    categories.push("browser");
-  }
-
-  // Reasoning: Pure logic/reasoning tasks (no other category)
-  if (categories.length === 0) {
-    categories.push("reasoning");
-  }
-
-  return categories;
-}
+// Note: categorizeTask is now imported from analytics.ts
 
 /**
  * Run benchmark on all tasks
@@ -476,10 +419,20 @@ async function main() {
     // Display summary
     displaySummary(results);
 
+    // Generate and display comprehensive analysis report
+    console.log("\n🔬 Generating comprehensive analysis...\n");
+    const analysisReport = generateAnalysisReport(results, tasks);
+    displayAnalysisReport(analysisReport);
+
     // Save results and update wrong answers
     await saveResults(results, tasks, config.outputDir, config.dataset);
 
-    console.log("✅ Benchmark completed successfully!");
+    // Save analysis report to file
+    const analysisPath = join(config.outputDir, `gaia-${config.dataset}-analysis.json`);
+    await writeFile(analysisPath, JSON.stringify(analysisReport, null, 2));
+    console.log(`📊 Analysis report saved to: ${analysisPath}`);
+
+    console.log("\n✅ Benchmark completed successfully!");
     process.exit(0);
   } catch (error) {
     console.error("\n❌ Benchmark failed:", error instanceof Error ? error.message : String(error));
