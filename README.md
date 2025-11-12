@@ -298,6 +298,34 @@ const agent = createGaiaAgent({
 });
 ```
 
+### ToolSDK Integration
+
+Integrate thousands of tools from [ToolSDK.ai](https://toolsdk.ai) ecosystem:
+
+```typescript
+import { createGaiaAgent, getDefaultTools } from '@gaia-agent/sdk';
+import { ToolSDKApiClient } from 'toolsdk/api';
+
+// Initialize ToolSDK client
+const toolSDK = new ToolSDKApiClient({ apiKey: process.env.TOOLSDK_AI_API_KEY });
+
+// Load tools from ToolSDK packages
+const helloTool = await toolSDK.package('mcp-starter').getAISDKTool('hello_tool');
+
+const agent = createGaiaAgent({
+  tools: {
+    ...getDefaultTools(),
+    helloTool,
+  },
+});
+
+const result = await agent.generate({
+  prompt: 'Use helloTool to greet the world',
+});
+```
+
+📖 **[ToolSDK Packages →](https://toolsdk.ai)**
+
 ### Extend GAIAAgent Class
 
 ```typescript
