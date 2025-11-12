@@ -91,7 +91,10 @@ describe("Browser Tools Factory Pattern", () => {
     it("should return error for AWS provider (WebSocket limitation)", async () => {
       const result = await awsAgentCoreProvider.execute({
         task: "Test task",
-        url: "https://example.com",
+        actions: {
+          action: "navigate",
+          url: "https://example.com",
+        },
       });
 
       expect(result.success).toBe(false);
