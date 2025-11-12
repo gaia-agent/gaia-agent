@@ -138,3 +138,260 @@ export function estimateConfidence(options: {
 
   return Math.max(0, Math.min(100, confidence));
 }
+
+/**
+ * Iterative answering with confidence-based retry
+ * If confidence is low, try alternative approach
+ */
+export async function iterativeAnswering(
+  agent: GAIAAgent,
+  task: GaiaTask,
+  options: {
+    maxAttempts?: number;
+    confidenceThreshold?: number;
+    verbose?: boolean;
+    useReflection?: boolean;
+  } = {},
+): Promise<{
+  answer: string;
+  attempts: number;
+  confidence?: number;
+  finalReflection?: string;
+}> {
+  const {
+    maxAttempts = 2,
+    confidenceThreshold = 70,
+    verbose = false,
+    useReflection = true,
+  } = options;
+
+  const attempts: Array<{ answer: string; confidence: number }> = [];
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    if (verbose) {
+      console.log(`\n🔄 Attempt ${attempt}/${maxAttempts}`);
+    }
+
+    // Generate answer with task-aware instructions
+    const taskInstructions = createTaskAwareInstructions(
+      task.question,
+      Boolean(task.files && task.files.length > 0),
+    );
+
+    // Build messages
+    const messages: CoreMessage[] = [];
+
+    if (task.files && task.files.length > 0) {
+      const contentParts: Array<
+        { type: "text"; text: string } | { type: "image"; image: string | URL }
+      > = [{ type: "text", text: task.question }];
+
+      for (const file of task.files) {
+        if (file.data) {
+          contentParts.push({
+            type: "image",
+            image: file.data,
+          });
+        }
+      }
+
+      messages.push({
+        role: "user",
+        content: contentParts,
+      });
+    } else {
+      messages.push({
+        role: "user",
+        content: task.question,
+      });
+    }
+
+    // Add attempt-specific context
+    if (attempt > 1) {
+      messages.push({
+        role: "user",
+        content: `Previous attempt had low confidence. Try a different approach or verify using alternative sources/methods.`,
+      });
+    }
+
+    const result = await agent.generate({
+      messages,
+    });
+
+    const answer = result.text || "";
+
+    // Estimate confidence
+    const confidence = estimateConfidence({
+      stepsCount: result.steps?.length,
+      toolsUsed: result.steps?.flatMap((s) =>
+        "toolCalls" in s && s.toolCalls
+          ? s.toolCalls.map((tc: { toolName: string }) => tc.toolName)
+          : [],
+      ),
+      hasError: false,
+      answerLength: answer.length,
+    });
+
+    if (verbose) {
+      console.log(`📊 Estimated confidence: ${confidence}%`);
+    }
+
+    attempts.push({ answer, confidence });
+
+    // Use reflection if enabled
+    if (useReflection && attempt < maxAttempts) {
+      const reflection = await reflectOnAnswer(agent, task, answer, verbose);
+
+      if (!reflection.shouldRetry || confidence >= confidenceThreshold) {
+        // High confidence, return this answer
+        return {
+          answer,
+          attempts: attempt,
+          confidence: reflection.confidence || confidence,
+          finalReflection: reflection.reflection,
+        };
+      }
+    } else if (confidence >= confidenceThreshold) {
+      // Reached confidence threshold without reflection
+      return {
+        answer,
+        attempts: attempt,
+        confidence,
+      };
+    }
+  }
+
+  // Return best attempt
+  const best = attempts.reduce((a, b) => (a.confidence > b.confidence ? a : b));
+
+  if (verbose) {
+    console.log(`\n✅ Returning best attempt (confidence: ${best.confidence}%)`);
+  }
+
+  return {
+    answer: best.answer,
+    attempts: attempts.length,
+    confidence: best.confidence,
+  };
+}
+
+/**
+ * Multi-strategy answering - try multiple approaches and pick the best
+ * This implements ensemble/voting mechanism
+ */
+export async function multiStrategyAnswering(
+  createAgentFn: (instructions: string) => GAIAAgent,
+  task: GaiaTask,
+  options: {
+    strategies?: Array<{ name: string; instructions: string }>;
+    verbose?: boolean;
+  } = {},
+): Promise<{
+  answer: string;
+  consensus?: boolean;
+  votes?: Record<string, number>;
+  strategies?: Array<{ name: string; answer: string }>;
+}> {
+  const { verbose = false } = options;
+
+  // Default strategies if not provided
+  const strategies = options.strategies || [
+    {
+      name: "search-first",
+      instructions: `${REACT_PLANNER_INSTRUCTIONS}\n\n🎯 STRATEGY: Search-First Approach\nPrioritize web search and authoritative sources. Use search, searchGetContents, and cross-verification.`,
+    },
+    {
+      name: "calculation-first",
+      instructions: `${REACT_PLANNER_INSTRUCTIONS}\n\n🎯 STRATEGY: Calculation-First Approach\nPrioritize computational tools. Use calculator and sandbox for verification. Cross-check calculations.`,
+    },
+  ];
+
+  if (verbose) {
+    console.log(`\n🤖 Running multi-strategy answering with ${strategies.length} strategies...`);
+  }
+
+  const results: Array<{ name: string; answer: string }> = [];
+
+  // Execute each strategy
+  for (const strategy of strategies) {
+    if (verbose) {
+      console.log(`\n📋 Strategy: ${strategy.name}`);
+    }
+
+    const agent = createAgentFn(strategy.instructions);
+
+    const messages: CoreMessage[] = [];
+
+    if (task.files && task.files.length > 0) {
+      const contentParts: Array<
+        { type: "text"; text: string } | { type: "image"; image: string | URL }
+      > = [{ type: "text", text: task.question }];
+
+      for (const file of task.files) {
+        if (file.data) {
+          contentParts.push({
+            type: "image",
+            image: file.data,
+          });
+        }
+      }
+
+      messages.push({
+        role: "user",
+        content: contentParts,
+      });
+    } else {
+      messages.push({
+        role: "user",
+        content: task.question,
+      });
+    }
+
+    try {
+      const result = await agent.generate({
+        messages,
+      });
+
+      const answer = (result.text || "").trim();
+      results.push({ name: strategy.name, answer });
+
+      if (verbose) {
+        console.log(`  Answer: ${answer.substring(0, 100)}${answer.length > 100 ? "..." : ""}`);
+      }
+    } catch (error) {
+      if (verbose) {
+        console.error(`  Error: ${error}`);
+      }
+      results.push({ name: strategy.name, answer: "" });
+    }
+  }
+
+  // Count votes (exact match)
+  const votes: Record<string, number> = {};
+  for (const result of results) {
+    const normalized = result.answer.toLowerCase().trim();
+    votes[normalized] = (votes[normalized] || 0) + 1;
+  }
+
+  // Find majority
+  const sortedVotes = Object.entries(votes).sort((a, b) => b[1] - a[1]);
+  const winner = sortedVotes[0];
+  const consensus = winner && winner[1] > results.length / 2;
+
+  if (verbose) {
+    console.log(`\n📊 Voting results:`);
+    for (const [answer, count] of sortedVotes) {
+      console.log(
+        `  ${answer.substring(0, 50)}${answer.length > 50 ? "..." : ""}: ${count} vote${count > 1 ? "s" : ""}`,
+      );
+    }
+    console.log(`\n${consensus ? "✅ Consensus reached" : "⚠️ No clear consensus"}`);
+  }
+
+  return {
+    answer: winner ? winner[0] : results[0]?.answer || "",
+    consensus,
+    votes,
+    strategies: results,
+  };
+}

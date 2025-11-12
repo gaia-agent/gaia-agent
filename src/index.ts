@@ -63,6 +63,8 @@ export { getDefaultTools } from "./config/tools.js";
 export {
   createTaskAwareInstructions,
   estimateConfidence,
+  iterativeAnswering,
+  multiStrategyAnswering,
   reflectOnAnswer,
 } from "./strategies/index.js";
 // Tool exports
