@@ -596,12 +596,12 @@ async function iterativeAnswering(task: GaiaTask, maxAttempts = 3) {
 - [ ] Auto-store corrections to memory
 - [ ] Dynamic instruction adjustment
 - [ ] Tool sequence learning
-- [ ] Confidence estimation
+- ✅ Confidence estimation (implemented in src/strategies/index.ts)
 
 ### Phase 4: Multi-Strategy
-- [ ] Parallel agent execution
-- [ ] Voting mechanism
-- [ ] Reflection loop
+- ✅ Parallel agent execution (multiStrategyAnswering)
+- ✅ Voting mechanism (multiStrategyAnswering)
+- ✅ Reflection loop (reflectOnAnswer)
 - [ ] Tool combination optimization
 
 ### Phase 5: Continuous Improvement
