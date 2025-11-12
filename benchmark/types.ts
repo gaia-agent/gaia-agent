@@ -14,6 +14,11 @@ export interface BenchmarkConfig {
   stream?: boolean;
   category?: "files" | "code" | "search" | "browser" | "reasoning";
   resume?: boolean;
+  useReActPlanner?: boolean;
+  useReflection?: boolean;
+  useIterative?: boolean;
+  confidenceThreshold?: number;
+  maxAttempts?: number;
 }
 
 export interface HuggingFaceTask {

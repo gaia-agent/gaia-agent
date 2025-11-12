@@ -16,6 +16,13 @@
  *   pnpm run benchmark --verbose          # Detailed output
  *   pnpm run benchmark --resume           # Resume from last checkpoint (latest.json)
  *
+ * Enhanced ReAct Planner (NEW):
+ *   pnpm run benchmark --react            # Enable ReAct planner (structured reasoning)
+ *   pnpm run benchmark --react --reflection  # Enable ReAct + reflection mechanism
+ *   pnpm run benchmark --react --iterative   # Enable ReAct + iterative answering
+ *   pnpm run benchmark --react --iterative --max-attempts 3  # Custom retry attempts
+ *   pnpm run benchmark --react --iterative --confidence 80   # Custom confidence threshold
+ *
  * Categories:
  *   files      - Tasks with file attachments (images, PDFs, etc.)
  *   code       - Tasks requiring code execution or mathematical calculations
@@ -28,6 +35,8 @@
  *   pnpm benchmark:search --stream              # Test search with streaming
  *   pnpm benchmark:code --random --verbose      # Random code execution task
  *   pnpm benchmark --resume                     # Resume interrupted benchmark
+ *   pnpm benchmark --react --limit 10           # Test ReAct planner on 10 tasks
+ *   pnpm benchmark --react --iterative --verbose  # ReAct with retry on low confidence
  */
 
 import { existsSync } from "node:fs";
@@ -58,7 +67,7 @@ if (!process.env.OPENAI_API_KEY) {
 import { readFile } from "node:fs/promises";
 // Now import other modules AFTER env is loaded
 import { createOpenAI } from "@ai-sdk/openai";
-import { createGaiaAgent } from "../src/index.js";
+import { createGaiaAgent, iterativeAnswering } from "../src/index.js";
 import type { GaiaTask, ProviderConfig } from "../src/types.js";
 import { downloadGaiaDataset } from "./downloader.js";
 import { evaluateTask } from "./evaluator.js";
@@ -223,8 +232,22 @@ async function runBenchmark(config: BenchmarkConfig): Promise<{
   const model = getOpenAIModel();
   const providers = getProviderConfigFromEnv();
 
-  // Create agent with custom model and providers
-  const gaiaAgent = providers ? createGaiaAgent({ model, providers }) : createGaiaAgent({ model });
+  // Create agent with custom model, providers, and ReAct planner if enabled
+  const agentConfig: {
+    model: ReturnType<typeof getOpenAIModel>;
+    providers?: ProviderConfig;
+    useReActPlanner?: boolean;
+  } = { model };
+
+  if (providers) {
+    agentConfig.providers = providers;
+  }
+
+  if (config.useReActPlanner) {
+    agentConfig.useReActPlanner = true;
+  }
+
+  const gaiaAgent = createGaiaAgent(agentConfig);
 
   // Load checkpoint if resuming
   let checkpoint: { results: GaiaBenchmarkResult[]; completedTaskIds: Set<string> } | null = null;
@@ -292,10 +315,59 @@ async function runBenchmark(config: BenchmarkConfig): Promise<{
 
     console.log(`[${totalCompleted}/${totalTasks}] Evaluating ${task.id}...`);
 
-    const result = await evaluateTask(task, gaiaAgent, {
-      verbose: config.verbose,
-      stream: config.stream,
-    });
+    let result: GaiaBenchmarkResult;
+
+    // Use iterative answering if enabled
+    if (config.useIterative && config.useReActPlanner) {
+      if (config.verbose) {
+        console.log(
+          `  🔄 Using iterative answering (max attempts: ${config.maxAttempts || 2}, threshold: ${config.confidenceThreshold || 70}%)`,
+        );
+      }
+
+      const iterativeResult = await iterativeAnswering(gaiaAgent, task, {
+        maxAttempts: config.maxAttempts || 2,
+        confidenceThreshold: config.confidenceThreshold || 70,
+        verbose: config.verbose,
+        useReflection: config.useReflection || false,
+      });
+
+      // Convert iterative result to benchmark result
+      result = {
+        taskId: task.id,
+        question: task.question,
+        level: task.level,
+        files: task.files?.map((f) => f.name),
+        answer: iterativeResult.answer,
+        expectedAnswer: task.answer,
+        correct: task.answer
+          ? iterativeResult.answer
+              .toLowerCase()
+              .trim()
+              .includes(task.answer.toLowerCase().trim()) ||
+            task.answer.toLowerCase().trim().includes(iterativeResult.answer.toLowerCase().trim())
+          : false,
+        durationMs: 0, // Duration not tracked in iterative mode
+        steps: 0, // Steps not tracked in iterative mode
+        summary: {
+          totalToolCalls: 0,
+          uniqueTools: [],
+          hadError: false,
+        },
+        metadata: {
+          attempts: iterativeResult.attempts,
+          confidence: iterativeResult.confidence,
+          finalReflection: iterativeResult.finalReflection,
+        },
+      };
+    } else {
+      // Standard evaluation
+      result = await evaluateTask(task, gaiaAgent, {
+        verbose: config.verbose,
+        stream: config.stream,
+      });
+    }
+
     results.push(result);
 
     // Save incremental results after each task (with all tasks for context)
@@ -339,6 +411,15 @@ async function main() {
           | "browser"
           | "reasoning")
       : undefined,
+    useReActPlanner: args.includes("--react"),
+    useReflection: args.includes("--reflection"),
+    useIterative: args.includes("--iterative"),
+    confidenceThreshold: args.includes("--confidence")
+      ? Number.parseInt(args[args.indexOf("--confidence") + 1], 10)
+      : undefined,
+    maxAttempts: args.includes("--max-attempts")
+      ? Number.parseInt(args[args.indexOf("--max-attempts") + 1], 10)
+      : undefined,
   };
 
   // Get configuration info
@@ -367,7 +448,18 @@ async function main() {
   console.log(`  Sandbox: ${sandboxProvider}`);
   console.log(`  Browser: ${browserProvider}`);
   console.log(`  Memory:  ${memoryProvider} (optional)`);
-  console.log(`${"=".repeat(60)}\n`);
+  console.log("=".repeat(60));
+  if (config.useReActPlanner) {
+    console.log("🧠 Enhanced ReAct Planner: ENABLED");
+    console.log(`  Reflection:  ${config.useReflection ? "enabled" : "disabled"}`);
+    console.log(`  Iterative:   ${config.useIterative ? "enabled" : "disabled"}`);
+    if (config.useIterative) {
+      console.log(`  Max Attempts: ${config.maxAttempts || 2}`);
+      console.log(`  Confidence:   ${config.confidenceThreshold || 70}%`);
+    }
+    console.log("=".repeat(60));
+  }
+  console.log("");
 
   // Check for API key
   if (!process.env.OPENAI_API_KEY) {
