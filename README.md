@@ -310,17 +310,19 @@ import { ToolSDKApiClient } from 'toolsdk/api';
 const toolSDK = new ToolSDKApiClient({ apiKey: process.env.TOOLSDK_AI_API_KEY });
 
 // Load tools from ToolSDK packages
-const helloTool = await toolSDK.package('mcp-starter').getAISDKTool('hello_tool');
+const emailTool = await toolSDK.package('@toolsdk.ai/mcp-send-email', {
+  RESEND_API_KEY: process.env.RESEND_API_KEY,
+}).getAISDKTool("send-email");
 
 const agent = createGaiaAgent({
   tools: {
     ...getDefaultTools(),
-    helloTool,
+    emailTool
   },
 });
 
 const result = await agent.generate({
-  prompt: 'Use helloTool to greet the world',
+  prompt: 'Help me search for the latest AI news and send it to john@example.com',
 });
 ```
 
