@@ -36,7 +36,15 @@ export const createBrowserTool = (provider: BrowserProvider = DEFAULT_PROVIDERS.
 
   return tool({
     description:
-      "AWS Bedrock AgentCore browser automation (requires WebSocket - use Steel instead)",
+      "AWS Bedrock AgentCore browser automation with Playwright actions. Execute single or batch actions (navigate, click, fill, extract, screenshot, scroll, wait) via Chrome DevTools Protocol.\n\n" +
+      "BEST PRACTICES:\n" +
+      "1. Start with navigate + wait(2-5s) for page load stabilization\n" +
+      "2. Use broad selectors (main, article, #content) - automatic fallback to page content if not found\n" +
+      "3. Batch related actions in array to minimize AI SDK steps\n" +
+      "4. For Wikipedia: use .mw-parser-output selector\n" +
+      "5. Set reasonable timeouts (10-30s)\n\n" +
+      "EXAMPLE: [{action:'navigate',url:'...'},{action:'wait',ms:3000},{action:'extract',selector:'main'}]\n\n" +
+      "FEATURES: Configurable timeouts, graceful error handling with fallbacks, automatic content extraction if selector fails.",
     inputSchema: awsAgentCoreSchemas.executeSchema as unknown as Tool["inputSchema"],
     execute: awsAgentCoreProvider.execute as unknown as Tool["execute"],
   });

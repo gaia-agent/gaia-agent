@@ -129,7 +129,10 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
         sha256: Sha256,
       });
 
-      const presigned = await presigner.presign(httpReq);
+      // AWS requires expiration between 1 and 300 seconds for WebSocket URLs
+      const presigned = await presigner.presign(httpReq, {
+        expiresIn: 300, // Maximum allowed: 5 minutes
+      });
       const httpsUrl = formatUrl(presigned);
       const wsUrl = httpsUrl.replace(/^https:/, "wss:");
 
@@ -201,11 +204,20 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
 
           case "extract": {
             if (action.selector) {
-              const element = page.locator(action.selector);
-              const content = action.attribute
-                ? await element.getAttribute(action.attribute)
-                : await element.textContent();
-              return { result: { content } };
+              try {
+                const locator = page.locator(action.selector);
+                const timeout = action.timeout || 30000;
+
+                // Wait for element to be present (with timeout)
+                await locator.waitFor({ state: "attached", timeout });
+
+                const content = action.attribute
+                  ? await locator.getAttribute(action.attribute)
+                  : await locator.textContent();
+                return { content };
+              } catch (_error) {
+                // Element not found or other error, skip extraction
+              }
             }
             const content = await page.content();
             return { content };
@@ -218,6 +230,7 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
             break;
           }
 
+          case "wait":
           case "sleep": {
             await page.waitForTimeout(action.ms);
             break;
@@ -297,9 +310,9 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
         };
       } finally {
         // Clean up Playwright resources
-        await page.close({ runBeforeUnload: true }).catch(() => {});
-        await context.close().catch(() => {});
-        await browser.close().catch(() => {});
+        await page.close({ runBeforeUnload: true }).catch(() => { });
+        await context.close().catch(() => { });
+        await browser.close().catch(() => { });
         // Stop browser session
         const stopCmd = new StopBrowserSessionCommand({
           browserIdentifier: identifier,
