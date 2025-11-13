@@ -4,18 +4,12 @@
  */
 
 import { createBrowserTools } from "../tools/browser/index.js";
-import {
-  calculator,
-  e2bSandbox,
-  exaFindSimilar,
-  exaGetContents,
-  exaSearch,
-  httpRequest,
-  sandockExecute,
-  tavilySearch,
-} from "../tools/index.js";
+import { calculator, httpRequest, planner, verifier } from "../tools/index.js";
 import { createMemoryTools } from "../tools/memory/index.js";
+import { createSandboxTools } from "../tools/sandbox/index.js";
+import { createSearchTools } from "../tools/search/index.js";
 import type { ProviderConfig } from "../types.js";
+import { DEFAULT_PROVIDERS } from "./defaults.js";
 import { loadProviderConfigFromEnv, validateProviderConfig } from "./providers.js";
 
 /**
@@ -30,7 +24,7 @@ import { loadProviderConfigFromEnv, validateProviderConfig } from "./providers.j
  * import { getDefaultTools } from 'gaia-agent';
  *
  * const tools = getDefaultTools();
- * // Uses default providers: E2B sandbox, BrowserUse, Tavily search, Mem0
+ * // Uses default providers: OpenAI search, E2B sandbox, Steel browser, Mem0 memory
  * ```
  *
  * @example Custom providers
@@ -38,9 +32,9 @@ import { loadProviderConfigFromEnv, validateProviderConfig } from "./providers.j
  * import { getDefaultTools, createGaiaAgent } from 'gaia-agent';
  *
  * const tools = getDefaultTools({
- *   browser: 'aws-bedrock-agentcore',  // Use AWS instead of BrowserUse
+ *   browser: 'aws-bedrock-agentcore',  // Use AWS instead of Steel
  *   sandbox: 'sandock',         // Use Sandock instead of E2B
- *   search: 'exa',              // Use Exa instead of Tavily
+ *   search: 'exa',              // Use Exa instead of OpenAI
  * });
  *
  * const agent = createGaiaAgent({ tools });
@@ -69,42 +63,40 @@ export function getDefaultTools(providers?: ProviderConfig) {
   const browserProvider =
     mergedConfig && "browser" in mergedConfig && mergedConfig.browser === undefined
       ? undefined
-      : mergedConfig?.browser || "steel";
+      : mergedConfig?.browser || DEFAULT_PROVIDERS.browser;
 
   const sandboxProvider =
     mergedConfig && "sandbox" in mergedConfig && mergedConfig.sandbox === undefined
       ? undefined
-      : mergedConfig?.sandbox || "e2b";
+      : mergedConfig?.sandbox || DEFAULT_PROVIDERS.sandbox;
 
   const searchProvider =
     mergedConfig && "search" in mergedConfig && mergedConfig.search === undefined
       ? undefined
-      : mergedConfig?.search || "tavily";
+      : mergedConfig?.search || DEFAULT_PROVIDERS.search;
 
   const memoryProvider =
     mergedConfig && "memory" in mergedConfig && mergedConfig.memory === undefined
       ? undefined
-      : mergedConfig?.memory || "mem0";
+      : mergedConfig?.memory || DEFAULT_PROVIDERS.memory;
 
   const tools: Record<string, unknown> = {
     calculator,
     httpRequest,
+    planner,
+    verifier,
   };
 
-  // Add search tools based on provider (skip if explicitly disabled)
-  if (searchProvider === "tavily") {
-    tools.search = tavilySearch;
-  } else if (searchProvider === "exa") {
-    tools.search = exaSearch;
-    tools.searchGetContents = exaGetContents;
-    tools.searchFindSimilar = exaFindSimilar;
+  // Add search tools based on provider using factory pattern (skip if explicitly disabled)
+  if (searchProvider !== undefined) {
+    const searchTools = createSearchTools(searchProvider);
+    Object.assign(tools, searchTools);
   }
 
-  // Add sandbox tools based on provider (skip if explicitly disabled)
-  if (sandboxProvider === "e2b") {
-    tools.sandbox = e2bSandbox;
-  } else if (sandboxProvider === "sandock") {
-    tools.sandbox = sandockExecute;
+  // Add sandbox tools based on provider using factory pattern (skip if explicitly disabled)
+  if (sandboxProvider !== undefined) {
+    const sandboxTools = createSandboxTools(sandboxProvider);
+    Object.assign(tools, sandboxTools);
   }
 
   // Add browser tools based on provider using factory pattern (skip if explicitly disabled)

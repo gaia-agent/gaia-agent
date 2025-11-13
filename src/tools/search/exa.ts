@@ -1,47 +1,67 @@
 /**
- * Exa Neural Search Tools
+ * Exa Neural Search Provider
  * Uses official exa-js SDK: https://exa.ai
  */
 
-import { tool } from "ai";
 import { z } from "zod";
+import type { ISearchProvider, ISearchSchemas } from "./types.js";
 
 /**
- * Exa search tool using official SDK
- * Install: npm install exa-js
+ * Exa search schema
  */
-export const exaSearch = tool({
-  description:
-    "Search the web using Exa neural search engine. Uses AI to understand semantic meaning. Best for research, finding similar content, and discovery.",
-  inputSchema: z.object({
-    query: z.string().describe("Search query"),
-    numResults: z.number().optional().describe("Number of results (default: 10)"),
-    category: z
-      .enum([
-        "company",
-        "research paper",
-        "news",
-        "github",
-        "tweet",
-        "personal site",
-        "pdf",
-        "linkedin profile",
-        "financial report",
-      ])
-      .optional()
-      .describe("Category filter"),
-    startPublishedDate: z.string().optional().describe("Filter by published date (YYYY-MM-DD)"),
-    endPublishedDate: z.string().optional().describe("Filter by published date (YYYY-MM-DD)"),
-    exaApiKey: z.string().optional().describe("Exa API key (if not in env)"),
-  }),
-  execute: async ({
-    query,
-    numResults = 10,
-    category,
-    startPublishedDate,
-    endPublishedDate,
-    exaApiKey,
-  }) => {
+const searchSchema = z.object({
+  query: z.string().describe("Search query"),
+  numResults: z.number().optional().describe("Number of results (default: 10)"),
+  category: z
+    .enum([
+      "company",
+      "research paper",
+      "news",
+      "github",
+      "tweet",
+      "personal site",
+      "pdf",
+      "linkedin profile",
+      "financial report",
+    ])
+    .optional()
+    .describe("Category filter"),
+  startPublishedDate: z.string().optional().describe("Filter by published date (YYYY-MM-DD)"),
+  endPublishedDate: z.string().optional().describe("Filter by published date (YYYY-MM-DD)"),
+  exaApiKey: z.string().optional().describe("Exa API key (if not in env)"),
+});
+
+/**
+ * Exa get contents schema
+ */
+const getContentsSchema = z.object({
+  ids: z.array(z.string()).describe("Result IDs from exaSearch"),
+  exaApiKey: z.string().optional().describe("Exa API key (if not in env)"),
+});
+
+/**
+ * Exa find similar schema
+ */
+const findSimilarSchema = z.object({
+  url: z.string().describe("URL to find similar content for"),
+  numResults: z.number().optional().describe("Number of results (default: 10)"),
+  exaApiKey: z.string().optional().describe("Exa API key (if not in env)"),
+});
+
+/**
+ * Exa provider implementation
+ */
+export const exaProvider: ISearchProvider = {
+  search: async (params: Record<string, unknown>) => {
+    const {
+      query,
+      numResults = 10,
+      category,
+      startPublishedDate,
+      endPublishedDate,
+      exaApiKey,
+    } = params as z.infer<typeof searchSchema>;
+
     try {
       const apiKey = exaApiKey || process.env.EXA_API_KEY;
 
@@ -53,7 +73,6 @@ export const exaSearch = tool({
         };
       }
 
-      // Use official exa-js SDK
       const Exa = (await import("exa-js")).default;
       const exa = new Exa(apiKey);
 
@@ -82,18 +101,10 @@ export const exaSearch = tool({
       };
     }
   },
-});
 
-/**
- * Exa get contents tool
- */
-export const exaGetContents = tool({
-  description: "Get full text content from Exa search results by URL or ID",
-  inputSchema: z.object({
-    ids: z.array(z.string()).describe("Result IDs from exaSearch"),
-    exaApiKey: z.string().optional().describe("Exa API key (if not in env)"),
-  }),
-  execute: async ({ ids, exaApiKey }) => {
+  getContents: async (params: Record<string, unknown>) => {
+    const { ids, exaApiKey } = params as z.infer<typeof getContentsSchema>;
+
     try {
       const apiKey = exaApiKey || process.env.EXA_API_KEY;
 
@@ -111,11 +122,12 @@ export const exaGetContents = tool({
 
       return {
         success: true,
-        contents: response.results.map((r) => ({
+        // biome-ignore lint/suspicious/noExplicitAny: Exa SDK response type
+        contents: response.results.map((r: any) => ({
           id: r.id,
           url: r.url,
           title: r.title,
-          text: (r as any).text,
+          text: r.text,
         })),
       };
     } catch (error) {
@@ -125,19 +137,10 @@ export const exaGetContents = tool({
       };
     }
   },
-});
 
-/**
- * Exa find similar tool
- */
-export const exaFindSimilar = tool({
-  description: "Find content similar to a given URL using Exa's neural understanding",
-  inputSchema: z.object({
-    url: z.string().describe("URL to find similar content for"),
-    numResults: z.number().optional().describe("Number of results (default: 10)"),
-    exaApiKey: z.string().optional().describe("Exa API key (if not in env)"),
-  }),
-  execute: async ({ url, numResults = 10, exaApiKey }) => {
+  findSimilar: async (params: Record<string, unknown>) => {
+    const { url, numResults = 10, exaApiKey } = params as z.infer<typeof findSimilarSchema>;
+
     try {
       const apiKey = exaApiKey || process.env.EXA_API_KEY;
 
@@ -168,4 +171,13 @@ export const exaFindSimilar = tool({
       };
     }
   },
-});
+};
+
+/**
+ * Exa schemas
+ */
+export const exaSchemas: ISearchSchemas = {
+  searchSchema,
+  getContentsSchema,
+  findSimilarSchema,
+};

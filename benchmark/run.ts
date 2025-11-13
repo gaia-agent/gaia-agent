@@ -14,6 +14,8 @@
  *   pnpm run benchmark --random           # Random single task
  *   pnpm run benchmark --stream           # Stream agent thinking in real-time
  *   pnpm run benchmark --verbose          # Detailed output
+ *   pnpm run benchmark --reflect          # Enable reflection mode (prompt-based)
+ *   pnpm run benchmark --reflect --verbose # Reflection with detailed output
  *   pnpm run benchmark --resume           # Resume from last checkpoint (latest.json)
  *
  * Categories:
@@ -58,10 +60,12 @@ if (!process.env.OPENAI_API_KEY) {
 import { readFile } from "node:fs/promises";
 // Now import other modules AFTER env is loaded
 import { createOpenAI } from "@ai-sdk/openai";
+import { DEFAULT_PROVIDERS } from "../src/config/defaults.js";
 import { createGaiaAgent } from "../src/index.js";
 import type { GaiaTask, ProviderConfig } from "../src/types.js";
 import { downloadGaiaDataset } from "./downloader.js";
 import { evaluateTask } from "./evaluator.js";
+import { evaluateTaskWithReflection } from "./reflection-evaluator.js";
 import { displaySummary, saveResults } from "./reporter.js";
 import type { BenchmarkConfig, GaiaBenchmarkResult } from "./types.js";
 
@@ -292,10 +296,16 @@ async function runBenchmark(config: BenchmarkConfig): Promise<{
 
     console.log(`[${totalCompleted}/${totalTasks}] Evaluating ${task.id}...`);
 
-    const result = await evaluateTask(task, gaiaAgent, {
-      verbose: config.verbose,
-      stream: config.stream,
-    });
+    // Use reflection evaluator if --reflect flag is enabled
+    const result = config.reflect
+      ? await evaluateTaskWithReflection(task, gaiaAgent, {
+          verbose: config.verbose,
+          reflectionStyle: "basic", // Can be made configurable
+        })
+      : await evaluateTask(task, gaiaAgent, {
+          verbose: config.verbose,
+          stream: config.stream,
+        });
     results.push(result);
 
     // Save incremental results after each task (with all tasks for context)
@@ -330,6 +340,7 @@ async function main() {
       : "./benchmark-results",
     verbose: args.includes("--verbose") || args.includes("-v"),
     stream: args.includes("--stream"),
+    reflect: args.includes("--reflect"),
     resume: args.includes("--resume"),
     category: args.includes("--category")
       ? (args[args.indexOf("--category") + 1] as
@@ -344,10 +355,10 @@ async function main() {
   // Get configuration info
   const modelName = process.env.OPENAI_MODEL || "gpt-4o";
   const providers = getProviderConfigFromEnv();
-  const searchProvider = providers?.search || "tavily";
-  const sandboxProvider = providers?.sandbox || "e2b";
-  const browserProvider = providers?.browser || "steel";
-  const memoryProvider = providers?.memory || "mem0";
+  const searchProvider = providers?.search || DEFAULT_PROVIDERS.search;
+  const sandboxProvider = providers?.sandbox || DEFAULT_PROVIDERS.sandbox;
+  const browserProvider = providers?.browser || DEFAULT_PROVIDERS.browser;
+  const memoryProvider = providers?.memory || DEFAULT_PROVIDERS.memory;
 
   console.log("🤖 GAIA Benchmark Runner");
   console.log("=".repeat(60));
@@ -358,6 +369,7 @@ async function main() {
   console.log(`Limit:    ${config.limit || "none"}`);
   console.log(`Random:   ${config.random ? "yes" : "no"}`);
   console.log(`Stream:   ${config.stream ? "yes" : "no"}`);
+  console.log(`Reflect:  ${config.reflect ? "yes (prompt-based)" : "no"}`);
   console.log(`Resume:   ${config.resume ? "yes" : "no"}`);
   console.log(`Output:   ${config.outputDir}`);
   console.log(`Verbose:  ${config.verbose}`);

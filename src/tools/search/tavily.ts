@@ -1,37 +1,40 @@
 /**
- * Tavily AI Search Tool
+ * Tavily AI Search Provider
  * Uses official @tavily/core SDK: https://www.tavily.com
  */
 
-import { tool } from "ai";
 import { z } from "zod";
+import type { ISearchProvider, ISearchSchemas } from "./types.js";
 
 /**
- * Tavily search tool using official SDK
- * Install: npm install @tavily/core
+ * Tavily search schema
  */
-export const tavilySearch = tool({
-  description:
-    "Search the web using Tavily AI search engine. Returns AI-optimized, factual search results with sources. Best for research and fact-checking.",
-  inputSchema: z.object({
-    query: z.string().describe("Search query"),
-    searchDepth: z
-      .enum(["basic", "advanced"])
-      .optional()
-      .describe("Search depth (basic or advanced)"),
-    maxResults: z.number().optional().describe("Maximum number of results (default: 5)"),
-    includeDomains: z.array(z.string()).optional().describe("Domains to include in search"),
-    excludeDomains: z.array(z.string()).optional().describe("Domains to exclude from search"),
-    tavilyApiKey: z.string().optional().describe("Tavily API key (if not in env)"),
-  }),
-  execute: async ({
-    query,
-    searchDepth = "basic",
-    maxResults = 5,
-    includeDomains,
-    excludeDomains,
-    tavilyApiKey,
-  }) => {
+const searchSchema = z.object({
+  query: z.string().describe("Search query"),
+  searchDepth: z
+    .enum(["basic", "advanced"])
+    .optional()
+    .describe("Search depth (basic or advanced)"),
+  maxResults: z.number().optional().describe("Maximum number of results (default: 5)"),
+  includeDomains: z.array(z.string()).optional().describe("Domains to include in search"),
+  excludeDomains: z.array(z.string()).optional().describe("Domains to exclude from search"),
+  tavilyApiKey: z.string().optional().describe("Tavily API key (if not in env)"),
+});
+
+/**
+ * Tavily provider implementation
+ */
+export const tavilyProvider: ISearchProvider = {
+  search: async (params: Record<string, unknown>) => {
+    const {
+      query,
+      searchDepth = "basic",
+      maxResults = 5,
+      includeDomains,
+      excludeDomains,
+      tavilyApiKey,
+    } = params as z.infer<typeof searchSchema>;
+
     try {
       const apiKey = tavilyApiKey || process.env.TAVILY_API_KEY;
 
@@ -72,4 +75,11 @@ export const tavilySearch = tool({
       };
     }
   },
-});
+};
+
+/**
+ * Tavily schemas
+ */
+export const tavilySchemas: ISearchSchemas = {
+  searchSchema,
+};

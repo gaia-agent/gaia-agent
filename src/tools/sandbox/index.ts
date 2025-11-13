@@ -5,15 +5,16 @@
 
 import type { Tool } from "ai";
 import { tool } from "ai";
+import { DEFAULT_PROVIDERS } from "../../config/defaults.js";
 import { e2bProvider, e2bSchemas } from "./e2b.js";
 import { sandockProvider, sandockSchemas } from "./sandock.js";
 import type { SandboxProvider } from "./types.js";
 
 /**
- * Sandbox execute tool factory
- * Creates a code execution tool based on the provider
+ * Sandbox tool factory
+ * Creates a sandbox tool based on the provider
  */
-export const createSandboxTool = (provider: SandboxProvider = "e2b"): Tool => {
+export const createSandboxTool = (provider: SandboxProvider = DEFAULT_PROVIDERS.sandbox): Tool => {
   if (provider === "e2b") {
     return tool({
       description:
@@ -34,7 +35,7 @@ export const createSandboxTool = (provider: SandboxProvider = "e2b"): Tool => {
 /**
  * Create all sandbox tools for a provider
  */
-export const createSandboxTools = (provider: SandboxProvider = "e2b") => {
+export const createSandboxTools = (provider: SandboxProvider = DEFAULT_PROVIDERS.sandbox) => {
   return {
     sandboxExecute: createSandboxTool(provider),
   };

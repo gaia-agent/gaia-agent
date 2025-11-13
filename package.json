@@ -36,6 +36,11 @@
       "import": "./dist/tools/search/tavily.js",
       "default": "./dist/tools/search/tavily.js"
     },
+    "./tools/search/openai": {
+      "types": "./dist/tools/search/openai.d.ts",
+      "import": "./dist/tools/search/openai.js",
+      "default": "./dist/tools/search/openai.js"
+    },
     "./tools/search/exa": {
       "types": "./dist/tools/search/exa.d.ts",
       "import": "./dist/tools/search/exa.js",
@@ -70,6 +75,11 @@
       "types": "./dist/tools/browser/aws-agentcore.d.ts",
       "import": "./dist/tools/browser/aws-agentcore.js",
       "default": "./dist/tools/browser/aws-agentcore.js"
+    },
+    "./tools/planning": {
+      "types": "./dist/tools/planning/index.d.ts",
+      "import": "./dist/tools/planning/index.js",
+      "default": "./dist/tools/planning/index.js"
     },
     "./tools/memory": {
       "types": "./dist/tools/memory/index.d.ts",

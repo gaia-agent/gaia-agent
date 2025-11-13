@@ -12,6 +12,7 @@ export interface BenchmarkConfig {
   outputDir: string;
   verbose: boolean;
   stream?: boolean;
+  reflect?: boolean;
   category?: "files" | "code" | "search" | "browser" | "reasoning";
   resume?: boolean;
 }

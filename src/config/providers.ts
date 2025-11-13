@@ -4,6 +4,7 @@
  */
 
 import type { ProviderConfig } from "../types.js";
+import { DEFAULT_PROVIDERS } from "./defaults.js";
 
 /**
  * Load provider configuration from environment variables
@@ -15,7 +16,7 @@ export function loadProviderConfigFromEnv(): ProviderConfig | undefined {
 
   // Search provider
   const searchProvider = process.env.GAIA_AGENT_SEARCH_PROVIDER?.toLowerCase();
-  if (searchProvider === "tavily" || searchProvider === "exa") {
+  if (searchProvider === "openai" || searchProvider === "tavily" || searchProvider === "exa") {
     envConfig.search = searchProvider;
     hasConfig = true;
   }
@@ -53,18 +54,19 @@ export function loadProviderConfigFromEnv(): ProviderConfig | undefined {
  */
 export function validateProviderConfig(providers?: ProviderConfig): void {
   // Determine which providers are enabled
-  // Default to tavily/e2b unless explicitly set to undefined or a different provider
+  // Use DEFAULT_PROVIDERS unless explicitly set to undefined or a different provider
   const searchProvider =
     providers && "search" in providers && providers.search === undefined
       ? undefined
-      : providers?.search || "tavily";
+      : providers?.search || DEFAULT_PROVIDERS.search;
 
   const sandboxProvider =
     providers && "sandbox" in providers && providers.sandbox === undefined
       ? undefined
-      : providers?.sandbox || "e2b";
+      : providers?.sandbox || DEFAULT_PROVIDERS.sandbox;
 
   // Validate search provider (skip if explicitly disabled)
+  // OpenAI search uses OPENAI_API_KEY which is required globally, so no separate validation needed
   if (
     searchProvider === "tavily" &&
     (!process.env.TAVILY_API_KEY || process.env.TAVILY_API_KEY.trim() === "")
@@ -72,6 +74,7 @@ export function validateProviderConfig(providers?: ProviderConfig): void {
     throw new Error(
       "TAVILY_API_KEY environment variable is required for Tavily search.\n" +
         "Get your API key at https://tavily.com\n" +
+        "Or use OpenAI search: GAIA_AGENT_SEARCH_PROVIDER=openai\n" +
         "Or disable search: createGaiaAgent({ providers: { search: undefined } })",
     );
   }
@@ -83,6 +86,7 @@ export function validateProviderConfig(providers?: ProviderConfig): void {
     throw new Error(
       "EXA_API_KEY environment variable is required for Exa search.\n" +
         "Get your API key at https://exa.ai\n" +
+        "Or use OpenAI search: GAIA_AGENT_SEARCH_PROVIDER=openai\n" +
         "Or disable search: createGaiaAgent({ providers: { search: undefined } })",
     );
   }
@@ -114,7 +118,7 @@ export function validateProviderConfig(providers?: ProviderConfig): void {
   const browserProvider =
     providers && "browser" in providers && providers.browser === undefined
       ? undefined
-      : providers?.browser || "steel";
+      : providers?.browser || DEFAULT_PROVIDERS.browser;
 
   if (
     browserProvider === "steel" &&

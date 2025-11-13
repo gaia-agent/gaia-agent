@@ -143,7 +143,7 @@ export type SandboxProvider = "e2b" | "sandock";
 /**
  * Available search providers
  */
-export type SearchProvider = "tavily" | "exa";
+export type SearchProvider = "openai" | "tavily" | "exa";
 
 /**
  * Available memory providers

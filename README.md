@@ -5,8 +5,8 @@
   
   ### 🤖 Build GAIA-Benchmark-ready Super AI Agents in seconds, not weeks
   
-  **Production-ready Super AI agent with 16+ tools and swappable providers**  
-  Built on AI SDK v6 ToolLoopAgent & ToolSDK.ai
+  **Production-ready Super AI agent with 18+ tools and swappable providers**  
+  Built on AI SDK v6 ToolLoopAgent & ToolSDK.ai with **ReAct reasoning**
   
   [![npm version](https://img.shields.io/npm/v/@gaia-agent/sdk.svg?style=flat-square)](https://www.npmjs.com/package/@gaia-agent/sdk)
   [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat-square)](LICENSE)
@@ -28,7 +28,13 @@
 ### 🚀 Zero Configuration
 Pre-configured agent ready for GAIA benchmarks out of the box
 
-### 🔧 16+ Built-in Tools
+### 🧠 ReAct Reasoning Pattern
+Built-in Reasoning + Acting framework for structured thinking
+
+### � Planning & Verification
+Multi-step planning + answer verification for complex tasks
+
+### �🔧 18+ Built-in Tools
 Organized by category with official SDKs (Tavily, Exa, E2B, BrowserUse, Steel)
 
 ### 🔄 Swappable Providers
@@ -147,13 +153,15 @@ STEEL_API_KEY=steel_live_... # Browser
 | Category | Tools | Providers |
 |----------|-------|-----------|
 | 🧮 **Core** | calculator, httpRequest | Built-in |
-| 🔍 **Search** | tavilySearch, exaSearch, exaGetContents | Tavily (default), Exa |
+| � **Planning** | planner, verifier | Built-in |
+| �🔍 **Search** | tavilySearch, exaSearch, exaGetContents | Tavily (default), Exa |
 | 🛡️ **Sandbox** | e2bSandbox, sandockExecute | E2B (default), Sandock |
 | 🖥️ **Browser** | steelBrowser, browserUseTool, awsBrowser | Steel (default), BrowserUse, AWS |
 | 🧠 **Memory** | mem0Remember, mem0Recall, memoryStore | Mem0 (default), AWS AgentCore |
 
 📖 **[Full tools documentation →](./docs/tools-reference.md)**  
-📖 **[Provider comparison →](./docs/providers.md)**
+📖 **[Provider comparison →](./docs/providers.md)**  
+📖 **[ReAct + Planning guide →](./docs/react-planning.md)** ⭐ NEW
 
 ---
 
@@ -356,6 +364,8 @@ class ResearchAgent extends GAIAAgent {
 
 ### 📖 Guides
 - **[Quick Start Guide](./docs/quick-start.md)** - Get started in 5 minutes
+- **[ReAct + Planning Guide](./docs/react-planning.md)** ⭐ NEW - Enhanced reasoning & planning
+- **[Reflection Guide](./docs/reflection-guide.md)** ⭐ NEW - Step-by-step reflection (optional)
 - **[Environment Variables](./docs/environment-variables.md)** - Complete configuration guide
 - **[GAIA Benchmark](./docs/gaia-benchmark.md)** - Requirements, setup, tips
 - **[Improving GAIA Scores](./docs/improving-gaia-scores.md)** - Strategies for better performance & self-evolution

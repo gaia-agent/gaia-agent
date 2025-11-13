@@ -5,16 +5,17 @@
 
 import type { Tool } from "ai";
 import { tool } from "ai";
+import { DEFAULT_PROVIDERS } from "../../config/defaults.js";
 import { awsAgentCoreProvider, awsAgentCoreSchemas } from "./aws-agentcore.js";
 import { browseruseProvider, browseruseSchemas } from "./browseruse.js";
 import { steelProvider, steelSchemas } from "./steel.js";
 import type { BrowserProvider } from "./types.js";
 
 /**
- * Browser automation tool factory
+ * Browser tool factory
  * Creates a browser tool based on the provider
  */
-export const createBrowserTool = (provider: BrowserProvider = "steel"): Tool => {
+export const createBrowserTool = (provider: BrowserProvider = DEFAULT_PROVIDERS.browser): Tool => {
   if (provider === "steel") {
     return tool({
       description:
@@ -44,7 +45,7 @@ export const createBrowserTool = (provider: BrowserProvider = "steel"): Tool => 
 /**
  * Create all browser tools for a provider
  */
-export const createBrowserTools = (provider: BrowserProvider = "steel") => {
+export const createBrowserTools = (provider: BrowserProvider = DEFAULT_PROVIDERS.browser) => {
   const browser = createBrowserTool(provider);
 
   return {

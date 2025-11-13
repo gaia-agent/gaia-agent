@@ -70,6 +70,7 @@ export class GAIAAgent extends ToolLoopAgent {
     providers?: ProviderConfig;
     additionalTools?: Record<string, unknown>;
     tools?: Record<string, unknown>;
+    reasoning?: boolean; // Enable OpenAI reasoning mode (o1/o3 models)
   }) {
     const defaultTools = getDefaultTools(config?.providers);
     const tools = config?.tools || {
@@ -77,16 +78,38 @@ export class GAIAAgent extends ToolLoopAgent {
       ...config?.additionalTools,
     };
 
+    // Determine model to use
+    let model: LanguageModel;
+    if (config?.model) {
+      model = config.model;
+    } else {
+      const openai = createOpenAI({
+        baseURL: process.env.OPENAI_BASE_URL,
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      // Check if reasoning mode is enabled
+      const useReasoning =
+        config?.reasoning ||
+        process.env.OPENAI_REASONING_MODE === "true" ||
+        process.env.OPENAI_REASONING_MODE === "1";
+
+      const modelName = process.env.OPENAI_MODEL || "gpt-4o";
+
+      // Use responses() for reasoning models (o1/o3) when explicitly enabled
+      // Note: OpenAI responses API is used for reasoning models
+      if (useReasoning || modelName.startsWith("o1") || modelName.startsWith("o3")) {
+        model = openai.responses(modelName);
+      } else {
+        model = openai(modelName);
+      }
+    }
+
     super({
-      model:
-        config?.model ||
-        createOpenAI({
-          baseURL: process.env.OPENAI_BASE_URL,
-          apiKey: process.env.OPENAI_API_KEY,
-        })(process.env.OPENAI_MODEL || "gpt-4o"),
+      model,
       instructions: config?.instructions || DEFAULT_INSTRUCTIONS,
       tools,
-      stopWhen: stepCountIs(config?.maxSteps || 15),
+      stopWhen: stepCountIs(config?.maxSteps || 30),
     });
   }
 }
@@ -155,6 +178,7 @@ export function createGaiaAgent(config?: {
   providers?: ProviderConfig;
   tools?: Record<string, unknown>;
   additionalTools?: Record<string, unknown>;
+  reasoning?: boolean; // Enable OpenAI reasoning mode (o1/o3 models)
 }) {
   return new GAIAAgent(config);
 }

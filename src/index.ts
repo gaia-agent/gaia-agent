@@ -50,6 +50,7 @@
 export type { LanguageModel, ToolLoopAgent } from "ai";
 // Main exports
 export { createGaiaAgent, GAIAAgent } from "./agent.js";
+export { DEFAULT_INSTRUCTIONS, DEFAULT_PROVIDERS, REACT_INSTRUCTIONS } from "./config/defaults.js";
 // Configuration utilities
 export { getDefaultTools } from "./config/tools.js";
 
@@ -63,14 +64,22 @@ export {
   exaGetContents,
   exaSearch,
   httpRequest,
+  planner,
   sandockExecute,
   steelBrowserTool,
   tavilySearch,
+  verifier,
 } from "./tools/index.js";
 
 // Memory tools factory
 export { createMemoryTools } from "./tools/memory/index.js";
-
+// Planning and verification types
+export type {
+  ExecutionPlan,
+  PlanStatus,
+  PlanStep,
+  VerificationResult,
+} from "./tools/planning/index.js";
 // Type exports
 export type {
   BrowserProvider,

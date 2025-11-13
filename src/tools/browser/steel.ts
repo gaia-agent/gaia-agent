@@ -21,6 +21,7 @@ export const steelProvider: ISteelProvider = {
   }: SteelBrowserParams): Promise<BrowserResult> => {
     try {
       const apiKey = steelApiKey || process.env.STEEL_API_KEY;
+      const baseURL = process.env.STEEL_BASE_URL || undefined;
 
       if (!apiKey) {
         return {
@@ -36,7 +37,7 @@ export const steelProvider: ISteelProvider = {
 
       const client = new Steel({
         steelAPIKey: apiKey,
-        // baseURL: "http://localhost:3000"
+        baseURL: baseURL,
       });
 
       // Create session with options

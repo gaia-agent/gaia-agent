@@ -1,85 +1,31 @@
 /**
- * Search tool types and interfaces
+ * Search provider types and interfaces
  */
 
 import type { z } from "zod";
 
-export type SearchProvider = "tavily" | "exa";
-
 /**
- * Common result types
+ * Search provider type
  */
-export interface SearchResult {
-  success: boolean;
-  error?: string;
-  [key: string]: unknown;
-}
+export type SearchProvider = "openai" | "tavily" | "exa";
 
 /**
- * Tavily specific types
- */
-export interface TavilySearchParams {
-  query: string;
-  tavilyApiKey?: string;
-  maxResults?: number;
-  searchDepth?: "basic" | "advanced";
-  includeAnswer?: boolean;
-  includeRawContent?: boolean;
-}
-
-/**
- * Exa specific types
- */
-export interface ExaSearchParams {
-  query: string;
-  exaApiKey?: string;
-  numResults?: number;
-  type?: "keyword" | "neural" | "auto";
-  useAutoprompt?: boolean;
-  category?: string;
-}
-
-export interface ExaFindSimilarParams {
-  url: string;
-  exaApiKey?: string;
-  numResults?: number;
-  category?: string;
-  excludeSourceDomain?: boolean;
-}
-
-export interface ExaGetContentsParams {
-  ids: string[];
-  exaApiKey?: string;
-  text?: boolean;
-}
-
-/**
- * Provider-specific interfaces
- */
-export interface ITavilyProvider {
-  search: (params: TavilySearchParams) => Promise<SearchResult>;
-}
-
-export interface IExaProvider {
-  search: (params: ExaSearchParams) => Promise<SearchResult>;
-  findSimilar: (params: ExaFindSimilarParams) => Promise<SearchResult>;
-  getContents: (params: ExaGetContentsParams) => Promise<SearchResult>;
-}
-
-/**
- * Generic search provider interface
+ * Base search provider interface
  */
 export interface ISearchProvider {
-  search: (params: unknown) => Promise<SearchResult>;
-  findSimilar?: (params: unknown) => Promise<SearchResult>;
-  getContents?: (params: unknown) => Promise<SearchResult>;
+  search: (params: Record<string, unknown>) => Promise<unknown>;
+  getContents?: (params: Record<string, unknown>) => Promise<unknown>;
+  findSimilar?: (params: Record<string, unknown>) => Promise<unknown>;
 }
 
 /**
- * Schema definitions for each provider
+ * Search tool schemas interface
  */
 export interface ISearchSchemas {
+  // biome-ignore lint/suspicious/noExplicitAny: Generic schema type
   searchSchema: z.ZodObject<any>;
-  findSimilarSchema?: z.ZodObject<any>;
+  // biome-ignore lint/suspicious/noExplicitAny: Generic schema type
   getContentsSchema?: z.ZodObject<any>;
+  // biome-ignore lint/suspicious/noExplicitAny: Generic schema type
+  findSimilarSchema?: z.ZodObject<any>;
 }
