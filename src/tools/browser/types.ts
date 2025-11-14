@@ -115,6 +115,12 @@ export const BrowserActionSchema = z.discriminatedUnion("action", [
         .optional()
         .describe("CSS selector to extract from. Default: entire page"),
       attribute: z.string().optional().describe("Extract specific attribute (e.g., 'href', 'src')"),
+      timeout: z
+        .number()
+        .positive()
+        .max(30000)
+        .optional()
+        .describe("Wait timeout in milliseconds (max 30s). Default: 30000"),
     })
     .describe("Extract text content or attributes from the page."),
 
@@ -160,7 +166,7 @@ export const BrowserActionSchema = z.discriminatedUnion("action", [
 
   z
     .object({
-      action: z.literal("sleep"),
+      action: z.literal("sleep").or(z.literal("wait")),
       ms: z
         .number()
         .int()
@@ -168,7 +174,9 @@ export const BrowserActionSchema = z.discriminatedUnion("action", [
         .max(60000)
         .describe("Sleep duration in milliseconds (max 60s)"),
     })
-    .describe("Wait for specified duration (use sparingly, prefer waitForSelector)."),
+    .describe(
+      "Wait for specified duration (use sparingly, prefer waitForSelector). Alias: wait. sleep.",
+    ),
 ]);
 export type BrowserAction = z.infer<typeof BrowserActionSchema>;
 
