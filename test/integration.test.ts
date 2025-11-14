@@ -11,9 +11,9 @@ describe("Search Tools Integration", () => {
   it("should create OpenAI search tool with correct name", () => {
     const tools = createSearchTools("openai");
     
-    // OpenAI native tool should be registered as "web_search"
-    expect(tools).toHaveProperty("web_search");
-    expect(tools.web_search).toBeDefined();
+    // OpenAI tool should be registered as "search" (wrapper around native web_search)
+    expect(tools).toHaveProperty("search");
+    expect(tools.search).toBeDefined();
   });
 
   it("should create Tavily search tool with correct name", () => {
@@ -97,10 +97,8 @@ describe("Tool Naming Consistency", () => {
     const tavilyTools = createSearchTools("tavily");
     const exaTools = createSearchTools("exa");
 
-    // OpenAI uses "web_search" (native tool name)
-    expect(Object.keys(openaiTools)).toContain("web_search");
-    
-    // Tavily and Exa use "search"
+    // All providers use "search" for main search tool
+    expect(Object.keys(openaiTools)).toContain("search");
     expect(Object.keys(tavilyTools)).toContain("search");
     expect(Object.keys(exaTools)).toContain("search");
     
