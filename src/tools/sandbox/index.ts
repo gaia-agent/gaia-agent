@@ -26,7 +26,7 @@ export const createSandboxTool = (provider: SandboxProvider = DEFAULT_PROVIDERS.
 
   return tool({
     description:
-      "Execute code in a secure Sandock sandbox. Supports Python, JavaScript, Bash, and browser automation via Sandock API (https://sandock.ai)",
+      "Execute Python code in a secure Sandock sandbox. Only supports Python. Uses seey/sandock-python:latest image with pre-installed packages (numpy, pandas, requests, openpyxl, etc.)",
     inputSchema: sandockSchemas.executeSchema as unknown as Tool["inputSchema"],
     execute: sandockProvider.execute as unknown as Tool["execute"],
   });

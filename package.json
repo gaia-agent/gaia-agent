@@ -167,6 +167,7 @@
     "hyparquet": "^1.20.2",
     "mime-types": "^3.0.1",
     "playwright": "^1.56.1",
+    "sandock": "^0.2.4",
     "steel-sdk": "^0.14.0",
     "zod": "^4.1.11"
   },

@@ -1,8 +1,9 @@
 /**
  * Sandock Sandbox Provider
- * Awaiting official SDK from https://sandock.ai
+ * Using official Sandock SDK from https://sandock.ai
  */
 
+import { createSandockClient } from "sandock";
 import { z } from "zod";
 import type {
   ISandboxSchemas,
@@ -13,10 +14,11 @@ import type {
 
 /**
  * Sandock schemas
+ * Note: Sandock only supports Python code execution
  */
 export const sandockSchemas: ISandboxSchemas = {
   executeSchema: z.object({
-    language: z.enum(["python", "javascript", "bash", "browser"]).describe("Execution environment"),
+    language: z.enum(["python", "bash", "browser"]).describe("Execution environment"),
     code: z.string().describe("Code to execute or browser commands"),
     sandockApiKey: z.string().optional().describe("Sandock API key (if not in env)"),
   }),
@@ -28,7 +30,7 @@ export const sandockSchemas: ISandboxSchemas = {
 export const sandockProvider: ISandockProvider = {
   async execute(params: SandockExecuteParams): Promise<SandboxResult> {
     try {
-      const { language, code, sandockApiKey } = params;
+      const { code, sandockApiKey } = params;
       const apiKey = sandockApiKey || process.env.SANDOCK_API_KEY;
 
       if (!apiKey) {
@@ -38,38 +40,85 @@ export const sandockProvider: ISandockProvider = {
         };
       }
 
-      // TODO: Use official Sandock SDK when available
-      // For now, use REST API
-      const response = await fetch("https://api.sandock.ai/v1/execute", {
-        method: "POST",
+      // Initialize Sandock client
+      const apiUrl = process.env.SANDOCK_API_URL || "https://sandock.ai";
+      const client = createSandockClient({
+        baseUrl: apiUrl,
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${apiKey}`,
         },
-        body: JSON.stringify({
-          language,
-          code,
-        }),
       });
 
-      if (!response.ok) {
+      // Use the /api/sandbox/{id}/code endpoint for code execution
+      // This requires creating a sandbox first, then executing code
+      // For simplicity, we'll use the run-code pattern from sandock-mcp
+
+      // Create an ephemeral sandbox
+      const sandboxName = `gaia-agent-${Date.now()}`;
+      const { data: createData, error: createError } = await client.POST("/api/sandbox", {
+        body: {
+          name: sandboxName,
+          image: "seey/sandock-python:latest", // Default Python image
+          keep: false, // Auto-cleanup
+        },
+      });
+
+      if (createError || !createData) {
         return {
           success: false,
-          error: `Sandock API error: ${response.statusText}`,
+          error: `Failed to create sandbox: ${createError || "Unknown error"}`,
         };
       }
 
-      const result = await response.json();
+      const sandboxId = createData.data.id;
 
-      return {
-        success: true,
-        language,
-        output: result,
-      };
+      try {
+        // Execute Python code in the sandbox
+        const { data: execData, error: execError } = await client.POST("/api/sandbox/{id}/code", {
+          params: {
+            path: { id: sandboxId },
+          },
+          body: {
+            language: "python",
+            code,
+            timeoutMs: 30000, // 30 second timeout
+          },
+        });
+
+        if (execError || !execData) {
+          return {
+            success: false,
+            error: `Code execution failed: ${execError || "Unknown error"}`,
+          };
+        }
+
+        // Format the result - SDK returns { data: { data: { stdout, stderr, ... } } }
+        const result = execData.data;
+        return {
+          success: true,
+          language: "python",
+          output: result.stdout || "",
+          error: result.stderr,
+          exitCode: result.exitCode,
+        };
+      } finally {
+        // Clean up the sandbox (async, non-blocking)
+        if (sandboxId) {
+          client
+            .DELETE("/api/sandbox/{id}", {
+              params: {
+                path: { id: sandboxId },
+              },
+            })
+            .catch((cleanupError) => {
+              console.error(`Failed to cleanup sandbox ${sandboxId}:`, cleanupError);
+            });
+        }
+      }
     } catch (error) {
       return {
-        error: error instanceof Error ? error.message : "Code execution failed",
         success: false,
+        error: error instanceof Error ? error.message : "Code execution failed",
       };
     }
   },
