@@ -270,15 +270,26 @@ export async function evaluateTaskWithReflection(
         content: task.question,
       });
     } else {
+      // Supported image formats by OpenAI
+      const supportedImageTypes = ["image/png", "image/jpeg", "image/gif", "image/webp"];
+
       const contentParts: Array<
         { type: "text"; text: string } | { type: "image"; image: string | URL }
       > = [{ type: "text", text: task.question }];
 
       for (const file of task.files) {
-        if (file.data) {
+        // Handle image files
+        if (file.data && supportedImageTypes.includes(file.type)) {
           contentParts.push({
             type: "image",
             image: file.data,
+          });
+        }
+        // Handle non-image files (XLSX, PDF, etc.)
+        else if (file.data) {
+          contentParts.push({
+            type: "text",
+            text: `\n[Attached file: ${file.name} (${file.type})] - File content available for processing`,
           });
         }
       }

@@ -43,7 +43,7 @@ function buildPromptMessages(task: GaiaTask): CoreMessage[] {
 
   messages.push({
     role: "user",
-    content: contentParts.length > 1 ? contentParts : task.question,
+    content: contentParts,
   });
 
   return messages;
