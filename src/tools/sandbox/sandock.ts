@@ -73,7 +73,7 @@ export const sandockSchemas: ISandboxSchemas = {
   writeFileSchema: z.object({
     sandboxId: z.string().describe("The sandbox ID returned from sandock_create_sandbox"),
     path: z.string().describe("File path in the sandbox (e.g., '/workspace/script.py')"),
-    content: z.string().describe("Text content to write to the file"),
+    content: z.string().describe("Text content to write to the file. Code to Python execute or browser commands. Use print() to output results."),
     executable: z.boolean().optional().describe("Make the file executable (default: false)"),
     sandockApiKey: z.string().optional().describe("Sandock API key (if not in env)"),
   }),
