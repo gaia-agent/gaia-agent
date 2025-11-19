@@ -18,9 +18,6 @@ function buildPromptMessages(task: GaiaTask): CoreMessage[] {
     return messages;
   }
 
-  // Supported image formats by OpenAI
-  const supportedImageTypes = ["image/png", "image/jpeg", "image/gif", "image/webp"];
-
   // Build content parts with files
   const contentParts: Array<
     { type: "text"; text: string } | { type: "image"; image: string | URL }
@@ -28,7 +25,7 @@ function buildPromptMessages(task: GaiaTask): CoreMessage[] {
 
   // Add file attachments
   for (const file of task.files) {
-    if (file.data && supportedImageTypes.includes(file.type)) {
+    if (file.data && file.type.includes("image")) {
       contentParts.push({
         type: "image",
         image: file.data,
@@ -36,7 +33,7 @@ function buildPromptMessages(task: GaiaTask): CoreMessage[] {
     } else if (file.data) {
       contentParts.push({
         type: "text",
-        text: `\n[Attached file: ${file.name} (${file.type})] - File content available for processing`,
+        text: file.data,
       });
     }
   }

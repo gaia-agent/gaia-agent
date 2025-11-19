@@ -19,7 +19,7 @@ import type {
 export const sandockSchemas: ISandboxSchemas = {
   executeSchema: z.object({
     language: z.enum(["python", "bash", "browser"]).describe("Execution environment"),
-    code: z.string().describe("Code to execute or browser commands"),
+    code: z.string().describe("Code to Python execute or browser commands. Use print() to output results."),
     sandockApiKey: z.string().optional().describe("Sandock API key (if not in env)"),
   }),
 };

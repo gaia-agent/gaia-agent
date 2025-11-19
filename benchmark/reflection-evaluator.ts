@@ -270,16 +270,13 @@ export async function evaluateTaskWithReflection(
         content: task.question,
       });
     } else {
-      // Supported image formats by OpenAI
-      const supportedImageTypes = ["image/png", "image/jpeg", "image/gif", "image/webp"];
-
       const contentParts: Array<
         { type: "text"; text: string } | { type: "image"; image: string | URL }
       > = [{ type: "text", text: task.question }];
 
       for (const file of task.files) {
         // Handle image files
-        if (file.data && supportedImageTypes.includes(file.type)) {
+        if (file.data && file.type.includes("image")) {
           contentParts.push({
             type: "image",
             image: file.data,
@@ -289,7 +286,7 @@ export async function evaluateTaskWithReflection(
         else if (file.data) {
           contentParts.push({
             type: "text",
-            text: `\n[Attached file: ${file.name} (${file.type})] - File content available for processing`,
+            text: file.data,
           });
         }
       }
