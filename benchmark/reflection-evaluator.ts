@@ -275,10 +275,18 @@ export async function evaluateTaskWithReflection(
       > = [{ type: "text", text: task.question }];
 
       for (const file of task.files) {
-        if (file.data) {
+        // Handle image files
+        if (file.data && file.type.includes("image")) {
           contentParts.push({
             type: "image",
             image: file.data,
+          });
+        }
+        // Handle non-image files (XLSX, PDF, etc.)
+        else if (file.data) {
+          contentParts.push({
+            type: "text",
+            text: file.data,
           });
         }
       }

@@ -26,9 +26,57 @@ export const createSandboxTool = (provider: SandboxProvider = DEFAULT_PROVIDERS.
 
   return tool({
     description:
-      "Execute code in a secure Sandock sandbox. Supports Python, JavaScript, Bash, and browser automation via Sandock API (https://sandock.ai)",
+      "Execute Python code in a secure Sandock sandbox. Only supports Python. Uses seey/sandock-python:latest image with pre-installed packages (numpy, pandas, requests, openpyxl, etc.)",
     inputSchema: sandockSchemas.executeSchema as unknown as Tool["inputSchema"],
     execute: sandockProvider.execute as unknown as Tool["execute"],
+  });
+};
+
+/**
+ * Create Sandock-specific tools (only available when provider is 'sandock')
+ */
+export const createSandockCreateSandboxTool = (): Tool => {
+  return tool({
+    description:
+      "Create a new isolated Sandock sandbox environment. Returns a sandboxId that must be used in subsequent operations (shell, file operations, etc).",
+    inputSchema: sandockSchemas.createSandboxSchema as unknown as Tool["inputSchema"],
+    execute: sandockProvider.createSandbox as unknown as Tool["execute"],
+  });
+};
+
+export const createSandockDeleteSandboxTool = (): Tool => {
+  return tool({
+    description:
+      "Delete a Sandock sandbox and free resources. Always call this when done to prevent resource leaks.",
+    inputSchema: sandockSchemas.deleteSandboxSchema as unknown as Tool["inputSchema"],
+    execute: sandockProvider.deleteSandbox as unknown as Tool["execute"],
+  });
+};
+
+export const createSandockShellExecTool = (): Tool => {
+  return tool({
+    description:
+      "Execute shell commands in a Sandock sandbox. Use for file operations, system commands, or running tools.",
+    inputSchema: sandockSchemas.shellExecSchema as unknown as Tool["inputSchema"],
+    execute: sandockProvider.shellExec as unknown as Tool["execute"],
+  });
+};
+
+export const createSandockWriteFileTool = (): Tool => {
+  return tool({
+    description:
+      "Write text content to a file in a Sandock sandbox. Use for creating scripts, config files, or text data. If it's code, the result should be printed in the log, e.g., using print() in Python.",
+    inputSchema: sandockSchemas.writeFileSchema as unknown as Tool["inputSchema"],
+    execute: sandockProvider.writeFile as unknown as Tool["execute"],
+  });
+};
+
+export const createSandockDownloadFileTool = (): Tool => {
+  return tool({
+    description:
+      "Download a file from URL into a Sandock sandbox. Use for importing user-uploaded files (ZIP, CSV, images). File content never passes through agent, avoiding token consumption.",
+    inputSchema: sandockSchemas.downloadFileSchema as unknown as Tool["inputSchema"],
+    execute: sandockProvider.downloadFile as unknown as Tool["execute"],
   });
 };
 
@@ -36,9 +84,20 @@ export const createSandboxTool = (provider: SandboxProvider = DEFAULT_PROVIDERS.
  * Create all sandbox tools for a provider
  */
 export const createSandboxTools = (provider: SandboxProvider = DEFAULT_PROVIDERS.sandbox) => {
-  return {
+  const tools: Record<string, Tool> = {
     sandboxExecute: createSandboxTool(provider),
   };
+
+  // Add Sandock-specific tools only when using Sandock provider
+  if (provider === "sandock") {
+    tools.sandockCreateSandbox = createSandockCreateSandboxTool();
+    tools.sandockDeleteSandbox = createSandockDeleteSandboxTool();
+    tools.sandockShellExec = createSandockShellExecTool();
+    tools.sandockWriteFile = createSandockWriteFileTool();
+    tools.sandockDownloadFile = createSandockDownloadFileTool();
+  }
+
+  return tools;
 };
 
 // Export provider instances and schemas for advanced use
