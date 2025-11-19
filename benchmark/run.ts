@@ -12,6 +12,7 @@
  *   pnpm run benchmark --category files   # Filter by capability category
  *   pnpm run benchmark --limit 10         # Limit number of tasks
  *   pnpm run benchmark --random           # Random single task
+ *   pnpm run benchmark --task-id UUID     # Test specific task by ID
  *   pnpm run benchmark --stream           # Stream agent thinking in real-time
  *   pnpm run benchmark --verbose          # Detailed output
  *   pnpm run benchmark --reflect          # Enable reflection mode (prompt-based)
@@ -29,6 +30,7 @@
  *   pnpm benchmark:files --limit 5 --verbose    # Test file handling capability
  *   pnpm benchmark:search --stream              # Test search with streaming
  *   pnpm benchmark:code --random --verbose      # Random code execution task
+ *   pnpm benchmark --task-id 5cfb274c-0207-4aa7-9575-6ac0bd95d9b2 --stream # Test specific task
  *   pnpm benchmark --resume                     # Resume interrupted benchmark
  */
 
@@ -242,6 +244,16 @@ async function runBenchmark(config: BenchmarkConfig): Promise<{
   // Download dataset
   let tasks = await downloadGaiaDataset(config.dataset);
 
+  // Filter by task ID if specified
+  if (config.taskId) {
+    tasks = tasks.filter((task) => task.id === config.taskId);
+    if (tasks.length === 0) {
+      console.error(`❌ Error: Task with ID "${config.taskId}" not found in dataset`);
+      process.exit(1);
+    }
+    console.log(`🎯 Found task with ID: ${config.taskId}`);
+  }
+
   // Filter by level if specified
   if (config.level) {
     tasks = tasks.filter((task) => task.level === config.level);
@@ -350,6 +362,7 @@ async function main() {
           | "browser"
           | "reasoning")
       : undefined,
+    taskId: args.includes("--task-id") ? args[args.indexOf("--task-id") + 1] : undefined,
   };
 
   // Get configuration info
@@ -366,6 +379,7 @@ async function main() {
   console.log(`Dataset:  ${config.dataset}`);
   console.log(`Level:    ${config.level || "all"}`);
   console.log(`Category: ${config.category || "all"}`);
+  console.log(`Task ID:  ${config.taskId || "none"}`);
   console.log(`Limit:    ${config.limit || "none"}`);
   console.log(`Random:   ${config.random ? "yes" : "no"}`);
   console.log(`Stream:   ${config.stream ? "yes" : "no"}`);
