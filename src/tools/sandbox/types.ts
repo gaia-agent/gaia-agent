@@ -33,6 +33,44 @@ export interface SandockExecuteParams {
   sandockApiKey?: string;
 }
 
+export interface SandockCreateSandboxParams {
+  name?: string;
+  memoryLimitMb?: number;
+  cpuShares?: number;
+  keep?: boolean;
+  sandockApiKey?: string;
+}
+
+export interface SandockDeleteSandboxParams {
+  sandboxId: string;
+  sandockApiKey?: string;
+}
+
+export interface SandockShellExecParams {
+  sandboxId: string;
+  command: string | string[];
+  workdir?: string;
+  timeout?: number;
+  env?: Record<string, string>;
+  sandockApiKey?: string;
+}
+
+export interface SandockWriteFileParams {
+  sandboxId: string;
+  path: string;
+  content: string;
+  executable?: boolean;
+  sandockApiKey?: string;
+}
+
+export interface SandockDownloadFileParams {
+  sandboxId: string;
+  url: string;
+  targetPath: string;
+  timeout?: number;
+  sandockApiKey?: string;
+}
+
 /**
  * Provider-specific interfaces
  */
@@ -42,6 +80,11 @@ export interface IE2BProvider {
 
 export interface ISandockProvider {
   execute: (params: SandockExecuteParams) => Promise<SandboxResult>;
+  createSandbox: (params: SandockCreateSandboxParams) => Promise<SandboxResult>;
+  deleteSandbox: (params: SandockDeleteSandboxParams) => Promise<SandboxResult>;
+  shellExec: (params: SandockShellExecParams) => Promise<SandboxResult>;
+  writeFile: (params: SandockWriteFileParams) => Promise<SandboxResult>;
+  downloadFile: (params: SandockDownloadFileParams) => Promise<SandboxResult>;
 }
 
 /**
@@ -56,4 +99,9 @@ export interface ISandboxProvider {
  */
 export interface ISandboxSchemas {
   executeSchema: z.ZodObject<any>;
+  createSandboxSchema?: z.ZodObject<any>;
+  deleteSandboxSchema?: z.ZodObject<any>;
+  shellExecSchema?: z.ZodObject<any>;
+  writeFileSchema?: z.ZodObject<any>;
+  downloadFileSchema?: z.ZodObject<any>;
 }
