@@ -15,6 +15,7 @@ export interface BenchmarkConfig {
   reflect?: boolean;
   category?: "files" | "code" | "search" | "browser" | "reasoning";
   resume?: boolean;
+  taskId?: string;
 }
 
 export interface HuggingFaceTask {
