@@ -1,6 +1,6 @@
 {
   "name": "@gaia-agent/sdk",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Production-ready AI agent library using AI SDK v6 ToolLoopAgent for GAIA benchmarks with swappable providers",
   "type": "module",
   "main": "./dist/index.js",
