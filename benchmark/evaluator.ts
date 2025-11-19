@@ -14,12 +14,12 @@ function buildPromptMessages(task: GaiaTask): CoreMessage[] {
 
   // If no files, just use simple text message
   if (!task.files || task.files.length === 0) {
-    messages.push({
-      role: "user",
-      content: task.question,
-    });
+    messages.push({ role: "user", content: task.question });
     return messages;
   }
+
+  // Supported image formats by OpenAI
+  const supportedImageTypes = ["image/png", "image/jpeg", "image/gif", "image/webp"];
 
   // Build content parts with files
   const contentParts: Array<
@@ -28,18 +28,22 @@ function buildPromptMessages(task: GaiaTask): CoreMessage[] {
 
   // Add file attachments
   for (const file of task.files) {
-    if (file.data) {
-      // Use image type for data URLs (AI SDK handles various file types via data URLs)
+    if (file.data && supportedImageTypes.includes(file.type)) {
       contentParts.push({
         type: "image",
         image: file.data,
+      });
+    } else if (file.data) {
+      contentParts.push({
+        type: "text",
+        text: `\n[Attached file: ${file.name} (${file.type})] - File content available for processing`,
       });
     }
   }
 
   messages.push({
     role: "user",
-    content: contentParts,
+    content: contentParts.length > 1 ? contentParts : task.question,
   });
 
   return messages;
