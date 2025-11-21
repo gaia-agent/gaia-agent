@@ -4,7 +4,7 @@
  */
 
 import { createOpenAI } from "@ai-sdk/openai";
-import type { LanguageModel } from "ai";
+import type { LanguageModel, ToolSet } from "ai";
 import { stepCountIs, ToolLoopAgent } from "ai";
 import { DEFAULT_INSTRUCTIONS } from "./config/defaults.js";
 import { getDefaultTools } from "./config/tools.js";
@@ -63,7 +63,7 @@ import type { ProviderConfig } from "./types.js";
  */
 export class GAIAAgent extends ToolLoopAgent {
   private _model: LanguageModel;
-  private _tools: Record<string, unknown>;
+  private _tools: ToolSet;
 
   constructor(config?: {
     model?: LanguageModel;
@@ -71,15 +71,15 @@ export class GAIAAgent extends ToolLoopAgent {
     maxSteps?: number;
     apiKey?: string;
     providers?: ProviderConfig;
-    additionalTools?: Record<string, unknown>;
-    tools?: Record<string, unknown>;
+    additionalTools?: ToolSet;
+    tools?: ToolSet;
     reasoning?: boolean; // Enable OpenAI reasoning mode (o1/o3 models)
   }) {
     const defaultTools = getDefaultTools(config?.providers);
-    const tools = config?.tools || {
+    const tools = (config?.tools || {
       ...defaultTools,
       ...config?.additionalTools,
-    };
+    }) as ToolSet;
 
     // Determine model to use
     let model: LanguageModel;
@@ -192,8 +192,8 @@ export function createGaiaAgent(config?: {
   maxSteps?: number;
   apiKey?: string;
   providers?: ProviderConfig;
-  tools?: Record<string, unknown>;
-  additionalTools?: Record<string, unknown>;
+  tools?: ToolSet;
+  additionalTools?: ToolSet;
   reasoning?: boolean; // Enable OpenAI reasoning mode (o1/o3 models)
 }) {
   return new GAIAAgent(config);
