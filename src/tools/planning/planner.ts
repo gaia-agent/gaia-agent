@@ -73,7 +73,7 @@ The plan will be stored in memory to track your progress through execution.`,
       .min(2)
       .max(10)
       .describe("Ordered list of steps to execute (minimum 2, maximum 10 steps)"),
-  }) as unknown as typeof tool.prototype.inputSchema,
+  }),
 
   execute: async ({ question, steps }): Promise<ExecutionPlan> => {
     // Validate steps are properly ordered

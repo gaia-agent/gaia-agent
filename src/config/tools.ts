@@ -3,6 +3,7 @@
  * Get all GAIA tools with swappable providers
  */
 
+import type { ToolSet } from "ai";
 import { createBrowserTools } from "../tools/browser/index.js";
 import { calculator, httpRequest, planner, verifier } from "../tools/index.js";
 import { createMemoryTools } from "../tools/memory/index.js";
@@ -80,7 +81,7 @@ export function getDefaultTools(providers?: ProviderConfig) {
       ? undefined
       : mergedConfig?.memory || DEFAULT_PROVIDERS.memory;
 
-  const tools: Record<string, unknown> = {
+  let tools: ToolSet = {
     calculator,
     httpRequest,
     planner,
@@ -90,19 +91,19 @@ export function getDefaultTools(providers?: ProviderConfig) {
   // Add search tools based on provider using factory pattern (skip if explicitly disabled)
   if (searchProvider !== undefined) {
     const searchTools = createSearchTools(searchProvider);
-    Object.assign(tools, searchTools);
+    tools = { ...tools, ...searchTools };
   }
 
   // Add sandbox tools based on provider using factory pattern (skip if explicitly disabled)
   if (sandboxProvider !== undefined) {
     const sandboxTools = createSandboxTools(sandboxProvider);
-    Object.assign(tools, sandboxTools);
+    tools = { ...tools, ...sandboxTools };
   }
 
   // Add browser tools based on provider using factory pattern (skip if explicitly disabled)
   if (browserProvider !== undefined) {
     const browserTools = createBrowserTools(browserProvider);
-    Object.assign(tools, browserTools);
+    tools = { ...tools, ...browserTools };
   }
 
   // Add memory tools based on provider using factory pattern (skip if explicitly disabled or no API key)
@@ -118,7 +119,7 @@ export function getDefaultTools(providers?: ProviderConfig) {
 
     if (hasMemoryKey) {
       const memoryTools = createMemoryTools(memoryProvider);
-      Object.assign(tools, memoryTools);
+      tools = { ...tools, ...memoryTools };
     }
     // Silently skip memory tools if no API key (memory is optional)
   }

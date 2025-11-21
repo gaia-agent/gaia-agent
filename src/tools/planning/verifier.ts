@@ -69,7 +69,7 @@ The verifier will analyze your answer, reasoning, and sources to provide confide
       .array(z.string())
       .optional()
       .describe("List of sources/tools used (e.g., ['Wikipedia', 'search', 'calculator'])"),
-  }) as unknown as typeof tool.prototype.inputSchema,
+  }),
 
   execute: async ({
     question,
