@@ -62,6 +62,9 @@ import type { ProviderConfig } from "./types.js";
  * ```
  */
 export class GAIAAgent extends ToolLoopAgent {
+  private _model: LanguageModel;
+  private _tools: Record<string, unknown>;
+
   constructor(config?: {
     model?: LanguageModel;
     instructions?: string;
@@ -111,6 +114,19 @@ export class GAIAAgent extends ToolLoopAgent {
       tools,
       stopWhen: stepCountIs(config?.maxSteps || 30),
     });
+
+    this._model = model;
+    this._tools = tools;
+  }
+
+  /**
+   * Get the model and tools used by the agent
+   */
+  public getModelAndTools() {
+    return {
+      model: this._model,
+      tools: this._tools,
+    };
   }
 }
 
