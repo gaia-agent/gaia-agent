@@ -89,11 +89,14 @@ export const steelProvider: ISteelProvider = {
           output: result,
         };
       } finally {
-        // Always release session
-        try {
-          await client.sessions.release(session.id);
-        } catch (releaseError) {
-          console.error("Failed to release Steel session:", releaseError);
+        // Control session cleanup via environment variable (default: true)
+        const shouldCleanup = process.env.BROWSER_AUTO_CLEANUP_SESSION !== "false";
+        if (shouldCleanup) {
+          try {
+            await client.sessions.release(session.id);
+          } catch (releaseError) {
+            console.error("Failed to release Steel session:", releaseError);
+          }
         }
       }
     } catch (error) {

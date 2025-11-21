@@ -309,16 +309,20 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
           details: error instanceof Error ? error.stack : undefined,
         };
       } finally {
-        // Clean up Playwright resources
-        await page.close({ runBeforeUnload: true }).catch(() => { });
-        await context.close().catch(() => { });
-        await browser.close().catch(() => { });
-        // Stop browser session
-        const stopCmd = new StopBrowserSessionCommand({
-          browserIdentifier: identifier,
-          sessionId,
-        });
-        await client.send(stopCmd);
+        // Control session cleanup via environment variable (default: true)
+        const shouldCleanup = process.env.BROWSER_AUTO_CLEANUP_SESSION !== "false";
+        if (shouldCleanup) {
+          // Clean up Playwright resources
+          await page.close({ runBeforeUnload: true }).catch(() => { });
+          await context.close().catch(() => { });
+          await browser.close().catch(() => { });
+          // Stop browser session
+          const stopCmd = new StopBrowserSessionCommand({
+            browserIdentifier: identifier,
+            sessionId,
+          });
+          await client.send(stopCmd);
+        }
       }
     } catch (error) {
       return {

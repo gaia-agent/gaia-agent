@@ -40,6 +40,9 @@ GAIA_AGENT_BROWSER_PROVIDER=steel      # Options: steel | browseruse | aws-bedro
 
 # Memory provider (optional, default: mem0)
 GAIA_AGENT_MEMORY_PROVIDER=mem0        # Options: mem0 | agentcore
+
+# Browser session cleanup control (default: true)
+BROWSER_AUTO_CLEANUP_SESSION=true      # Set to "false" to preserve sessions for debugging
 ```
 
 ## Provider API Keys
@@ -204,6 +207,23 @@ AWS_REGION=us-east-1
 ```
 
 Setup: [AWS IAM](https://aws.amazon.com/iam/)
+
+### Browser Session Cleanup
+
+All browser providers (Steel, AWS AgentCore, BrowserUse) support session cleanup control:
+
+```bash
+# Control automatic session cleanup (default: true)
+BROWSER_AUTO_CLEANUP_SESSION=true      # Set to "false" to preserve sessions for debugging
+```
+
+**When to disable cleanup:**
+- Debugging browser automation issues
+- Inspecting browser state after execution
+- Reviewing Steel session recordings
+- Analyzing AWS browser session logs
+
+**Note:** Preserved sessions may incur additional costs depending on the provider.
 
 ### Mem0 Memory
 
