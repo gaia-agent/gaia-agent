@@ -36,15 +36,30 @@ export const createBrowserTool = (provider: BrowserProvider = DEFAULT_PROVIDERS.
 
   return tool({
     description:
-      "AWS Bedrock AgentCore browser automation with Playwright actions. Execute single or batch actions (navigate, click, fill, extract, screenshot, scroll, wait) via Chrome DevTools Protocol.\n\n" +
+      "AWS Bedrock AgentCore browser automation with Playwright actions. Supports launch, navigate, screenshot, click, fill, extract, info, closePage, exit, waitForNavigation, sleep/wait, and composite open (launch+navigate+info/extract/screenshot) or sequence (multi-step in one call).\n\n" +
+      "🎯 RECOMMENDED PATTERNS:\n" +
+      "1. **First-time access (no sessionId)**: Use 'open' operation - it auto-creates session + navigates + extracts\n" +
+      "   Example: {operation:{action:'open',url:'...',wantContent:true}}\n" +
+      "2. **Existing session**: Use 'sequence' for multi-step operations or single actions\n" +
+      "   Example: {sessionId:'xxx',operation:{action:'sequence',steps:[{action:'navigate',url:'...'},{action:'wait',ms:3000},{action:'extract'}]}}\n\n" +
+      "⚠️ CRITICAL: DO NOT invent selectors! Use this workflow:\n" +
+      "1. Navigate to page + wait 2-5s\n" +
+      "2. Extract full page content (no selector) to see actual DOM structure\n" +
+      "3. Use AI analysis to find real selectors from extracted content\n" +
+      "4. Then perform targeted extraction/interaction\n\n" +
       "BEST PRACTICES:\n" +
-      "1. Start with navigate + wait(2-5s) for page load stabilization\n" +
-      "2. Use broad selectors (main, article, #content) - automatic fallback to page content if not found\n" +
-      "3. Batch related actions in array to minimize AI SDK steps\n" +
-      "4. For Wikipedia: use .mw-parser-output selector\n" +
+      "1. First visit: use 'open' operation with wantContent:true to get page structure in one call\n" +
+      "2. Use broad selectors (main, article, #content) - auto fallback if not found\n" +
+      "3. For specific data: first get page content, then extract with real selectors\n" +
+      "4. Batch related actions in sequence to minimize steps\n" +
       "5. Set reasonable timeouts (10-30s)\n\n" +
-      "EXAMPLE: [{action:'navigate',url:'...'},{action:'wait',ms:3000},{action:'extract',selector:'main'}]\n\n" +
-      "FEATURES: Configurable timeouts, graceful error handling with fallbacks, automatic content extraction if selector fails.",
+      "✅ CORRECT workflow:\n" +
+      "First visit: {operation:{action:'open',url:'...',wantContent:true}}\n" +
+      "Analyze extracted content to find real selectors\n" +
+      "Follow-up: {sessionId:'xxx',operation:{action:'extract',selector:'<real-selector-from-step1>'}}\n\n" +
+      "❌ WRONG workflow:\n" +
+      "BAD: {operation:{action:'sequence',steps:[{action:'navigate',url:'...'},{action:'extract',selector:'invented-selector'}]}} ← Will fail!\n\n" +
+      "FEATURES: Graceful error handling (selector not found = fallback to page content), configurable timeouts, automatic retries.",
     inputSchema: awsAgentCoreSchemas.executeSchema as unknown as Tool["inputSchema"],
     execute: awsAgentCoreProvider.execute as unknown as Tool["execute"],
   });

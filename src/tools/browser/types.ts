@@ -38,14 +38,24 @@ export interface BrowserUseBrowserParams {
 /**
  * Browser action schema - supports Playwright-like operations
  */
-export const BrowserActionSchema = z.discriminatedUnion("action", [
+export const BrowserBaseActionSchema = z.discriminatedUnion("action", [
   // Session Management
-  // z.object({
-  //   action: z.literal('launch'),
-  //   // Optional parameters for launch..
-  // }).describe("Launch a new browser session with optional parameters."),
+  z
+    .object({
+      action: z.literal("launch"),
+      headless: z.boolean().optional().default(true),
+      viewport: z
+        .object({
+          width: z.number().int().positive().min(800).max(1920),
+          height: z.number().int().positive().min(600).max(1080),
+        })
+        .optional()
+        .describe("Viewport for new browser sessions. Default 1280x1080"),
+    })
+    .describe("Launch a new browser session with optional parameters."),
 
-  // z.object({ action: z.literal('close') }),
+  z.object({ action: z.literal("closePage") }).describe("Close the current page."),
+  z.object({ action: z.literal("exit") }).describe("Exit the browser to leave all pages and sessions."),
 
   // Navigation Actions
   z
@@ -92,7 +102,7 @@ export const BrowserActionSchema = z.discriminatedUnion("action", [
 
   z
     .object({
-      action: z.literal("fill"),
+      action: z.literal("fill").or(z.literal("type")),
       selector: z.string().describe("CSS selector for input field"),
       value: z.string().describe("Value to fill (replaces existing content)"),
     })
@@ -113,7 +123,12 @@ export const BrowserActionSchema = z.discriminatedUnion("action", [
       selector: z
         .string()
         .optional()
-        .describe("CSS selector to extract from. Default: entire page"),
+        .describe(
+          "CSS selector to extract from. " +
+            "IMPORTANT: Leave empty on first visit to get full page structure. " +
+            "Only use specific selector after analyzing page content. " +
+            "If selector not found, will fallback to full page content.",
+        ),
       attribute: z.string().optional().describe("Extract specific attribute (e.g., 'href', 'src')"),
       timeout: z
         .number()
@@ -122,7 +137,11 @@ export const BrowserActionSchema = z.discriminatedUnion("action", [
         .optional()
         .describe("Wait timeout in milliseconds (max 30s). Default: 30000"),
     })
-    .describe("Extract text content or attributes from the page."),
+    .describe(
+      "Extract text content or attributes. " +
+        "Best practice: First extract without selector to see page structure, " +
+        "then use specific selectors based on actual content.",
+    ),
 
   // Page Information
   z
@@ -178,13 +197,62 @@ export const BrowserActionSchema = z.discriminatedUnion("action", [
       "Wait for specified duration (use sparingly, prefer waitForSelector). Alias: wait. sleep.",
     ),
 ]);
+
+/**
+ * Browser operation schema - includes base actions and composite actions
+ */
+export const BrowserActionSchema = z.union([
+  BrowserBaseActionSchema,
+  // Composite action: sequence of operations
+  z.object({
+    action: z.literal("sequence"),
+    steps: z.array(BrowserBaseActionSchema).describe("Sequence of browser actions to perform"),
+    continueOnError: z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe("For sequence: whether to continue when a step fails"),
+    wantContent: z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe("For sequence: whether to return extract page content at the end"),
+    wantScreenshot: z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe("For sequence: whether to return captured screenshot at the end"),
+  }),
+  // Composite action: open (launch+navigate+info/extract/screenshot)
+  z
+    .object({
+      action: z.literal("open"),
+      url: z.string().describe("URL to navigate to (must be valid HTTP/HTTPS URL)"),
+      headless: z.boolean().optional().default(true),
+      viewport: z
+        .object({
+          width: z.number().int().positive().min(800).max(1920),
+          height: z.number().int().positive().min(600).max(1080),
+        })
+        .optional()
+        .describe("Viewport for new browser sessions. Default 1280x1080"),
+      wantInfo: z.boolean().optional().default(true).describe("Include page title/url"),
+      wantContent: z.boolean().optional().default(false).describe("Extract page content"),
+      wantScreenshot: z.boolean().optional().default(false).describe("Capture screenshot (base64)"),
+    })
+    .describe("Open a browser session, navigate to URL, and perform info/extract/screenshot."),
+]);
 export type BrowserAction = z.infer<typeof BrowserActionSchema>;
 
 /**
  * AWS AgentCore specific types
  */
 export const AWSBrowserParamsSchema = z.object({
-  task: z.string().describe("Browser task description"),
+  // Optional session ID to reuse existing session
+  sessionId: z
+    .string()
+    .optional()
+    .describe("Browser session ID (optional for first call; required for subsequent operations)"),
 
   // Provider configuration
   browserIdentifier: z.string().optional().describe("Browser identifier"),
@@ -223,11 +291,11 @@ export const AWSBrowserParamsSchema = z.object({
       "The dimensions of the browser viewport for this session. This determines the visible area of the web content and affects how web pages are rendered. If not specified, Amazon Bedrock uses a default viewport size.",
     ),
 
-  // Batch operation support - execute multiple actions in sequence
-  actions: z
-    .union([BrowserActionSchema, z.array(BrowserActionSchema)])
-    .describe(
-      "Single browser action or array of actions to execute sequentially. Use array to minimize AI SDK steps.",
+  // Browser operation - supports single action, sequence, or open
+  operation: BrowserActionSchema.describe(
+      "Browser operation to perform. Supports single actions (navigate, click, etc.), " +
+      "composite 'open' (auto-creates session + navigates + extracts), or " +
+      "'sequence' for multi-step operations in one call.",
     ),
 });
 export type AWSBrowserParams = z.infer<typeof AWSBrowserParamsSchema>;

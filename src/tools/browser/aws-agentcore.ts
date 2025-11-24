@@ -14,12 +14,13 @@
  */
 
 import {
-  type AWSBrowserParams,
   AWSBrowserParamsSchema,
-  type BrowserAction,
+  type AWSBrowserParams,
+  type BrowserBaseActionSchema,
   type BrowserResult,
   type IAWSAgentCoreProvider,
 } from "./types.js";
+import type { z } from "zod";
 
 const DEFAULT_IDENTIFIER = "aws.browser.v1";
 
@@ -30,7 +31,7 @@ const DEFAULT_IDENTIFIER = "aws.browser.v1";
 export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
   execute: async (params: AWSBrowserParams): Promise<BrowserResult> => {
     const {
-      task,
+      sessionId: existingSessionId,
       browserIdentifier,
       awsRegion,
       awsAccessKeyId,
@@ -38,7 +39,7 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
       sessionName,
       sessionTimeoutSeconds,
       viewPort,
-      actions,
+      operation,
     } = params;
     const { BedrockAgentCoreClient, StartBrowserSessionCommand, StopBrowserSessionCommand } =
       await import("@aws-sdk/client-bedrock-agentcore");
@@ -65,29 +66,55 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
       },
     });
 
-    let sessionId: string;
+    let sessionId: string | undefined = existingSessionId;
+    let isNewSession = false;
 
-    // Create browser session
-    try {
-      const startBrowserSessionCommand = new StartBrowserSessionCommand({
-        browserIdentifier: identifier,
-        name: sessionName,
-        sessionTimeoutSeconds,
-        viewPort,
-      });
-      const resp = await client.send(startBrowserSessionCommand);
-      if (!resp.sessionId) {
-        throw new Error("No sessionId returned from StartBrowserSessionCommand");
+    // Create browser session only if not reusing existing one
+    const ensureSession = async (): Promise<string> => {
+      if (!sessionId) {
+        try {
+          const startBrowserSessionCommand = new StartBrowserSessionCommand({
+            browserIdentifier: identifier,
+            name: sessionName,
+            sessionTimeoutSeconds,
+            viewPort,
+          });
+          const resp = await client.send(startBrowserSessionCommand);
+          if (!resp.sessionId) {
+            throw new Error("No sessionId returned from StartBrowserSessionCommand");
+          }
+          sessionId = resp.sessionId;
+          isNewSession = true;
+        } catch (error) {
+          const msg = error instanceof Error ? error.message : String(error);
+          throw new Error(`Failed to create AWS Bedrock AgentCore Browser session: ${msg}`);
+        }
       }
-      sessionId = resp.sessionId;
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : String(error);
-      return {
-        success: false,
-        error: `Failed to create AWS Bedrock AgentCore Browser session: ${msg}`,
-        details: error instanceof Error ? error.stack : undefined,
+      return sessionId;
+    };
+
+    // Helper to build final result with optional content/screenshot
+    const buildFinalResult = async (
+      page: import("playwright").Page,
+      wantContent?: boolean,
+      wantScreenshot?: boolean,
+    ): Promise<Record<string, unknown>> => {
+      const result: Record<string, unknown> = {
+        url: page.url(),
+        title: await page.title(),
       };
-    }
+
+      if (wantContent) {
+        result.content = await page.content();
+      }
+
+      if (wantScreenshot) {
+        const screenshot = await page.screenshot({ fullPage: false, type: "png" });
+        result.screenshot = screenshot.toString("base64");
+      }
+
+      return result;
+    };
 
     const generateWsConnection = async (): Promise<{
       wsUrl: string;
@@ -146,17 +173,87 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
     };
 
     try {
+      // Handle composite 'open' action
+      if (operation.action === "open") {
+        // 1. Ensure session
+        await ensureSession();
+        if (!sessionId) {
+          throw new Error("Failed to create session");
+        }
+
+        // 2. Connect and navigate
+        const { wsUrl, headers } = await generateWsConnection();
+        const browser = await chromium.connectOverCDP(wsUrl, { headers });
+        const context = browser.contexts()[0] ?? (await browser.newContext());
+        const page = context.pages()[0] ?? (await context.newPage());
+
+        try {
+          await page.goto(operation.url, { waitUntil: "load", timeout: 30000 });
+
+          // 3. Build final result
+          const result = await buildFinalResult(
+            page,
+            operation.wantContent,
+            operation.wantScreenshot,
+          );
+
+          return {
+            success: true,
+            action: "open",
+            sessionId,
+            ...result,
+          };
+        } finally {
+          const shouldCleanup = process.env.BROWSER_AUTO_CLEANUP_SESSION !== "false";
+          if (shouldCleanup && isNewSession) {
+            await page.close({ runBeforeUnload: true }).catch(() => {});
+            await context.close().catch(() => {});
+            await browser.close().catch(() => {});
+            const stopCmd = new StopBrowserSessionCommand({
+              browserIdentifier: identifier,
+              sessionId,
+            });
+            await client.send(stopCmd);
+          }
+        }
+      }
+
       // Connect to browser session via Playwright CDP
+      await ensureSession();
+      if (!sessionId) {
+        throw new Error("Failed to create session");
+      }
+
       const { wsUrl, headers } = await generateWsConnection();
       const browser = await chromium.connectOverCDP(wsUrl, { headers });
       const context = browser.contexts()[0] ?? (await browser.newContext());
       const page = context.pages()[0] ?? (await context.newPage());
 
       const executeAction = async (
-        action: BrowserAction,
+        action: z.infer<typeof BrowserBaseActionSchema>,
       ): Promise<{ [key: string]: unknown } | undefined> => {
         // Execute action based on type
         switch (action.action) {
+          case "launch":
+            // Session already created by ensureSession
+            return { sessionId };
+
+          case "closePage":
+            await page.close({ runBeforeUnload: true });
+            break;
+
+          case "exit": {
+            await page.close({ runBeforeUnload: true }).catch(() => {});
+            await context.close().catch(() => {});
+            await browser.close().catch(() => {});
+            const stopCmd = new StopBrowserSessionCommand({
+              browserIdentifier: identifier,
+              sessionId,
+            });
+            await client.send(stopCmd);
+            break;
+          }
+
           case "navigate": {
             await page.goto(action.url, {
               waitUntil: action.waitUntil || "load",
@@ -174,6 +271,7 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
             break;
           }
 
+          case "type":
           case "fill": {
             await page.fill(action.selector, action.value);
             break;
@@ -281,26 +379,50 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
       };
 
       try {
-        // Normalize to array for batch processing
-        const actionList = Array.isArray(actions) ? actions : [actions];
-        let results: Record<string, unknown> = {};
+        // Handle sequence action
+        if (operation.action === "sequence") {
+          const results: Array<Record<string, unknown>> = [];
+          const continueOnError = operation.continueOnError || false;
 
-        // Execute actions sequentially
-        for (const action of actionList) {
-          const result = await executeAction(action);
-          if (result !== undefined) {
-            results = { ...results, ...result };
+          for (let i = 0; i < operation.steps.length; i++) {
+            const action = operation.steps[i];
+            try {
+              const result = await executeAction(action);
+              results.push({ success: true, ...action, ...result });
+            } catch (error) {
+              const err = error instanceof Error ? error.message : String(error);
+              results.push({ success: false, error: err, ...action });
+              if (!continueOnError) {
+                break;
+              }
+            }
           }
+
+          const finalResult = await buildFinalResult(
+            page,
+            operation.wantContent,
+            operation.wantScreenshot,
+          );
+
+          return {
+            success: continueOnError ? true : results.every((r) => r.success === true),
+            action: "sequence",
+            sessionId,
+            ...finalResult,
+            results,
+          };
         }
+
+        // Single action execution
+        const result = await executeAction(operation);
 
         return {
           success: true,
-          task,
+          action: operation.action,
           sessionId,
           url: page.url(),
           title: await page.title(),
-          content: await page.content(),
-          ...results,
+          ...result,
         };
       } catch (error) {
         return {
@@ -310,12 +432,13 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
         };
       } finally {
         // Control session cleanup via environment variable (default: true)
+        // Only cleanup if this is a new session, not a reused one
         const shouldCleanup = process.env.BROWSER_AUTO_CLEANUP_SESSION !== "false";
-        if (shouldCleanup) {
+        if (shouldCleanup && isNewSession && sessionId) {
           // Clean up Playwright resources
-          await page.close({ runBeforeUnload: true }).catch(() => { });
-          await context.close().catch(() => { });
-          await browser.close().catch(() => { });
+          await page.close({ runBeforeUnload: true }).catch(() => {});
+          await context.close().catch(() => {});
+          await browser.close().catch(() => {});
           // Stop browser session
           const stopCmd = new StopBrowserSessionCommand({
             browserIdentifier: identifier,
