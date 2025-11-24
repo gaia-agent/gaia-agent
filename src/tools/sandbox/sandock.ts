@@ -4,7 +4,6 @@
  */
 
 import { randomUUID } from "node:crypto";
-import { createSandockClient } from "sandock";
 import { z } from "zod";
 import type {
   ISandboxSchemas,
@@ -20,6 +19,17 @@ import type {
 
 // Fixed Docker image for consistent Python environment
 const SANDOCK_PYTHON_IMAGE = "seey/sandock-python:latest";
+
+async function getSandockClient(apiKey: string) {
+  const { createSandockClient } = await import("sandock");
+  const apiUrl = process.env.SANDOCK_API_URL || "https://sandock.ai";
+  return createSandockClient({
+    baseUrl: apiUrl,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  });
+}
 
 /**
  * Sandock schemas
@@ -110,13 +120,7 @@ export const sandockProvider: ISandockProvider = {
       }
 
       // Initialize Sandock client
-      const apiUrl = process.env.SANDOCK_API_URL || "https://sandock.ai";
-      const client = createSandockClient({
-        baseUrl: apiUrl,
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      });
+      const client = await getSandockClient(apiKey);
 
       // Use the /api/sandbox/{id}/code endpoint for code execution
       // This requires creating a sandbox first, then executing code
@@ -204,13 +208,7 @@ export const sandockProvider: ISandockProvider = {
         };
       }
 
-      const apiUrl = process.env.SANDOCK_API_URL || "https://sandock.ai";
-      const client = createSandockClient({
-        baseUrl: apiUrl,
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      });
+      const client = await getSandockClient(apiKey);
 
       const sandboxName = params.name || `gaia-sandbox-${randomUUID().slice(0, 8)}`;
 
@@ -257,13 +255,7 @@ export const sandockProvider: ISandockProvider = {
         };
       }
 
-      const apiUrl = process.env.SANDOCK_API_URL || "https://sandock.ai";
-      const client = createSandockClient({
-        baseUrl: apiUrl,
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      });
+      const client = await getSandockClient(apiKey);
 
       const { data, error } = await client.DELETE("/api/sandbox/{id}", {
         params: {
@@ -316,13 +308,7 @@ export const sandockProvider: ISandockProvider = {
         };
       }
 
-      const apiUrl = process.env.SANDOCK_API_URL || "https://sandock.ai";
-      const client = createSandockClient({
-        baseUrl: apiUrl,
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      });
+      const client = await getSandockClient(apiKey);
 
       const maxTimeout = Math.min(timeout, 300);
 
@@ -375,13 +361,7 @@ export const sandockProvider: ISandockProvider = {
         };
       }
 
-      const apiUrl = process.env.SANDOCK_API_URL || "https://sandock.ai";
-      const client = createSandockClient({
-        baseUrl: apiUrl,
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      });
+      const client = await getSandockClient(apiKey);
 
       const { data, error } = await client.POST("/api/sandbox/{id}/fs/write", {
         params: {
@@ -431,13 +411,7 @@ export const sandockProvider: ISandockProvider = {
         };
       }
 
-      const apiUrl = process.env.SANDOCK_API_URL || "https://sandock.ai";
-      const client = createSandockClient({
-        baseUrl: apiUrl,
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      });
+      const client = await getSandockClient(apiKey);
 
       const maxTimeout = Math.min(timeout, 300);
 
