@@ -159,7 +159,7 @@
     "@smithy/protocol-http": "^5.3.5",
     "@smithy/signature-v4": "^5.3.5",
     "@tavily/core": "^0.5.12",
-    "ai": "6.0.0-beta.105",
+    "ai": "6.0.0-beta.111",
     "browser-use-sdk": "^2.0.4",
     "dotenv": "^17.2.3",
     "e2b": "^2.6.3",
