@@ -76,10 +76,11 @@ export class GAIAAgent extends ToolLoopAgent {
     reasoning?: boolean; // Enable OpenAI reasoning mode (o1/o3 models)
   }) {
     const defaultTools = getDefaultTools(config?.providers);
-    const tools = (config?.tools || {
+    // unset all undefined tools
+    const tools = Object.fromEntries(Object.entries(config?.tools || {
       ...defaultTools,
       ...config?.additionalTools,
-    }) as ToolSet;
+    }).filter(([_, value]) => value !== undefined));
 
     // Determine model to use
     let model: LanguageModel;

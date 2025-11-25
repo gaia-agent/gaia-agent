@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { createGaiaAgent, getDefaultTools } from "../src/index.js";
 import { calculator, httpRequest } from "../src/tools/core.js";
+import type { Tool } from "ai";
 
 describe("calculator tool", () => {
   it("should be defined and have description", () => {
@@ -48,5 +49,16 @@ describe("createGaiaAgent", () => {
     const agent = createGaiaAgent();
     expect(agent).toBeDefined();
     expect(agent.tools).toBeDefined();
+  });
+});
+
+
+describe("createGaiaAgent with undefined tools", () => {
+  it("should create an agent instance with tools", () => {
+    const agent = createGaiaAgent({ additionalTools: { calculator: undefined as unknown as Tool, httpRequest: undefined as unknown as Tool } });
+    expect(agent).toBeDefined();
+    const toolKeys = Object.keys(agent.tools);
+    expect(toolKeys).not.toContain("calculator");
+    expect(toolKeys).not.toContain("httpRequest");
   });
 });
