@@ -206,9 +206,9 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
         } finally {
           const shouldCleanup = process.env.BROWSER_AUTO_CLEANUP_SESSION !== "false";
           if (shouldCleanup && isNewSession) {
-            await page.close({ runBeforeUnload: true }).catch(() => {});
-            await context.close().catch(() => {});
-            await browser.close().catch(() => {});
+            await page.close({ runBeforeUnload: true }).catch(() => { });
+            await context.close().catch(() => { });
+            await browser.close().catch(() => { });
             const stopCmd = new StopBrowserSessionCommand({
               browserIdentifier: identifier,
               sessionId,
@@ -243,9 +243,9 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
             break;
 
           case "exit": {
-            await page.close({ runBeforeUnload: true }).catch(() => {});
-            await context.close().catch(() => {});
-            await browser.close().catch(() => {});
+            await page.close({ runBeforeUnload: true }).catch(() => { });
+            await context.close().catch(() => { });
+            await browser.close().catch(() => { });
             const stopCmd = new StopBrowserSessionCommand({
               browserIdentifier: identifier,
               sessionId,
@@ -436,9 +436,9 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
         const shouldCleanup = process.env.BROWSER_AUTO_CLEANUP_SESSION !== "false";
         if (shouldCleanup && isNewSession && sessionId) {
           // Clean up Playwright resources
-          await page.close({ runBeforeUnload: true }).catch(() => {});
-          await context.close().catch(() => {});
-          await browser.close().catch(() => {});
+          await page.close({ runBeforeUnload: true }).catch(() => { });
+          await context.close().catch(() => { });
+          await browser.close().catch(() => { });
           // Stop browser session
           const stopCmd = new StopBrowserSessionCommand({
             browserIdentifier: identifier,
