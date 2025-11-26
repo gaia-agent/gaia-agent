@@ -90,6 +90,20 @@ export async function saveResults(
 }
 
 /**
+ * Sanitize text for markdown table cells
+ * Removes newlines, tabs, and pipes that would break table formatting
+ */
+function sanitizeMarkdownTableCell(text: string): string {
+  return text
+    .replace(/\n/g, " ") // Replace newlines with spaces
+    .replace(/\r/g, "") // Remove carriage returns
+    .replace(/\t/g, " ") // Replace tabs with spaces
+    .replace(/\|/g, "\\|") // Escape pipe characters
+    .replace(/\s+/g, " ") // Collapse multiple spaces
+    .trim();
+}
+
+/**
  * Get provider names from environment variables
  */
 function getProviderNames(): { search: string; sandbox: string; browser: string } {
@@ -212,9 +226,10 @@ async function updateDetailedResults(
   const tableRows = results
     .slice(0, 10) // Show first 10 results
     .map((result) => {
-      const questionTruncated = result.question.length > 100
-        ? result.question.slice(0, 97) + "..."
-        : result.question;
+      // Sanitize question text to prevent markdown table breaking
+      const questionSanitized = sanitizeMarkdownTableCell(result.question);
+      const questionTruncated =
+        questionSanitized.length > 100 ? questionSanitized.slice(0, 97) + "..." : questionSanitized;
       const correctIcon = result.correct ? "✅" : "❌";
       const toolsUsed = result.toolsUsed?.join(", ") || "-";
       return `| ${result.taskId} | ${questionTruncated} | ${result.level} | ${correctIcon} | ${result.steps} | ${result.durationMs.toLocaleString()} | ${toolsUsed} |`;
