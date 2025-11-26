@@ -311,17 +311,17 @@ async function runBenchmark(config: BenchmarkConfig): Promise<{
     // Use reflection evaluator if --reflect flag is enabled
     const result = config.reflect
       ? await evaluateTaskWithReflection(task, gaiaAgent, {
-          verbose: config.verbose,
-          reflectionStyle: "basic", // Can be made configurable
-        })
+        verbose: config.verbose,
+        reflectionStyle: "basic", // Can be made configurable
+      })
       : await evaluateTask(task, gaiaAgent, {
-          verbose: config.verbose,
-          stream: config.stream,
-        });
+        verbose: config.verbose,
+        stream: config.stream,
+      });
     results.push(result);
 
     // Save incremental results after each task (with all tasks for context)
-    await saveResults(results, allTasks, config.outputDir, config.dataset, true);
+    await saveResults(results, allTasks, config.outputDir, config.dataset, true, config);
 
     // Add small delay to avoid rate limits
     if (index < tasks.length - 1) {
@@ -356,11 +356,11 @@ async function main() {
     resume: args.includes("--resume"),
     category: args.includes("--category")
       ? (args[args.indexOf("--category") + 1] as
-          | "files"
-          | "code"
-          | "search"
-          | "browser"
-          | "reasoning")
+        | "files"
+        | "code"
+        | "search"
+        | "browser"
+        | "reasoning")
       : undefined,
     taskId: args.includes("--task-id") ? args[args.indexOf("--task-id") + 1] : undefined,
   };
@@ -411,7 +411,7 @@ async function main() {
     displaySummary(results);
 
     // Save results and update wrong answers
-    await saveResults(results, tasks, config.outputDir, config.dataset);
+    await saveResults(results, tasks, config.outputDir, config.dataset, false, config);
 
     console.log("✅ Benchmark completed successfully!");
     process.exit(0);

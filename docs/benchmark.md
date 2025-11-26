@@ -1,6 +1,15 @@
 # Benchmark Module
 
-Modular GAIA benchmark runner with streaming support and automatic wrong answers tracking.
+Modular GAIA benchmark runner with streaming support, automatic wrong answers tracking, and **auto-updating documentation**.
+
+## Features
+
+- ✅ **Automatic Documentation Updates**: Benchmark results automatically update README.md and docs/benchmark-results.md
+- ✅ **Resume Support**: Continue interrupted benchmarks from last checkpoint
+- ✅ **Wrong Answers Tracking**: Automatically collect and retry failed tasks
+- ✅ **Category Filtering**: Test specific capabilities (files, code, search, browser, reasoning)
+- ✅ **Streaming Mode**: Real-time agent thinking output
+- ✅ **Reflection Mode**: Optional step-by-step reflection for enhanced reasoning
 
 ## Structure
 
@@ -137,6 +146,35 @@ pnpm benchmark:wrong --verbose --stream --limit 5 --level 1
 ```
 
 📖 **[See full wrong answers documentation →](./wrong-answers.md)**
+
+## Automatic Documentation Updates
+
+After each benchmark run completes, the system automatically:
+
+1. **Updates README.md** - Adds/updates a row in the benchmark results table with:
+   - Benchmark command (e.g., `pnpm benchmark:level1`)
+   - Timestamp
+   - Results (correct/total)
+   - Accuracy percentage
+   - Model used
+   - Providers (search, sandbox, browser)
+   - Link to detailed results
+
+2. **Updates docs/benchmark-results.md** - Creates/updates a detailed section with:
+   - Full task-by-task breakdown table
+   - Task IDs, questions (truncated), level, correctness, steps, duration, tools used
+   - Complete metadata (timestamp, model, providers)
+
+**Example after running `pnpm benchmark:level1`:**
+
+README.md will show:
+```markdown
+| `pnpm benchmark:level1` | 2025-11-26 08:33 | 15/20 | 75.00% | gpt-4o | Search: tavily, Sandbox: e2b, Browser: steel | [View Details](./docs/benchmark-results.md#level-1) |
+```
+
+docs/benchmark-results.md will show a full table with all Level 1 task results.
+
+**No manual updates needed!** 🎉
 
 ## Module Details
 
