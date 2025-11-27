@@ -5,8 +5,10 @@
 import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import type { ProviderConfig } from "../src/types.js";
 import type { BenchmarkConfig, GaiaBenchmarkResult, GaiaTask } from "./types.js";
 import { updateWrongAnswers } from "./wrong-answers.js";
+import { getCompleteProviderConfig } from "./provider-helper.js";
 
 /**
  * Calculate and display summary statistics
@@ -104,16 +106,6 @@ function sanitizeMarkdownTableCell(text: string): string {
 }
 
 /**
- * Get provider names from environment variables
- */
-function getProviderNames(): { search: string; sandbox: string; browser: string } {
-  const search = process.env.GAIA_AGENT_SEARCH_PROVIDER || "tavily";
-  const sandbox = process.env.GAIA_AGENT_SANDBOX_PROVIDER || "e2b";
-  const browser = process.env.GAIA_AGENT_BROWSER_PROVIDER || "steel";
-  return { search, sandbox, browser };
-}
-
-/**
  * Determine benchmark command from config
  */
 function getBenchmarkCommand(dataset: string, config?: BenchmarkConfig): string {
@@ -148,7 +140,7 @@ async function updateReadmeTable(
     accuracy: number;
     model: string;
   },
-  providers: { search: string; sandbox: string; browser: string },
+  providers: ProviderConfig,
   detailsLink: string,
 ): Promise<void> {
   const readmePath = join(process.cwd(), "README.md");
@@ -162,7 +154,7 @@ async function updateReadmeTable(
   const timestamp = new Date(metadata.timestamp).toISOString().slice(0, 16).replace("T", " ");
   const results = `${metadata.correct}/${metadata.total}`;
   const accuracy = `${metadata.accuracy.toFixed(2)}%`;
-  const providerText = `Search: ${providers.search}, Sandbox: ${providers.sandbox}, Browser: ${providers.browser}`;
+  const providerText = `Search: ${providers.search}, Sandbox: ${providers.sandbox}, Browser: ${providers.browser}, Memory: ${providers.memory}`;
 
   const newRow = `| \`${command}\` | ${timestamp} | ${results} | ${accuracy} | ${metadata.model} | ${providerText} | [View Details](${detailsLink}) |`;
 
@@ -208,7 +200,7 @@ async function updateDetailedResults(
     accuracy: number;
     model: string;
   },
-  providers: { search: string; sandbox: string; browser: string },
+  providers: ProviderConfig,
 ): Promise<void> {
   const docsPath = join(process.cwd(), "docs", "benchmark-results.md");
 
@@ -237,7 +229,7 @@ async function updateDetailedResults(
     .join("\n");
 
   const timestamp = new Date(metadata.timestamp).toISOString().slice(0, 19).replace("T", " ");
-  const providerText = `Search: ${providers.search}, Sandbox: ${providers.sandbox}, Browser: ${providers.browser}`;
+  const providerText = `Search: ${providers.search}, Sandbox: ${providers.sandbox}, Browser: ${providers.browser}, Memory: ${providers.memory}`;
 
   const newSection = `## ${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}
 
@@ -315,7 +307,7 @@ async function updateBenchmarkDocs(
 ): Promise<void> {
   try {
     const command = getBenchmarkCommand(dataset, config);
-    const providers = getProviderNames();
+    const providers = getCompleteProviderConfig();
     const sectionId = getSectionIdFromCommand(command, dataset);
     const detailsLink = `./docs/benchmark-results.md#${sectionId}`;
 
