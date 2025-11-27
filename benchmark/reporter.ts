@@ -6,7 +6,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { ProviderConfig } from "../src/types.js";
-import type { BenchmarkConfig, GaiaBenchmarkResult, GaiaTask } from "./types.js";
+import type { BenchmarkConfig, GaiaBenchmarkMetadata, GaiaBenchmarkResult, GaiaTask } from "./types.js";
 import { updateWrongAnswers } from "./wrong-answers.js";
 import { getCompleteProviderConfig } from "./provider-helper.js";
 
@@ -60,17 +60,19 @@ export async function saveResults(
   const correct = results.filter((r) => r.correct).length;
   const accuracy = total > 0 ? (correct / total) * 100 : 0;
 
+  const metadata: GaiaBenchmarkMetadata = {
+    dataset,
+    timestamp: new Date().toISOString(),
+    total,
+    correct,
+    accuracy: Number.parseFloat(accuracy.toFixed(2)),
+    agent: "gaia-agent",
+    model: process.env.OPENAI_MODEL || "gpt-4o",
+    incremental,
+  };
+
   const output = {
-    metadata: {
-      dataset,
-      timestamp: new Date().toISOString(),
-      total,
-      correct,
-      accuracy: Number.parseFloat(accuracy.toFixed(2)),
-      agent: "gaia-agent",
-      model: process.env.OPENAI_MODEL || "gpt-4o",
-      incremental,
-    },
+    metadata,
     results,
   };
 
@@ -87,7 +89,7 @@ export async function saveResults(
   if (!incremental) {
     await updateWrongAnswers(results, tasks, outputDir);
     // Update README.md and detailed results file
-    await updateBenchmarkDocs(results, dataset, output.metadata, config);
+    await updateBenchmarkDocs(results, output.metadata, config);
   }
 }
 
@@ -133,13 +135,7 @@ function getBenchmarkCommand(dataset: string, config?: BenchmarkConfig): string 
  */
 async function updateReadmeTable(
   command: string,
-  metadata: {
-    timestamp: string;
-    total: number;
-    correct: number;
-    accuracy: number;
-    model: string;
-  },
+  metadata: GaiaBenchmarkMetadata,
   providers: ProviderConfig,
   detailsLink: string,
 ): Promise<void> {
@@ -192,14 +188,7 @@ async function updateReadmeTable(
 async function updateDetailedResults(
   command: string,
   results: GaiaBenchmarkResult[],
-  metadata: {
-    dataset: string;
-    timestamp: string;
-    total: number;
-    correct: number;
-    accuracy: number;
-    model: string;
-  },
+  metadata: GaiaBenchmarkMetadata,
   providers: ProviderConfig,
 ): Promise<void> {
   const docsPath = join(process.cwd(), "docs", "benchmark-results.md");
@@ -295,24 +284,18 @@ function getSectionIdFromCommand(command: string, dataset: string): string {
  */
 async function updateBenchmarkDocs(
   results: GaiaBenchmarkResult[],
-  dataset: string,
-  metadata: {
-    timestamp: string;
-    total: number;
-    correct: number;
-    accuracy: number;
-    model: string;
-  },
+  metadata: GaiaBenchmarkMetadata,
   config?: BenchmarkConfig,
 ): Promise<void> {
   try {
+    const dataset = metadata.dataset;
     const command = getBenchmarkCommand(dataset, config);
     const providers = getCompleteProviderConfig();
     const sectionId = getSectionIdFromCommand(command, dataset);
     const detailsLink = `./docs/benchmark-results.md#${sectionId}`;
 
     await updateReadmeTable(command, metadata, providers, detailsLink);
-    await updateDetailedResults(command, results, { dataset, ...metadata }, providers);
+    await updateDetailedResults(command, results, metadata, providers);
   } catch (error) {
     console.error("❌ Error updating benchmark docs:", error);
   }

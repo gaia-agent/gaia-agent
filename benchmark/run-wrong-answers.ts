@@ -31,7 +31,6 @@ if (!process.env.OPENAI_API_KEY) {
 
 import { createOpenAI } from "@ai-sdk/openai";
 import { createGaiaAgent } from "../src/index.js";
-import type { ProviderConfig } from "../src/types.js";
 import { downloadGaiaDataset } from "./downloader.js";
 import { evaluateTask } from "./evaluator.js";
 import { displaySummary, saveResults } from "./reporter.js";

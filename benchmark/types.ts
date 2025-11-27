@@ -28,4 +28,15 @@ export interface HuggingFaceTask {
   Annotator_Metadata?: Record<string, unknown>;
 }
 
+export interface GaiaBenchmarkMetadata {
+  dataset: string;
+  timestamp: string;
+  total: number;
+  correct: number;
+  accuracy: number;
+  agent: string;
+  model: string;
+  incremental?: boolean;
+}
+
 export type { GaiaBenchmarkResult, GaiaTask, StepDetail };
