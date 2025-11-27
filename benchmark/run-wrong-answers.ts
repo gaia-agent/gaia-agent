@@ -31,12 +31,12 @@ if (!process.env.OPENAI_API_KEY) {
 
 import { createOpenAI } from "@ai-sdk/openai";
 import { createGaiaAgent } from "../src/index.js";
-import type { ProviderConfig } from "../src/types.js";
 import { downloadGaiaDataset } from "./downloader.js";
 import { evaluateTask } from "./evaluator.js";
 import { displaySummary, saveResults } from "./reporter.js";
 import type { GaiaBenchmarkResult } from "./types.js";
 import { displayWrongAnswersSummary, loadWrongAnswers } from "./wrong-answers.js";
+import { getCompleteProviderConfig } from "./provider-helper.js";
 
 /**
  * Get OpenAI model from environment
@@ -47,43 +47,6 @@ function getOpenAIModel() {
     baseURL: process.env.OPENAI_BASE_URL,
     apiKey: process.env.OPENAI_API_KEY,
   })(modelName);
-}
-
-/**
- * Get provider configuration from environment
- */
-function getProviderConfigFromEnv(): ProviderConfig | undefined {
-  const config: ProviderConfig = {};
-
-  if (process.env.GAIA_AGENT_SEARCH_PROVIDER) {
-    const provider = process.env.GAIA_AGENT_SEARCH_PROVIDER.toLowerCase();
-    if (provider === "tavily" || provider === "exa") {
-      config.search = provider;
-    }
-  }
-
-  if (process.env.GAIA_AGENT_SANDBOX_PROVIDER) {
-    const provider = process.env.GAIA_AGENT_SANDBOX_PROVIDER.toLowerCase();
-    if (provider === "e2b" || provider === "sandock") {
-      config.sandbox = provider;
-    }
-  }
-
-  if (process.env.GAIA_AGENT_BROWSER_PROVIDER) {
-    const provider = process.env.GAIA_AGENT_BROWSER_PROVIDER.toLowerCase();
-    if (provider === "browseruse" || provider === "aws-bedrock-agentcore" || provider === "steel") {
-      config.browser = provider;
-    }
-  }
-
-  if (process.env.GAIA_AGENT_MEMORY_PROVIDER) {
-    const provider = process.env.GAIA_AGENT_MEMORY_PROVIDER.toLowerCase();
-    if (provider === "mem0" || provider === "agentcore") {
-      config.memory = provider;
-    }
-  }
-
-  return Object.keys(config).length > 0 ? config : undefined;
 }
 
 /**
@@ -104,7 +67,7 @@ async function main() {
     : undefined;
 
   const modelName = process.env.OPENAI_MODEL || "gpt-4o";
-  const providers = getProviderConfigFromEnv();
+  const providers = getCompleteProviderConfig();
 
   console.log("📚 Wrong Answers Benchmark Runner");
   console.log("=".repeat(60));
@@ -116,10 +79,10 @@ async function main() {
   console.log(`Level:    ${levelFilter || "all"}`);
   console.log("=".repeat(60));
   console.log("Providers:");
-  console.log(`  Search:  ${providers?.search || "tavily"}`);
-  console.log(`  Sandbox: ${providers?.sandbox || "e2b"}`);
-  console.log(`  Browser: ${providers?.browser || "steel"}`);
-  console.log(`  Memory:  ${providers?.memory || "mem0"} (optional)`);
+  console.log(`  Search:  ${providers.search}`);
+  console.log(`  Sandbox: ${providers.sandbox}`);
+  console.log(`  Browser: ${providers.browser}`);
+  console.log(`  Memory:  ${providers.memory} (optional)`);
   console.log(`${"=".repeat(60)}\n`);
 
   // Load wrong answers collection

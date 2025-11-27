@@ -271,6 +271,21 @@ Easier to analyze and debug! 🎉
 
 ---
 
+## 📈 Benchmark Results
+
+Latest benchmark performance across different task categories:
+
+| Benchmark Command | Timestamp | Results | Accuracy | Model | Providers | Details |
+|-------------------|-----------|---------|----------|-------|-----------|---------|
+| `pnpm benchmark` | 2025-11-26 08:33 | 22/53 | 41.51% | gpt-4o | Search: tavily, Sandbox: e2b, Browser: steel | [View Details](./docs/benchmark-results.md#validation) |
+| `pnpm benchmark:level1` | 2025-11-27 10:38 | 16/53 | 30.19% | gpt-4o | Search: openai, Sandbox: e2b, Browser: steel, Memory: mem0 | [View Details](./docs/benchmark-results.md#level-1) |
+
+📖 **[See detailed task-by-task results →](./docs/benchmark-results.md)**
+
+**Note:** Benchmark results are automatically updated after each benchmark run.
+
+---
+
 ## 🧪 Testing
 
 Run unit tests with Vitest:

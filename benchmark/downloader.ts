@@ -168,7 +168,7 @@ export async function downloadGaiaDataset(dataset: "validation" | "test"): Promi
     if (error instanceof Error && error.message.includes("401")) {
       console.error(
         "   Please set HUGGINGFACE_TOKEN in your .env file.\n" +
-          "   Get your token from: https://huggingface.co/settings/tokens",
+        "   Get your token from: https://huggingface.co/settings/tokens",
       );
     }
     throw error;

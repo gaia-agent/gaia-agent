@@ -62,14 +62,14 @@ if (!process.env.OPENAI_API_KEY) {
 import { readFile } from "node:fs/promises";
 // Now import other modules AFTER env is loaded
 import { createOpenAI } from "@ai-sdk/openai";
-import { DEFAULT_PROVIDERS } from "../src/config/defaults.js";
 import { createGaiaAgent } from "../src/index.js";
-import type { GaiaTask, ProviderConfig } from "../src/types.js";
+import type { GaiaTask } from "../src/types.js";
 import { downloadGaiaDataset } from "./downloader.js";
 import { evaluateTask } from "./evaluator.js";
 import { evaluateTaskWithReflection } from "./reflection-evaluator.js";
 import { displaySummary, saveResults } from "./reporter.js";
 import type { BenchmarkConfig, GaiaBenchmarkResult } from "./types.js";
+import { getCompleteProviderConfig, getProviderConfigFromEnv } from "./provider-helper.js";
 
 /**
  * Load checkpoint from latest.json if it exists
@@ -118,43 +118,6 @@ function getOpenAIModel() {
     baseURL: process.env.OPENAI_BASE_URL,
     apiKey: process.env.OPENAI_API_KEY,
   })(modelName);
-}
-
-/**
- * Get provider configuration from environment variables
- */
-function getProviderConfigFromEnv(): ProviderConfig | undefined {
-  const config: ProviderConfig = {};
-
-  if (process.env.GAIA_AGENT_SEARCH_PROVIDER) {
-    const provider = process.env.GAIA_AGENT_SEARCH_PROVIDER.toLowerCase();
-    if (provider === "tavily" || provider === "exa") {
-      config.search = provider;
-    }
-  }
-
-  if (process.env.GAIA_AGENT_SANDBOX_PROVIDER) {
-    const provider = process.env.GAIA_AGENT_SANDBOX_PROVIDER.toLowerCase();
-    if (provider === "e2b" || provider === "sandock") {
-      config.sandbox = provider;
-    }
-  }
-
-  if (process.env.GAIA_AGENT_BROWSER_PROVIDER) {
-    const provider = process.env.GAIA_AGENT_BROWSER_PROVIDER.toLowerCase();
-    if (provider === "browseruse" || provider === "aws-bedrock-agentcore") {
-      config.browser = provider;
-    }
-  }
-
-  if (process.env.GAIA_AGENT_MEMORY_PROVIDER) {
-    const provider = process.env.GAIA_AGENT_MEMORY_PROVIDER.toLowerCase();
-    if (provider === "mem0" || provider === "agentcore") {
-      config.memory = provider;
-    }
-  }
-
-  return Object.keys(config).length > 0 ? config : undefined;
 }
 
 /**
@@ -311,17 +274,17 @@ async function runBenchmark(config: BenchmarkConfig): Promise<{
     // Use reflection evaluator if --reflect flag is enabled
     const result = config.reflect
       ? await evaluateTaskWithReflection(task, gaiaAgent, {
-          verbose: config.verbose,
-          reflectionStyle: "basic", // Can be made configurable
-        })
+        verbose: config.verbose,
+        reflectionStyle: "basic", // Can be made configurable
+      })
       : await evaluateTask(task, gaiaAgent, {
-          verbose: config.verbose,
-          stream: config.stream,
-        });
+        verbose: config.verbose,
+        stream: config.stream,
+      });
     results.push(result);
 
     // Save incremental results after each task (with all tasks for context)
-    await saveResults(results, allTasks, config.outputDir, config.dataset, true);
+    await saveResults(results, allTasks, config.outputDir, config.dataset, true, config);
 
     // Add small delay to avoid rate limits
     if (index < tasks.length - 1) {
@@ -356,22 +319,18 @@ async function main() {
     resume: args.includes("--resume"),
     category: args.includes("--category")
       ? (args[args.indexOf("--category") + 1] as
-          | "files"
-          | "code"
-          | "search"
-          | "browser"
-          | "reasoning")
+        | "files"
+        | "code"
+        | "search"
+        | "browser"
+        | "reasoning")
       : undefined,
     taskId: args.includes("--task-id") ? args[args.indexOf("--task-id") + 1] : undefined,
   };
 
   // Get configuration info
   const modelName = process.env.OPENAI_MODEL || "gpt-4o";
-  const providers = getProviderConfigFromEnv();
-  const searchProvider = providers?.search || DEFAULT_PROVIDERS.search;
-  const sandboxProvider = providers?.sandbox || DEFAULT_PROVIDERS.sandbox;
-  const browserProvider = providers?.browser || DEFAULT_PROVIDERS.browser;
-  const memoryProvider = providers?.memory || DEFAULT_PROVIDERS.memory;
+  const providers = getCompleteProviderConfig();
 
   console.log("🤖 GAIA Benchmark Runner");
   console.log("=".repeat(60));
@@ -389,10 +348,10 @@ async function main() {
   console.log(`Verbose:  ${config.verbose}`);
   console.log("=".repeat(60));
   console.log("Providers:");
-  console.log(`  Search:  ${searchProvider}`);
-  console.log(`  Sandbox: ${sandboxProvider}`);
-  console.log(`  Browser: ${browserProvider}`);
-  console.log(`  Memory:  ${memoryProvider} (optional)`);
+  console.log(`  Search:  ${providers.search}`);
+  console.log(`  Sandbox: ${providers.sandbox}`);
+  console.log(`  Browser: ${providers.browser}`);
+  console.log(`  Memory:  ${providers.memory} (optional)`);
   console.log(`${"=".repeat(60)}\n`);
 
   // Check for API key
@@ -411,7 +370,7 @@ async function main() {
     displaySummary(results);
 
     // Save results and update wrong answers
-    await saveResults(results, tasks, config.outputDir, config.dataset);
+    await saveResults(results, tasks, config.outputDir, config.dataset, false, config);
 
     console.log("✅ Benchmark completed successfully!");
     process.exit(0);
