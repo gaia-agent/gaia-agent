@@ -205,15 +205,21 @@ async function updateDetailedResults(
 
   // Generate table rows
   const tableRows = results
-    .slice(0, 10) // Show first 10 results
+    // .slice(0, 10) // Show first 10 results
     .map((result) => {
       // Sanitize question text to prevent markdown table breaking
       const questionSanitized = sanitizeMarkdownTableCell(result.question);
       const questionTruncated =
-        questionSanitized.length > 100 ? questionSanitized.slice(0, 97) + "..." : questionSanitized;
+        questionSanitized.length > 100 ? `${questionSanitized.slice(0, 97)}...` : questionSanitized;
+      const answerSanitized = sanitizeMarkdownTableCell(result.answer || "-");
+      const answerTruncated =
+        answerSanitized.length > 50 ? `${answerSanitized.slice(0, 47)}...` : answerSanitized;
+      const expectedAnswerSanitized = sanitizeMarkdownTableCell(result.expectedAnswer || "-");
+      const expectedAnswerTruncated =
+        expectedAnswerSanitized.length > 50 ? `${expectedAnswerSanitized.slice(0, 47)}...` : expectedAnswerSanitized;
       const correctIcon = result.correct ? "✅" : "❌";
       const toolsUsed = result.toolsUsed?.join(", ") || "-";
-      return `| ${result.taskId} | ${questionTruncated} | ${result.level} | ${correctIcon} | ${result.steps} | ${result.durationMs.toLocaleString()} | ${toolsUsed} |`;
+      return `| ${result.taskId} | ${questionTruncated} | ${result.level} | ${answerTruncated} | ${expectedAnswerTruncated} | ${correctIcon} | ${result.steps} | ${result.durationMs.toLocaleString()} | ${toolsUsed} |`;
     })
     .join("\n");
 
@@ -229,8 +235,8 @@ async function updateDetailedResults(
 **Model:** ${metadata.model}  
 **Providers:** ${providerText}
 
-| Task ID | Question | Level | Correct | Steps | Duration (ms) | Tools Used |
-|---------|----------|-------|---------|-------|---------------|------------|
+| Task ID | Question | Level | Answer | Expected Answer | Correct | Steps | Duration (ms) | Tools Used |
+|---------|----------|-------|--------|-----------------|---------|-------|---------------|------------|
 ${tableRows}
 
 *Note: This table shows a sample of results. Full results are available in the JSON files.*

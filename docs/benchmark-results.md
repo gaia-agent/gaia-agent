@@ -122,11 +122,11 @@ Each benchmark result includes:
 - **Task ID**: Unique identifier for the task
 - **Question**: The task question (truncated in table view)
 - **Level**: Difficulty level (1-3)
+- **Answer**: Agent's final answer (truncated in table view)
+- **Expected Answer**: Correct answer from GAIA dataset (truncated in table view)
 - **Correct**: ✅ if answer matches expected, ❌ otherwise
 - **Steps**: Number of reasoning steps taken
 - **Duration**: Time taken in milliseconds
 - **Tools Used**: List of tools invoked during execution
-- **Answer**: Agent's final answer
-- **Expected Answer**: Correct answer from GAIA dataset
 
 For complete results including full questions, answers, and step-by-step details, see the JSON files in `benchmark-results/`.
