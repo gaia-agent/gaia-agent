@@ -76,18 +76,25 @@ export interface IAgentCoreProvider {
 
 /**
  * Generic memory provider interface (for factory use)
+ * Uses bivariant function types for compatibility with specific provider types
  */
 export interface IMemoryProvider {
-  store: (params: unknown) => Promise<MemoryResult>;
-  retrieve: (params: unknown) => Promise<MemoryResult>;
-  delete?: (params: unknown) => Promise<MemoryResult>;
+  // biome-ignore lint/suspicious/noExplicitAny: Required for provider type compatibility in registry pattern
+  store: (params: any) => Promise<MemoryResult>;
+  // biome-ignore lint/suspicious/noExplicitAny: Required for provider type compatibility in registry pattern
+  retrieve: (params: any) => Promise<MemoryResult>;
+  // biome-ignore lint/suspicious/noExplicitAny: Required for provider type compatibility in registry pattern
+  delete?: (params: any) => Promise<MemoryResult>;
 }
 
 /**
  * Schema definitions for each provider
  */
 export interface IMemorySchemas {
+  // biome-ignore lint/suspicious/noExplicitAny: Zod schema generic type
   storeSchema: z.ZodObject<any>;
+  // biome-ignore lint/suspicious/noExplicitAny: Zod schema generic type
   retrieveSchema: z.ZodObject<any>;
+  // biome-ignore lint/suspicious/noExplicitAny: Zod schema generic type
   deleteSchema?: z.ZodObject<any>;
 }
