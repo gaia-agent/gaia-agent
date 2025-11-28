@@ -30,21 +30,24 @@ export interface Mem0RetrieveParams {
 }
 
 /**
- * AgentCore specific types
+ * AgentCore specific types - aligned with AWS SDK API
  */
 export interface AgentCoreStoreParams {
-  sessionId: string;
+  memoryId: string;
   content: string;
-  metadata?: Record<string, string>;
+  namespace: string;
+  memoryStrategyId?: string;
   awsRegion?: string;
   awsAccessKeyId?: string;
   awsSecretAccessKey?: string;
-  memoryId?: string;
 }
 
 export interface AgentCoreRetrieveParams {
-  sessionId: string;
-  query?: string;
+  memoryId: string;
+  namespace: string;
+  query: string;
+  topK?: number;
+  memoryStrategyId?: string;
   maxResults?: number;
   awsRegion?: string;
   awsAccessKeyId?: string;
@@ -52,8 +55,8 @@ export interface AgentCoreRetrieveParams {
 }
 
 export interface AgentCoreDeleteParams {
-  sessionId: string;
   memoryId: string;
+  memoryRecordId: string;
   awsRegion?: string;
   awsAccessKeyId?: string;
   awsSecretAccessKey?: string;
@@ -76,18 +79,25 @@ export interface IAgentCoreProvider {
 
 /**
  * Generic memory provider interface (for factory use)
+ * Uses bivariant function types for compatibility with specific provider types
  */
 export interface IMemoryProvider {
-  store: (params: unknown) => Promise<MemoryResult>;
-  retrieve: (params: unknown) => Promise<MemoryResult>;
-  delete?: (params: unknown) => Promise<MemoryResult>;
+  // biome-ignore lint/suspicious/noExplicitAny: Required for provider type compatibility in registry pattern
+  store: (params: any) => Promise<MemoryResult>;
+  // biome-ignore lint/suspicious/noExplicitAny: Required for provider type compatibility in registry pattern
+  retrieve: (params: any) => Promise<MemoryResult>;
+  // biome-ignore lint/suspicious/noExplicitAny: Required for provider type compatibility in registry pattern
+  delete?: (params: any) => Promise<MemoryResult>;
 }
 
 /**
  * Schema definitions for each provider
  */
 export interface IMemorySchemas {
+  // biome-ignore lint/suspicious/noExplicitAny: Zod schema generic type
   storeSchema: z.ZodObject<any>;
+  // biome-ignore lint/suspicious/noExplicitAny: Zod schema generic type
   retrieveSchema: z.ZodObject<any>;
+  // biome-ignore lint/suspicious/noExplicitAny: Zod schema generic type
   deleteSchema?: z.ZodObject<any>;
 }
