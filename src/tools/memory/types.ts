@@ -30,21 +30,24 @@ export interface Mem0RetrieveParams {
 }
 
 /**
- * AgentCore specific types
+ * AgentCore specific types - aligned with AWS SDK API
  */
 export interface AgentCoreStoreParams {
-  sessionId: string;
+  memoryId: string;
   content: string;
-  metadata?: Record<string, string>;
+  namespace: string;
+  memoryStrategyId?: string;
   awsRegion?: string;
   awsAccessKeyId?: string;
   awsSecretAccessKey?: string;
-  memoryId?: string;
 }
 
 export interface AgentCoreRetrieveParams {
-  sessionId: string;
-  query?: string;
+  memoryId: string;
+  namespace: string;
+  query: string;
+  topK?: number;
+  memoryStrategyId?: string;
   maxResults?: number;
   awsRegion?: string;
   awsAccessKeyId?: string;
@@ -52,8 +55,8 @@ export interface AgentCoreRetrieveParams {
 }
 
 export interface AgentCoreDeleteParams {
-  sessionId: string;
   memoryId: string;
+  memoryRecordId: string;
   awsRegion?: string;
   awsAccessKeyId?: string;
   awsSecretAccessKey?: string;
