@@ -131,7 +131,34 @@ function getBenchmarkCommand(dataset: string, config?: BenchmarkConfig): string 
 }
 
 /**
+ * Parse a table row to extract command, model, and providers
+ */
+function parseTableRow(row: string): { command: string; model: string; providers: string } | null {
+  // Match: | `command` | timestamp | results | accuracy | model | providers | details |
+  const match = row.match(/\|\s*`([^`]+)`\s*\|[^|]+\|[^|]+\|[^|]+\|\s*([^|]+)\s*\|\s*([^|]+)\s*\|/);
+  if (match) {
+    return {
+      command: match[1].trim(),
+      model: match[2].trim(),
+      providers: match[3].trim(),
+    };
+  }
+  return null;
+}
+
+/**
+ * Clear the Details link from a table row
+ */
+function clearDetailsLink(row: string): string {
+  // Replace [View Details](link) or any markdown link with "-"
+  return row.replace(/\[View Details\]\([^)]*\)/, "-");
+}
+
+/**
  * Update README.md with benchmark results
+ * - Matches rows by command + model + providers
+ * - If same command but different model/providers, keeps multiple rows
+ * - Only the latest row for each command has Details link, old ones are cleared
  */
 async function updateReadmeTable(
   command: string,
@@ -164,19 +191,51 @@ async function updateReadmeTable(
   }
 
   const existingRows = match[2].split("\n").filter((row) => row.trim());
-  const commandColumn = existingRows.findIndex((row) => row.includes(`\`${command}\``));
 
-  let newTableRows: string;
-  if (commandColumn !== -1) {
-    // Update existing row
-    existingRows[commandColumn] = newRow;
-    newTableRows = existingRows.join("\n");
+  // Find exact match (same command + model + providers)
+  const exactMatchIndex = existingRows.findIndex((row) => {
+    const parsed = parseTableRow(row);
+    return parsed &&
+      parsed.command === command &&
+      parsed.model === metadata.model &&
+      parsed.providers === providerText;
+  });
+
+  // Find all rows with the same command (to clear their Details links)
+  const sameCommandIndices = existingRows
+    .map((row, idx) => {
+      const parsed = parseTableRow(row);
+      return parsed && parsed.command === command ? idx : -1;
+    })
+    .filter((idx) => idx !== -1);
+
+  let newTableRows: string[];
+
+  if (exactMatchIndex !== -1) {
+    // Exact match found - update that row
+    // First, clear Details links for other rows with same command
+    newTableRows = existingRows.map((row, idx) => {
+      if (idx === exactMatchIndex) {
+        return newRow; // Update with new data including Details link
+      }
+      if (sameCommandIndices.includes(idx)) {
+        return clearDetailsLink(row); // Clear Details link for same command rows
+      }
+      return row;
+    });
   } else {
-    // Add new row
-    newTableRows = [...existingRows, newRow].join("\n");
+    // No exact match - add new row
+    // Clear Details links for all existing rows with same command
+    newTableRows = existingRows.map((row, idx) => {
+      if (sameCommandIndices.includes(idx)) {
+        return clearDetailsLink(row);
+      }
+      return row;
+    });
+    newTableRows.push(newRow);
   }
 
-  const updatedReadme = readme.replace(tableRegex, `$1${newTableRows}$3`);
+  const updatedReadme = readme.replace(tableRegex, `$1${newTableRows.join("\n")}$3`);
   await writeFile(readmePath, updatedReadme);
 
   console.log("📝 Updated README.md benchmark table");
