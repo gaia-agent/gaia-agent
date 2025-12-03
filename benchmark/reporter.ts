@@ -225,8 +225,9 @@ async function updateDetailedResults(
 
   const timestamp = new Date(metadata.timestamp).toISOString().slice(0, 19).replace("T", " ");
   const providerText = `Search: ${providers.search}, Sandbox: ${providers.sandbox}, Browser: ${providers.browser}, Memory: ${providers.memory}`;
+  const sectionTitle = getSectionTitle(sectionId);
 
-  const newSection = `## ${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}
+  const newSection = `## ${sectionTitle}
 
 **Command:** \`${command}\`  
 **Dataset:** ${metadata.dataset}  
@@ -244,7 +245,7 @@ ${tableRows}
 ---`;
 
   // Replace section or add if not exists
-  const sectionRegex = new RegExp(`## ${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}[\\s\\S]*?(?=\\n## |$)`, "i");
+  const sectionRegex = new RegExp(`## ${sectionTitle}[\\s\\S]*?(?=\\n## |$)`, "i");
 
   if (sectionRegex.test(detailedResults)) {
     detailedResults = detailedResults.replace(sectionRegex, newSection);
@@ -283,6 +284,18 @@ function getSectionIdFromCommand(command: string, dataset: string): string {
   if (command.includes("reasoning")) return "reasoning";
   if (dataset === "test") return "test";
   return "validation";
+}
+
+/**
+ * Convert section ID to display title
+ * e.g., "level-1" -> "Level 1", "validation" -> "Validation"
+ */
+function getSectionTitle(sectionId: string): string {
+  if (sectionId.startsWith("level-")) {
+    const level = sectionId.replace("level-", "");
+    return `Level ${level}`;
+  }
+  return sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
 }
 
 /**
