@@ -224,11 +224,22 @@ export const BrowserActionSchema = z.union([
       .optional()
       .default(false)
       .describe("For sequence: whether to return extract page content at the end"),
-    wantScreenshot: z
+    wantElements: z
       .boolean()
       .optional()
       .default(false)
-      .describe("For sequence: whether to return captured screenshot at the end"),
+      .describe(
+        "Extract interactive elements (links, buttons, inputs) with CSS selectors. " +
+        "Default: false. Essential for subsequent click/fill operations.",
+      ),
+    wantScreenshot: z
+      .boolean()
+      .optional()
+      .default(true)
+      .describe(
+        "Whether to return screenshot URL at the end for artifact display. " +
+        "Default: true. Only set to false when user explicitly requests to disable screenshot.",
+      ),
   }),
   // Composite action: open (launch+navigate+info/extract/screenshot)
   z
@@ -245,9 +256,29 @@ export const BrowserActionSchema = z.union([
         .describe("Viewport for new browser sessions. Default 1280x1080"),
       wantInfo: z.boolean().optional().default(true).describe("Include page title/url"),
       wantContent: z.boolean().optional().default(false).describe("Extract page content"),
-      wantScreenshot: z.boolean().optional().default(false).describe("Capture screenshot (base64)"),
+      wantElements: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Extract interactive elements (links, buttons, inputs) with CSS selectors. " +
+          "Default: false. Essential for click/fill operations.",
+        ),
+      wantScreenshot: z
+        .boolean()
+        .optional()
+        .default(true)
+        .describe(
+          "Capture screenshot URL for artifact display. " +
+          "Default: true. Only set to false when user explicitly requests to disable screenshot.",
+        ),
     })
-    .describe("Open a browser session, navigate to URL, and perform info/extract/screenshot."),
+    .describe(
+      "Open a browser session and navigate to URL. " +
+      "If no sessionId provided, creates a new session. " +
+      "If user explicitly requests to continue using an existing session, you may provide a valid sessionId from previous operations. " +
+      "NEVER invent a sessionId - only use one returned from a previous browser operation.",
+    ),
 ]);
 export type BrowserAction = z.infer<typeof BrowserActionSchema>;
 

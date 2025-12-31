@@ -94,10 +94,11 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
       return sessionId;
     };
 
-    // Helper to build final result with optional content/screenshot
+    // Helper to build final result with optional content/elements/screenshot
     const buildFinalResult = async (
       page: import("playwright").Page,
       wantContent?: boolean,
+      wantElements?: boolean,
       wantScreenshot?: boolean,
     ): Promise<Record<string, unknown>> => {
       const result: Record<string, unknown> = {
@@ -107,6 +108,50 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
 
       if (wantContent) {
         result.content = await page.content();
+      }
+
+      // Extract interactive elements with selectors (helps AI understand available elements)
+      if (wantElements) {
+        try {
+          // Use evaluate with explicit any to avoid DOM type issues
+          // biome-ignore lint/suspicious/noExplicitAny: Browser context types
+          const elements = await page.evaluate((): any[] => {
+            // biome-ignore lint/suspicious/noExplicitAny: Browser context
+            const interactiveElements: any[] = [];
+
+            // Helper to generate a unique selector
+            // biome-ignore lint/suspicious/noExplicitAny: Browser context
+            const getSelector = (el: any): string => {
+              if (el.id) return `#${el.id}`;
+              if (el.className && typeof el.className === "string") {
+                const classes = el.className.trim().split(/\s+/).join(".");
+                if (classes) return `${el.tagName.toLowerCase()}.${classes}`;
+              }
+              return el.tagName.toLowerCase();
+            };
+
+            // Find interactive elements
+            const selectors = "a, button, input, select, textarea, [role=button], [onclick]";
+            // biome-ignore lint/suspicious/noExplicitAny: Browser context
+            (globalThis as any).document.querySelectorAll(selectors).forEach((el: any) => {
+              const rect = el.getBoundingClientRect();
+              const visible = rect.width > 0 && rect.height > 0;
+              interactiveElements.push({
+                tag: el.tagName.toLowerCase(),
+                type: el.type || undefined,
+                text: el.textContent?.trim().slice(0, 100) || undefined,
+                href: el.href || undefined,
+                selector: getSelector(el),
+                visible,
+              });
+            });
+
+            return interactiveElements.slice(0, 50); // Limit to 50 elements
+          });
+          result.elements = elements;
+        } catch {
+          // Ignore errors in element extraction
+        }
       }
 
       if (wantScreenshot) {
@@ -207,6 +252,7 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
           const result = await buildFinalResult(
             page,
             operation.wantContent,
+            operation.wantElements,
             operation.wantScreenshot,
           );
 
@@ -422,6 +468,7 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
           const finalResult = await buildFinalResult(
             page,
             operation.wantContent,
+            operation.wantElements,
             operation.wantScreenshot,
           );
 

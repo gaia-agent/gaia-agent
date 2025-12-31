@@ -79,7 +79,10 @@ export const createBrowserTool = (
       "FEATURES: Graceful error handling (selector not found = fallback to page content), configurable timeouts, automatic retries.",
     inputSchema: awsAgentCoreSchemas.executeSchema as unknown as Tool["inputSchema"],
     execute: ((params: unknown) =>
-      awsAgentCoreProvider.execute(params as Parameters<typeof awsAgentCoreProvider.execute>[0], screenshotUploadFn)) as unknown as Tool["execute"],
+      awsAgentCoreProvider.execute(
+        params as Parameters<typeof awsAgentCoreProvider.execute>[0],
+        screenshotUploadFn,
+      )) as unknown as Tool["execute"],
   });
 };
 
