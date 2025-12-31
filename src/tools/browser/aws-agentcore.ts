@@ -19,6 +19,7 @@ import {
   type BrowserBaseActionSchema,
   type BrowserResult,
   type IAWSAgentCoreProvider,
+  type ScreenshotUploadFn,
 } from "./types.js";
 import type { z } from "zod";
 
@@ -29,7 +30,7 @@ const DEFAULT_IDENTIFIER = "aws.browser.v1";
  * Currently returns error due to WebSocket limitations
  */
 export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
-  execute: async (params: AWSBrowserParams): Promise<BrowserResult> => {
+  execute: async (params: AWSBrowserParams, screenshotUploadFn?: ScreenshotUploadFn): Promise<BrowserResult> => {
     const {
       sessionId: existingSessionId,
       browserIdentifier,
@@ -110,7 +111,19 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
 
       if (wantScreenshot) {
         const screenshot = await page.screenshot({ fullPage: false, type: "png" });
-        result.screenshot = screenshot.toString("base64");
+        // If screenshotUploadFn is provided, upload to external storage and return URL
+        // This reduces AI context size and avoids concurrent connection issues
+        if (screenshotUploadFn) {
+          const screenshotUrl = await screenshotUploadFn(screenshot);
+          if (screenshotUrl) {
+            result.screenshotUrl = screenshotUrl;
+          } else {
+            // Fallback to base64 if upload fails
+            result.screenshot = screenshot.toString("base64");
+          }
+        } else {
+          result.screenshot = screenshot.toString("base64");
+        }
       }
 
       return result;
@@ -295,6 +308,14 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
             }
 
             const screenshot = await page.screenshot(screenshotOptions);
+            // If screenshotUploadFn is provided, upload to external storage and return URL
+            if (screenshotUploadFn) {
+              const screenshotUrl = await screenshotUploadFn(screenshot);
+              if (screenshotUrl) {
+                return { screenshotUrl };
+              }
+            }
+            // Fallback to base64
             return {
               screenshot: screenshot.toString("base64"),
             };

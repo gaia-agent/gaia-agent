@@ -9,13 +9,28 @@ import { DEFAULT_PROVIDERS } from "../../config/defaults.js";
 import { awsAgentCoreProvider, awsAgentCoreSchemas } from "./aws-agentcore.js";
 import { browseruseProvider, browseruseSchemas } from "./browseruse.js";
 import { steelProvider, steelSchemas } from "./steel.js";
-import type { BrowserProvider } from "./types.js";
+import type { BrowserProvider, ScreenshotUploadFn } from "./types.js";
+
+/**
+ * Browser tool factory options
+ */
+export interface BrowserToolOptions {
+  /**
+   * Optional function to upload screenshots to external storage (e.g., S3)
+   * This reduces AI context size and avoids concurrent connection issues
+   * Only used by AWS AgentCore provider
+   */
+  screenshotUploadFn?: ScreenshotUploadFn;
+}
 
 /**
  * Browser tool factory
  * Creates a browser tool based on the provider
  */
-export const createBrowserTool = (provider: BrowserProvider = DEFAULT_PROVIDERS.browser): Tool => {
+export const createBrowserTool = (
+  provider: BrowserProvider = DEFAULT_PROVIDERS.browser,
+  options?: BrowserToolOptions,
+): Tool => {
   if (provider === "steel") {
     return tool({
       description:
@@ -34,6 +49,8 @@ export const createBrowserTool = (provider: BrowserProvider = DEFAULT_PROVIDERS.
     });
   }
 
+  // AWS AgentCore provider with optional screenshotUploadFn
+  const { screenshotUploadFn } = options || {};
   return tool({
     description:
       "AWS Bedrock AgentCore browser automation with Playwright actions. Supports launch, navigate, screenshot, click, fill, extract, info, closePage, exit, waitForNavigation, sleep/wait, and composite open (launch+navigate+info/extract/screenshot) or sequence (multi-step in one call).\n\n" +
@@ -61,15 +78,19 @@ export const createBrowserTool = (provider: BrowserProvider = DEFAULT_PROVIDERS.
       "BAD: {operation:{action:'sequence',steps:[{action:'navigate',url:'...'},{action:'extract',selector:'invented-selector'}]}} ← Will fail!\n\n" +
       "FEATURES: Graceful error handling (selector not found = fallback to page content), configurable timeouts, automatic retries.",
     inputSchema: awsAgentCoreSchemas.executeSchema as unknown as Tool["inputSchema"],
-    execute: awsAgentCoreProvider.execute as unknown as Tool["execute"],
+    execute: ((params: unknown) =>
+      awsAgentCoreProvider.execute(params as Parameters<typeof awsAgentCoreProvider.execute>[0], screenshotUploadFn)) as unknown as Tool["execute"],
   });
 };
 
 /**
  * Create all browser tools for a provider
  */
-export const createBrowserTools = (provider: BrowserProvider = DEFAULT_PROVIDERS.browser) => {
-  const browser = createBrowserTool(provider);
+export const createBrowserTools = (
+  provider: BrowserProvider = DEFAULT_PROVIDERS.browser,
+  options?: BrowserToolOptions,
+) => {
+  const browser = createBrowserTool(provider, options);
 
   return {
     browser,
@@ -80,7 +101,7 @@ export const createBrowserTools = (provider: BrowserProvider = DEFAULT_PROVIDERS
 export { awsAgentCoreProvider, awsAgentCoreSchemas } from "./aws-agentcore.js";
 export { browseruseProvider, browseruseSchemas } from "./browseruse.js";
 export { steelProvider, steelSchemas } from "./steel.js";
-export type { BrowserProvider } from "./types.js";
+export type { BrowserProvider, ScreenshotUploadFn } from "./types.js";
 
 // Legacy exports for backward compatibility
 export const steelBrowserTool = createBrowserTool("steel");

@@ -125,9 +125,9 @@ export const BrowserBaseActionSchema = z.discriminatedUnion("action", [
         .optional()
         .describe(
           "CSS selector to extract from. " +
-            "IMPORTANT: Leave empty on first visit to get full page structure. " +
-            "Only use specific selector after analyzing page content. " +
-            "If selector not found, will fallback to full page content.",
+          "IMPORTANT: Leave empty on first visit to get full page structure. " +
+          "Only use specific selector after analyzing page content. " +
+          "If selector not found, will fallback to full page content.",
         ),
       attribute: z.string().optional().describe("Extract specific attribute (e.g., 'href', 'src')"),
       timeout: z
@@ -139,8 +139,8 @@ export const BrowserBaseActionSchema = z.discriminatedUnion("action", [
     })
     .describe(
       "Extract text content or attributes. " +
-        "Best practice: First extract without selector to see page structure, " +
-        "then use specific selectors based on actual content.",
+      "Best practice: First extract without selector to see page structure, " +
+      "then use specific selectors based on actual content.",
     ),
 
   // Page Information
@@ -293,12 +293,19 @@ export const AWSBrowserParamsSchema = z.object({
 
   // Browser operation - supports single action, sequence, or open
   operation: BrowserActionSchema.describe(
-      "Browser operation to perform. Supports single actions (navigate, click, etc.), " +
-      "composite 'open' (auto-creates session + navigates + extracts), or " +
-      "'sequence' for multi-step operations in one call.",
-    ),
+    "Browser operation to perform. Supports single actions (navigate, click, etc.), " +
+    "composite 'open' (auto-creates session + navigates + extracts), or " +
+    "'sequence' for multi-step operations in one call.",
+  ),
 });
 export type AWSBrowserParams = z.infer<typeof AWSBrowserParamsSchema>;
+
+/**
+ * Screenshot upload function type
+ * Used to upload screenshots to external storage (e.g., S3) and return URL
+ * This reduces AI context size and avoids concurrent connection issues
+ */
+export type ScreenshotUploadFn = (screenshotBuffer: Buffer) => Promise<string | undefined>;
 
 /**
  * Provider-specific interfaces
@@ -312,7 +319,7 @@ export interface IBrowserUseProvider {
 }
 
 export interface IAWSAgentCoreProvider {
-  execute: (params: AWSBrowserParams) => Promise<BrowserResult>;
+  execute: (params: AWSBrowserParams, screenshotUploadFn?: ScreenshotUploadFn) => Promise<BrowserResult>;
 }
 
 /**
