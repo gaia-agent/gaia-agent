@@ -286,7 +286,7 @@ export const awsAgentCoreProvider: IAWSAgentCoreProvider = {
 
           case "type":
           case "fill": {
-            await page.fill(action.selector, action.value);
+            await page.fill(action.selector, action.value, { force: action.force || false });
             break;
           }
 

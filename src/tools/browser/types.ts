@@ -105,6 +105,13 @@ export const BrowserBaseActionSchema = z.discriminatedUnion("action", [
       action: z.literal("fill").or(z.literal("type")),
       selector: z.string().describe("CSS selector for input field"),
       value: z.string().describe("Value to fill (replaces existing content)"),
+      force: z
+        .boolean()
+        .optional()
+        .describe(
+          "Force fill even if element is not visible (useful for hidden inputs). " +
+          "Use this if the element exists but has visible: false in the elements list.",
+        ),
     })
     .describe("Fill an input field (faster than type, no events)."),
 
