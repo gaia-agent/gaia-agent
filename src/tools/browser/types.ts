@@ -252,7 +252,11 @@ export const AWSBrowserParamsSchema = z.object({
   sessionId: z
     .string()
     .optional()
-    .describe("Browser session ID (optional for first call; required for subsequent operations)"),
+    .describe(
+      "Browser session ID. " +
+      "Only provide sessionId if you have a valid one from a previous browser operation in this conversation. " +
+      "NEVER invent or guess a sessionId - if no valid sessionId exists, omit this field and let the tool create a new session.",
+    ),
 
   // Provider configuration
   browserIdentifier: z.string().optional().describe("Browser identifier"),
