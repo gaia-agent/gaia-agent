@@ -4,7 +4,7 @@
  * Re-exports from AI SDK v6 for convenience
  */
 
-export type { CoreMessage, Tool, ToolLoopAgent } from "ai";
+export type { ModelMessage as CoreMessage, Tool, ToolLoopAgent } from "ai";
 
 /**
  * GAIA benchmark task definition
